@@ -9,8 +9,8 @@ import (
 
 	"fmt"
 
-	"github.com/cloudfoundry-incubator/volman/voldriver"
-	"github.com/cloudfoundry-incubator/volman/voldriver/driverhttp"
+	"github.com/cloudfoundry-incubator/voldriver"
+	"github.com/cloudfoundry-incubator/voldriver/driverhttp"
 	"github.com/cloudfoundry-incubator/volman/volmanfakes"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

@@ -17,8 +17,8 @@ import (
 	"os/exec"
 	"path"
 
-	"github.com/cloudfoundry-incubator/volman/voldriver"
-	"github.com/cloudfoundry-incubator/volman/voldriver/driverhttp"
+	"github.com/cloudfoundry-incubator/voldriver"
+	"github.com/cloudfoundry-incubator/voldriver/driverhttp"
 	"github.com/cloudfoundry/gunk/http_wrap/httpfakes"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
