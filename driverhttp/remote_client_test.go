@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"time"
 
+	"code.cloudfoundry.org/clock/fakeclock"
+
 	"bytes"
 	"fmt"
 
@@ -22,7 +24,6 @@ import (
 	"github.com/cloudfoundry/gunk/http_wrap/httpfakes"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/pivotal-golang/clock/fakeclock"
 	"github.com/pivotal-golang/lager/lagertest"
 	"github.com/tedsuo/ifrit"
 	"github.com/tedsuo/ifrit/ginkgomon"
@@ -272,10 +273,10 @@ var _ = Describe("RemoteClient", func() {
 
 	Context("when the transport is unix", func() {
 		var (
-			volumeId                    string
-			unixRunner                  *ginkgomon.Runner
+			volumeId                     string
+			unixRunner                   *ginkgomon.Runner
 			localDriverUnixServerProcess ifrit.Process
-			socketPath                  string
+			socketPath                   string
 		)
 
 		BeforeEach(func() {

@@ -3,7 +3,7 @@ package driverhttp
 import (
 	"time"
 
-	"github.com/pivotal-golang/clock"
+	"code.cloudfoundry.org/clock"
 )
 
 const (

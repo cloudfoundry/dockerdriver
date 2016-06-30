@@ -12,6 +12,7 @@ import (
 	"fmt"
 
 	"code.cloudfoundry.org/cfhttp"
+	"code.cloudfoundry.org/clock"
 	"github.com/cloudfoundry-incubator/voldriver"
 	"github.com/pivotal-golang/lager"
 	"github.com/tedsuo/rata"
@@ -23,7 +24,6 @@ import (
 	"errors"
 
 	"github.com/cloudfoundry/gunk/http_wrap"
-	"github.com/pivotal-golang/clock"
 )
 
 type reqFactory struct {
