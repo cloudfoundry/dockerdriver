@@ -3,7 +3,7 @@ package voldriver
 import (
 	"encoding/json"
 
-	"github.com/pivotal-golang/lager"
+	"code.cloudfoundry.org/lager"
 )
 
 type specWriter struct {

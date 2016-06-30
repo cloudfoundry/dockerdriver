@@ -1,7 +1,7 @@
 package voldriver
 
 import (
-	"github.com/pivotal-golang/lager"
+	"code.cloudfoundry.org/lager"
 	"github.com/tedsuo/rata"
 )
 
@@ -109,14 +109,14 @@ func (e Error) Error() string {
 }
 
 type TLSConfig struct {
-	InsecureSkipVerify bool `json:"InsecureSkipVerify"`
-	CAFile string `json:"CAFile"`
-	CertFile string `json:"CertFile"`
-	KeyFile string `json:"KeyFile"`
+	InsecureSkipVerify bool   `json:"InsecureSkipVerify"`
+	CAFile             string `json:"CAFile"`
+	CertFile           string `json:"CertFile"`
+	KeyFile            string `json:"KeyFile"`
 }
 
 type DriverSpec struct {
-	Name    string `json:"Name"`
-	Address string `json:"Addr"`
+	Name      string     `json:"Name"`
+	Address   string     `json:"Addr"`
 	TLSConfig *TLSConfig `json:"TLSConfig"`
 }

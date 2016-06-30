@@ -10,8 +10,8 @@ import (
 
 	"fmt"
 
+	"code.cloudfoundry.org/lager/lagertest"
 	"github.com/cloudfoundry-incubator/voldriver"
-	"github.com/pivotal-golang/lager/lagertest"
 )
 
 var _ = Describe("SpecWriter", func() {

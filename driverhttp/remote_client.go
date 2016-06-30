@@ -13,8 +13,8 @@ import (
 
 	"code.cloudfoundry.org/cfhttp"
 	"code.cloudfoundry.org/clock"
+	"code.cloudfoundry.org/lager"
 	"github.com/cloudfoundry-incubator/voldriver"
-	"github.com/pivotal-golang/lager"
 	"github.com/tedsuo/rata"
 
 	os_http "net/http"
