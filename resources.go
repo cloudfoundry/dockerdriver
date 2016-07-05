@@ -27,7 +27,7 @@ var Routes = rata.Routes{
 	{Path: "/VolumeDriver.Unmount", Method: "POST", Name: UnmountRoute},
 }
 
-//go:generate counterfeiter -o ../volmanfakes/fake_driver_client.go . Driver
+//go:generate counterfeiter -o voldriverfakes/fake_driver_client.go . Driver
 
 type Driver interface {
 	Activate(logger lager.Logger) ActivateResponse

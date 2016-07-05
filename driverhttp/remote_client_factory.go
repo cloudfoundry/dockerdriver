@@ -4,7 +4,7 @@ import (
 	"github.com/cloudfoundry-incubator/voldriver"
 )
 
-//go:generate counterfeiter -o ../../volmanfakes/fake_remote_client_factory.go . RemoteClientFactory
+//go:generate counterfeiter -o ../voldriverfakes/fake_remote_client_factory.go . RemoteClientFactory
 
 type RemoteClientFactory interface {
 	NewRemoteClient(url string, tls *voldriver.TLSConfig) (voldriver.Driver, error)
