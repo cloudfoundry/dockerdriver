@@ -31,13 +31,20 @@ var Routes = rata.Routes{
 
 type Driver interface {
 	Activate(logger lager.Logger) ActivateResponse
-	Create(logger lager.Logger, createRequest CreateRequest) ErrorResponse
 	Get(logger lager.Logger, getRequest GetRequest) GetResponse
 	List(logger lager.Logger) ListResponse
 	Mount(logger lager.Logger, mountRequest MountRequest) MountResponse
 	Path(logger lager.Logger, pathRequest PathRequest) PathResponse
-	Remove(logger lager.Logger, removeRequest RemoveRequest) ErrorResponse
 	Unmount(logger lager.Logger, unmountRequest UnmountRequest) ErrorResponse
+
+	Provisioner
+}
+
+//go:generate counterfeiter -o voldriverfakes/fake_provisioner.go . Provisioner
+
+type Provisioner interface {
+	Create(logger lager.Logger, createRequest CreateRequest) ErrorResponse
+	Remove(logger lager.Logger, removeRequest RemoveRequest) ErrorResponse
 }
 
 type ActivateResponse struct {
