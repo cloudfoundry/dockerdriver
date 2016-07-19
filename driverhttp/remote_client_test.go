@@ -107,17 +107,10 @@ var _ = Describe("RemoteClient", func() {
 	Context("when the driver returns successful and the transport is TCP", func() {
 		var volumeId string
 
-		BeforeEach(func() {
-			httpClient.DoReturns(validHttpCreateResponse, nil)
-			volumeId = "fake-volume"
-			createResponse := driver.Create(testLogger, voldriver.CreateRequest{Name: volumeId, Opts: map[string]interface{}{"volume_id": volumeId}})
-			Expect(createResponse.Err).To(Equal(""))
-		})
-
 		It("should be able to mount", func() {
 			httpClient.DoReturns(validHttpMountResponse, nil)
 
-			mountResponse := driver.Mount(testLogger, voldriver.MountRequest{Name: volumeId})
+			mountResponse := driver.Mount(testLogger, voldriver.MountRequest{Name: volumeId, Opts: map[string]interface{}{"volume_id": volumeId}})
 
 			By("giving back a path with no error")
 			Expect(mountResponse.Err).To(Equal(""))
@@ -174,7 +167,7 @@ var _ = Describe("RemoteClient", func() {
 			httpClient.DoReturns(validHttpMountResponse, nil)
 
 			volumeId := "fake-volume"
-			mountResponse := driver.Mount(testLogger, voldriver.MountRequest{Name: volumeId})
+			mountResponse := driver.Mount(testLogger, voldriver.MountRequest{Name: volumeId, Opts: map[string]interface{}{"volume_id": volumeId}})
 
 			By("signaling an error")
 			Expect(mountResponse.Err).NotTo(Equal(""))
@@ -191,7 +184,7 @@ var _ = Describe("RemoteClient", func() {
 			httpClient.DoReturns(invalidHttpResponse, nil)
 
 			volumeId := "fake-volume"
-			mountResponse := driver.Mount(testLogger, voldriver.MountRequest{Name: volumeId})
+			mountResponse := driver.Mount(testLogger, voldriver.MountRequest{Name: volumeId, Opts: map[string]interface{}{"volume_id": volumeId}})
 
 			By("signaling an error")
 			Expect(mountResponse.Err).NotTo(Equal(""))

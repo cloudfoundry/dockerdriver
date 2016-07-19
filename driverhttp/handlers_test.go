@@ -12,7 +12,7 @@ import (
 	"code.cloudfoundry.org/lager/lagertest"
 	"github.com/cloudfoundry-incubator/voldriver"
 	"github.com/cloudfoundry-incubator/voldriver/driverhttp"
-	"github.com/cloudfoundry-incubator/volman/volmanfakes"
+	"github.com/cloudfoundry-incubator/voldriver/voldriverfakes"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -24,7 +24,7 @@ var _ = Describe("Volman Driver Handlers", func() {
 
 		It("should produce a handler with an activate route", func() {
 			By("faking out the driver")
-			driver := &volmanfakes.FakeDriver{}
+			driver := &voldriverfakes.FakeDriver{}
 			driver.ActivateReturns(voldriver.ActivateResponse{Implements: []string{"VolumeDriver"}})
 			handler, err := driverhttp.NewHandler(testLogger, driver)
 			Expect(err).NotTo(HaveOccurred())
@@ -52,7 +52,7 @@ var _ = Describe("Volman Driver Handlers", func() {
 
 		It("should produce a handler with a list route", func() {
 			By("faking out the driver")
-			driver := &volmanfakes.FakeDriver{}
+			driver := &voldriverfakes.FakeDriver{}
 			volume := voldriver.VolumeInfo{
 				Name:       "fake-volume",
 				Mountpoint: "fake-mountpoint",
@@ -89,13 +89,17 @@ var _ = Describe("Volman Driver Handlers", func() {
 
 		It("should produce a handler with a mount route", func() {
 			By("faking out the driver")
-			driver := &volmanfakes.FakeDriver{}
+			driver := &voldriverfakes.FakeDriver{}
 			driver.MountReturns(voldriver.MountResponse{Mountpoint: "dummy_path"})
 			handler, err := driverhttp.NewHandler(testLogger, driver)
 			Expect(err).NotTo(HaveOccurred())
 
 			httpResponseRecorder := httptest.NewRecorder()
-			MountRequest := voldriver.MountRequest{}
+			volumeId := "something"
+			MountRequest := voldriver.MountRequest{
+				Name: "some-volume",
+				Opts: map[string]interface{}{"volume_id": volumeId},
+			}
 			mountJSONRequest, err := json.Marshal(MountRequest)
 			Expect(err).NotTo(HaveOccurred())
 
@@ -122,7 +126,7 @@ var _ = Describe("Volman Driver Handlers", func() {
 
 		It("should produce a handler with an unmount route", func() {
 			By("faking out the driver")
-			driver := &volmanfakes.FakeDriver{}
+			driver := &voldriverfakes.FakeDriver{}
 			driver.UnmountReturns(voldriver.ErrorResponse{})
 
 			handler, err := driverhttp.NewHandler(testLogger, driver)
@@ -148,7 +152,7 @@ var _ = Describe("Volman Driver Handlers", func() {
 
 		It("should produce a handler with a get route", func() {
 			By("faking out the driver")
-			driver := &volmanfakes.FakeDriver{}
+			driver := &voldriverfakes.FakeDriver{}
 			driver.GetReturns(voldriver.GetResponse{Volume: voldriver.VolumeInfo{Name: "some-volume", Mountpoint: "dummy_path"}})
 			handler, err := driverhttp.NewHandler(testLogger, driver)
 			Expect(err).NotTo(HaveOccurred())
@@ -173,7 +177,7 @@ var _ = Describe("Volman Driver Handlers", func() {
 
 		It("should produce a handler with a path route", func() {
 			By("faking out the driver")
-			driver := &volmanfakes.FakeDriver{}
+			driver := &voldriverfakes.FakeDriver{}
 			driver.PathReturns(voldriver.PathResponse{})
 			handler, err := driverhttp.NewHandler(testLogger, driver)
 			Expect(err).NotTo(HaveOccurred())
@@ -198,7 +202,7 @@ var _ = Describe("Volman Driver Handlers", func() {
 
 		It("should produce a handler with a create route", func() {
 			By("faking out the driver")
-			driver := &volmanfakes.FakeDriver{}
+			driver := &voldriverfakes.FakeDriver{}
 			driver.CreateReturns(voldriver.ErrorResponse{})
 			handler, err := driverhttp.NewHandler(testLogger, driver)
 			Expect(err).NotTo(HaveOccurred())
@@ -223,7 +227,7 @@ var _ = Describe("Volman Driver Handlers", func() {
 
 		It("should produce a handler with a remove route", func() {
 			By("faking out the driver")
-			driver := &volmanfakes.FakeDriver{}
+			driver := &voldriverfakes.FakeDriver{}
 			driver.RemoveReturns(voldriver.ErrorResponse{})
 			handler, err := driverhttp.NewHandler(testLogger, driver)
 			Expect(err).NotTo(HaveOccurred())
