@@ -59,6 +59,7 @@ type CreateRequest struct {
 
 type MountRequest struct {
 	Name string
+	Opts map[string]interface{}
 }
 
 type MountResponse struct {
