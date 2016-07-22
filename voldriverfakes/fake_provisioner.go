@@ -27,6 +27,8 @@ type FakeProvisioner struct {
 	removeReturns struct {
 		result1 voldriver.ErrorResponse
 	}
+	invocations      map[string][][]interface{}
+	invocationsMutex sync.RWMutex
 }
 
 func (fake *FakeProvisioner) Create(logger lager.Logger, createRequest voldriver.CreateRequest) voldriver.ErrorResponse {
@@ -35,6 +37,7 @@ func (fake *FakeProvisioner) Create(logger lager.Logger, createRequest voldriver
 		logger        lager.Logger
 		createRequest voldriver.CreateRequest
 	}{logger, createRequest})
+	fake.recordInvocation("Create", []interface{}{logger, createRequest})
 	fake.createMutex.Unlock()
 	if fake.CreateStub != nil {
 		return fake.CreateStub(logger, createRequest)
@@ -68,6 +71,7 @@ func (fake *FakeProvisioner) Remove(logger lager.Logger, removeRequest voldriver
 		logger        lager.Logger
 		removeRequest voldriver.RemoveRequest
 	}{logger, removeRequest})
+	fake.recordInvocation("Remove", []interface{}{logger, removeRequest})
 	fake.removeMutex.Unlock()
 	if fake.RemoveStub != nil {
 		return fake.RemoveStub(logger, removeRequest)
@@ -93,6 +97,28 @@ func (fake *FakeProvisioner) RemoveReturns(result1 voldriver.ErrorResponse) {
 	fake.removeReturns = struct {
 		result1 voldriver.ErrorResponse
 	}{result1}
+}
+
+func (fake *FakeProvisioner) Invocations() map[string][][]interface{} {
+	fake.invocationsMutex.RLock()
+	defer fake.invocationsMutex.RUnlock()
+	fake.createMutex.RLock()
+	defer fake.createMutex.RUnlock()
+	fake.removeMutex.RLock()
+	defer fake.removeMutex.RUnlock()
+	return fake.invocations
+}
+
+func (fake *FakeProvisioner) recordInvocation(key string, args []interface{}) {
+	fake.invocationsMutex.Lock()
+	defer fake.invocationsMutex.Unlock()
+	if fake.invocations == nil {
+		fake.invocations = map[string][][]interface{}{}
+	}
+	if fake.invocations[key] == nil {
+		fake.invocations[key] = [][]interface{}{}
+	}
+	fake.invocations[key] = append(fake.invocations[key], args)
 }
 
 var _ voldriver.Provisioner = new(FakeProvisioner)
