@@ -61,6 +61,14 @@ type FakeDriver struct {
 	unmountReturns struct {
 		result1 voldriver.ErrorResponse
 	}
+	CapabilitiesStub        func(logger lager.Logger) voldriver.CapabilitiesResponse
+	capabilitiesMutex       sync.RWMutex
+	capabilitiesArgsForCall []struct {
+		logger lager.Logger
+	}
+	capabilitiesReturns struct {
+		result1 voldriver.CapabilitiesResponse
+	}
 	CreateStub        func(logger lager.Logger, createRequest voldriver.CreateRequest) voldriver.ErrorResponse
 	createMutex       sync.RWMutex
 	createArgsForCall []struct {
@@ -285,6 +293,39 @@ func (fake *FakeDriver) UnmountReturns(result1 voldriver.ErrorResponse) {
 	}{result1}
 }
 
+func (fake *FakeDriver) Capabilities(logger lager.Logger) voldriver.CapabilitiesResponse {
+	fake.capabilitiesMutex.Lock()
+	fake.capabilitiesArgsForCall = append(fake.capabilitiesArgsForCall, struct {
+		logger lager.Logger
+	}{logger})
+	fake.recordInvocation("Capabilities", []interface{}{logger})
+	fake.capabilitiesMutex.Unlock()
+	if fake.CapabilitiesStub != nil {
+		return fake.CapabilitiesStub(logger)
+	} else {
+		return fake.capabilitiesReturns.result1
+	}
+}
+
+func (fake *FakeDriver) CapabilitiesCallCount() int {
+	fake.capabilitiesMutex.RLock()
+	defer fake.capabilitiesMutex.RUnlock()
+	return len(fake.capabilitiesArgsForCall)
+}
+
+func (fake *FakeDriver) CapabilitiesArgsForCall(i int) lager.Logger {
+	fake.capabilitiesMutex.RLock()
+	defer fake.capabilitiesMutex.RUnlock()
+	return fake.capabilitiesArgsForCall[i].logger
+}
+
+func (fake *FakeDriver) CapabilitiesReturns(result1 voldriver.CapabilitiesResponse) {
+	fake.CapabilitiesStub = nil
+	fake.capabilitiesReturns = struct {
+		result1 voldriver.CapabilitiesResponse
+	}{result1}
+}
+
 func (fake *FakeDriver) Create(logger lager.Logger, createRequest voldriver.CreateRequest) voldriver.ErrorResponse {
 	fake.createMutex.Lock()
 	fake.createArgsForCall = append(fake.createArgsForCall, struct {
@@ -368,6 +409,8 @@ func (fake *FakeDriver) Invocations() map[string][][]interface{} {
 	defer fake.pathMutex.RUnlock()
 	fake.unmountMutex.RLock()
 	defer fake.unmountMutex.RUnlock()
+	fake.capabilitiesMutex.RLock()
+	defer fake.capabilitiesMutex.RUnlock()
 	fake.createMutex.RLock()
 	defer fake.createMutex.RUnlock()
 	fake.removeMutex.RLock()

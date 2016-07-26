@@ -345,6 +345,37 @@ func (r *remoteClient) Get(logger lager.Logger, getRequest voldriver.GetRequest)
 	return voldriver.GetResponse{}
 }
 
+func (r *remoteClient) Capabilities(logger lager.Logger) voldriver.CapabilitiesResponse {
+	logger = logger.Session("capabilities")
+	logger.Info("start")
+	defer logger.Info("end")
+
+	request := newReqFactory(r.reqGen, voldriver.CapabilitiesRoute, nil)
+
+	response, err := r.do(logger, request)
+	if err != nil {
+		logger.Error("failed-capabilities", err)
+		return voldriver.CapabilitiesResponse{}
+	}
+
+	if response.StatusCode == 500 {
+		var remoteError voldriver.CapabilitiesResponse
+		if err := unmarshallJSON(logger, response.Body, &remoteError); err != nil {
+			logger.Error("failed-parsing-error-response", err)
+			return voldriver.CapabilitiesResponse{}
+		}
+		return remoteError
+	}
+
+	var capabilities voldriver.CapabilitiesResponse
+	if err := unmarshallJSON(logger, response.Body, &capabilities); err != nil {
+		logger.Error("failed-parsing-capabilities-response", err)
+		return voldriver.CapabilitiesResponse{}
+	}
+
+	return capabilities
+}
+
 func unmarshallJSON(logger lager.Logger, reader io.ReadCloser, jsonResponse interface{}) error {
 	body, err := ioutil.ReadAll(reader)
 	if err != nil {

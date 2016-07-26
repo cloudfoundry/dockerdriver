@@ -26,14 +26,15 @@ func NewHandler(logger lager.Logger, client voldriver.Driver) (http.Handler, err
 	defer logger.Info("end")
 
 	var handlers = rata.Handlers{
-		voldriver.ActivateRoute: newActivateHandler(logger, client),
-		voldriver.GetRoute:      newGetHandler(logger, client),
-		voldriver.ListRoute:     newListHandler(logger, client),
-		voldriver.PathRoute:     newPathHandler(logger, client),
-		voldriver.CreateRoute:   newCreateHandler(logger, client),
-		voldriver.MountRoute:    newMountHandler(logger, client),
-		voldriver.UnmountRoute:  newUnmountHandler(logger, client),
-		voldriver.RemoveRoute:   newRemoveHandler(logger, client),
+		voldriver.ActivateRoute:     newActivateHandler(logger, client),
+		voldriver.GetRoute:          newGetHandler(logger, client),
+		voldriver.ListRoute:         newListHandler(logger, client),
+		voldriver.PathRoute:         newPathHandler(logger, client),
+		voldriver.CreateRoute:       newCreateHandler(logger, client),
+		voldriver.MountRoute:        newMountHandler(logger, client),
+		voldriver.UnmountRoute:      newUnmountHandler(logger, client),
+		voldriver.RemoveRoute:       newRemoveHandler(logger, client),
+		voldriver.CapabilitiesRoute: newCapabilitiesHandler(logger, client),
 	}
 
 	return rata.NewRouter(voldriver.Routes, handlers)
@@ -257,5 +258,17 @@ func newRemoveHandler(logger lager.Logger, client voldriver.Driver) http.Handler
 		}
 
 		cf_http_handlers.WriteJSONResponse(w, statusOK, removeResponse)
+	}
+}
+
+func newCapabilitiesHandler(logger lager.Logger, client voldriver.Driver) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		logger := logger.Session("handle-capabilities")
+		logger.Info("start")
+		defer logger.Info("end")
+
+		capabilitiesResponse := client.Capabilities(logger)
+		logger.Debug("capabilities-response", lager.Data{"capabilities": capabilitiesResponse})
+		cf_http_handlers.WriteJSONResponse(w, http.StatusOK, capabilitiesResponse)
 	}
 }

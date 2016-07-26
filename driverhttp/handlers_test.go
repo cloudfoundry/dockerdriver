@@ -249,5 +249,33 @@ var _ = Describe("Volman Driver Handlers", func() {
 			By("then expecting correct HTTP status code")
 			Expect(httpResponseRecorder.Code).To(Equal(200))
 		})
+
+		It("should produce a handler with a capabilities route", func() {
+			By("faking out the driver")
+			driver := &voldriverfakes.FakeDriver{}
+			driver.CapabilitiesReturns(voldriver.CapabilitiesResponse{Capabilities:voldriver.CapabilityInfo{Scope:"global"}})
+			handler, err := driverhttp.NewHandler(testLogger, driver)
+			Expect(err).NotTo(HaveOccurred())
+
+			By("then fake serving the response using the handler")
+			route, found := voldriver.Routes.FindRouteByName(voldriver.CapabilitiesRoute)
+			Expect(found).To(BeTrue())
+
+			path := fmt.Sprintf("http://0.0.0.0%s", route.Path)
+			httpRequest, err := http.NewRequest("POST", path, bytes.NewReader([]byte{}))
+			Expect(err).NotTo(HaveOccurred())
+
+			httpResponseRecorder := httptest.NewRecorder()
+			handler.ServeHTTP(httpResponseRecorder, httpRequest)
+
+			By("then deserialing the HTTP response")
+			capabilitiesResponse := voldriver.CapabilitiesResponse{}
+			body, err := ioutil.ReadAll(httpResponseRecorder.Body)
+			err = json.Unmarshal(body, &capabilitiesResponse)
+
+			By("then expecting correct JSON conversion")
+			Expect(err).ToNot(HaveOccurred())
+			Expect(capabilitiesResponse.Capabilities).Should(Equal(voldriver.CapabilityInfo{Scope:"global"}))
+		})
 	})
 })

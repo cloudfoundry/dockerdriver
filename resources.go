@@ -6,14 +6,15 @@ import (
 )
 
 const (
-	ActivateRoute = "activate"
-	CreateRoute   = "create"
-	GetRoute      = "get"
-	ListRoute     = "list"
-	MountRoute    = "mount"
-	PathRoute     = "path"
-	RemoveRoute   = "remove"
-	UnmountRoute  = "unmount"
+	ActivateRoute     = "activate"
+	CreateRoute       = "create"
+	GetRoute          = "get"
+	ListRoute         = "list"
+	MountRoute        = "mount"
+	PathRoute         = "path"
+	RemoveRoute       = "remove"
+	UnmountRoute      = "unmount"
+	CapabilitiesRoute = "capabilities"
 )
 
 var Routes = rata.Routes{
@@ -25,6 +26,7 @@ var Routes = rata.Routes{
 	{Path: "/VolumeDriver.Path", Method: "POST", Name: PathRoute},
 	{Path: "/VolumeDriver.Remove", Method: "POST", Name: RemoveRoute},
 	{Path: "/VolumeDriver.Unmount", Method: "POST", Name: UnmountRoute},
+	{Path: "/VolumeDriver.Capabilities", Method: "POST", Name: CapabilitiesRoute},
 }
 
 //go:generate counterfeiter -o voldriverfakes/fake_driver_client.go . Driver
@@ -36,6 +38,7 @@ type Driver interface {
 	Mount(logger lager.Logger, mountRequest MountRequest) MountResponse
 	Path(logger lager.Logger, pathRequest PathRequest) PathResponse
 	Unmount(logger lager.Logger, unmountRequest UnmountRequest) ErrorResponse
+	Capabilities(logger lager.Logger) CapabilitiesResponse
 
 	Provisioner
 }
@@ -102,10 +105,18 @@ type GetResponse struct {
 	Err    string
 }
 
+type CapabilitiesResponse struct {
+	Capabilities CapabilityInfo
+}
+
 type VolumeInfo struct {
 	Name       string
 	Mountpoint string
 	MountCount int
+}
+
+type CapabilityInfo struct {
+	Scope string
 }
 
 type Error struct {
