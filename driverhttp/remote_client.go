@@ -14,7 +14,7 @@ import (
 	"code.cloudfoundry.org/cfhttp"
 	"code.cloudfoundry.org/clock"
 	"code.cloudfoundry.org/lager"
-	"github.com/cloudfoundry-incubator/voldriver"
+	"code.cloudfoundry.org/voldriver"
 	"github.com/tedsuo/rata"
 
 	os_http "net/http"

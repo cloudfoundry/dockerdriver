@@ -11,7 +11,7 @@ import (
 	"fmt"
 
 	"code.cloudfoundry.org/lager/lagertest"
-	"github.com/cloudfoundry-incubator/voldriver"
+	"code.cloudfoundry.org/voldriver"
 )
 
 var _ = Describe("SpecWriter", func() {

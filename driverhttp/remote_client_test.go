@@ -20,8 +20,8 @@ import (
 	"path"
 
 	"code.cloudfoundry.org/lager/lagertest"
-	"github.com/cloudfoundry-incubator/voldriver"
-	"github.com/cloudfoundry-incubator/voldriver/driverhttp"
+	"code.cloudfoundry.org/voldriver"
+	"code.cloudfoundry.org/voldriver/driverhttp"
 	"github.com/cloudfoundry/gunk/http_wrap/httpfakes"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -37,7 +37,6 @@ var _ = Describe("RemoteClient", func() {
 		driver                    voldriver.Driver
 		validHttpMountResponse    *http.Response
 		validHttpPathResponse     *http.Response
-		validHttpCreateResponse   *http.Response
 		validHttpActivateResponse *http.Response
 		invalidHttpResponse       *http.Response
 		fakeClock                 *fakeclock.FakeClock
@@ -47,9 +46,6 @@ var _ = Describe("RemoteClient", func() {
 		httpClient = new(httpfakes.FakeClient)
 		fakeClock = fakeclock.NewFakeClock(time.Now())
 		driver = driverhttp.NewRemoteClientWithClient("http://127.0.0.1:8080", httpClient, fakeClock)
-		validHttpCreateResponse = &http.Response{
-			StatusCode: 200,
-		}
 
 		validHttpMountResponse = &http.Response{
 			StatusCode: 200,

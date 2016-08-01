@@ -10,9 +10,9 @@ import (
 	"fmt"
 
 	"code.cloudfoundry.org/lager/lagertest"
-	"github.com/cloudfoundry-incubator/voldriver"
-	"github.com/cloudfoundry-incubator/voldriver/driverhttp"
-	"github.com/cloudfoundry-incubator/voldriver/voldriverfakes"
+	"code.cloudfoundry.org/voldriver"
+	"code.cloudfoundry.org/voldriver/driverhttp"
+	"code.cloudfoundry.org/voldriver/voldriverfakes"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -253,7 +253,7 @@ var _ = Describe("Volman Driver Handlers", func() {
 		It("should produce a handler with a capabilities route", func() {
 			By("faking out the driver")
 			driver := &voldriverfakes.FakeDriver{}
-			driver.CapabilitiesReturns(voldriver.CapabilitiesResponse{Capabilities:voldriver.CapabilityInfo{Scope:"global"}})
+			driver.CapabilitiesReturns(voldriver.CapabilitiesResponse{Capabilities: voldriver.CapabilityInfo{Scope: "global"}})
 			handler, err := driverhttp.NewHandler(testLogger, driver)
 			Expect(err).NotTo(HaveOccurred())
 
@@ -275,7 +275,7 @@ var _ = Describe("Volman Driver Handlers", func() {
 
 			By("then expecting correct JSON conversion")
 			Expect(err).ToNot(HaveOccurred())
-			Expect(capabilitiesResponse.Capabilities).Should(Equal(voldriver.CapabilityInfo{Scope:"global"}))
+			Expect(capabilitiesResponse.Capabilities).Should(Equal(voldriver.CapabilityInfo{Scope: "global"}))
 		})
 	})
 })

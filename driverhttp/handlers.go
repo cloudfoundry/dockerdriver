@@ -9,7 +9,7 @@ import (
 
 	cf_http_handlers "code.cloudfoundry.org/cfhttp/handlers"
 	"code.cloudfoundry.org/lager"
-	"github.com/cloudfoundry-incubator/voldriver"
+	"code.cloudfoundry.org/voldriver"
 	"github.com/tedsuo/rata"
 )
 

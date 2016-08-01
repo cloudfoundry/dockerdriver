@@ -1,7 +1,7 @@
 package driverhttp
 
 import (
-	"github.com/cloudfoundry-incubator/voldriver"
+	"code.cloudfoundry.org/voldriver"
 )
 
 //go:generate counterfeiter -o ../voldriverfakes/fake_remote_client_factory.go . RemoteClientFactory

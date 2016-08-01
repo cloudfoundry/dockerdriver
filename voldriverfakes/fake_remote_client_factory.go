@@ -4,8 +4,8 @@ package voldriverfakes
 import (
 	"sync"
 
-	"github.com/cloudfoundry-incubator/voldriver"
-	"github.com/cloudfoundry-incubator/voldriver/driverhttp"
+	"code.cloudfoundry.org/voldriver"
+	"code.cloudfoundry.org/voldriver/driverhttp"
 )
 
 type FakeRemoteClientFactory struct {
