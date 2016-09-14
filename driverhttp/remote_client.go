@@ -15,6 +15,7 @@ import (
 	"code.cloudfoundry.org/clock"
 	"code.cloudfoundry.org/lager"
 	"code.cloudfoundry.org/voldriver"
+	"code.cloudfoundry.org/goshims/http_wrap"
 	"github.com/tedsuo/rata"
 
 	os_http "net/http"
@@ -22,8 +23,6 @@ import (
 	"time"
 
 	"errors"
-
-	"github.com/cloudfoundry/gunk/http_wrap"
 )
 
 type reqFactory struct {
@@ -51,11 +50,10 @@ type remoteClient struct {
 }
 
 func NewRemoteClient(url string, tls *voldriver.TLSConfig) (*remoteClient, error) {
-	baseClient := cfhttp.NewClient()
-	httpClient := http_wrap.NewClientFrom(baseClient)
+	client := cfhttp.NewClient()
 
 	if strings.Contains(url, ".sock") {
-		httpClient = cfhttp.NewUnixClient(url)
+		client = cfhttp.NewUnixClient(url)
 		url = fmt.Sprintf("unix://%s", url)
 	} else {
 		if tls != nil {
@@ -66,7 +64,7 @@ func NewRemoteClient(url string, tls *voldriver.TLSConfig) (*remoteClient, error
 
 			tlsConfig.InsecureSkipVerify = tls.InsecureSkipVerify
 
-			if tr, ok := baseClient.Transport.(*http.Transport); ok {
+			if tr, ok := client.Transport.(*http.Transport); ok {
 				tr.TLSClientConfig = tlsConfig
 			} else {
 				return nil, errors.New("Invalid transport")
@@ -75,8 +73,9 @@ func NewRemoteClient(url string, tls *voldriver.TLSConfig) (*remoteClient, error
 
 	}
 
-	return NewRemoteClientWithClient(url, httpClient, clock.NewClock()), nil
+	return NewRemoteClientWithClient(url, client, clock.NewClock()), nil
 }
+
 func NewRemoteClientWithClient(socketPath string, client http_wrap.Client, clock clock.Clock) *remoteClient {
 	return &remoteClient{
 		HttpClient: client,
