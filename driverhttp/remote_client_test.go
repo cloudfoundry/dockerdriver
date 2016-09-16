@@ -48,17 +48,17 @@ var _ = Describe("RemoteClient", func() {
 		driver = driverhttp.NewRemoteClientWithClient("http://127.0.0.1:8080", httpClient, fakeClock)
 
 		validHttpMountResponse = &http.Response{
-			StatusCode: 200,
+			StatusCode: driverhttp.StatusOK,
 			Body:       stringCloser{bytes.NewBufferString("{\"Mountpoint\":\"somePath\"}")},
 		}
 
 		validHttpPathResponse = &http.Response{
-			StatusCode: 200,
+			StatusCode: driverhttp.StatusOK,
 			Body:       stringCloser{bytes.NewBufferString("{\"Mountpoint\":\"somePath\"}")},
 		}
 
 		validHttpActivateResponse = &http.Response{
-			StatusCode: 200,
+			StatusCode: driverhttp.StatusOK,
 			Body:       stringCloser{bytes.NewBufferString("{\"Implements\":[\"VolumeDriver\"]}")},
 		}
 	})
@@ -70,7 +70,7 @@ var _ = Describe("RemoteClient", func() {
 			httpClient = new(http_fake.FakeClient)
 			driver = driverhttp.NewRemoteClientWithClient("http://127.0.0.1:8080", httpClient, fakeClock)
 			invalidHttpResponse = &http.Response{
-				StatusCode: 500,
+				StatusCode: driverhttp.StatusInternalServerError,
 				Body:       stringCloser{bytes.NewBufferString("{\"Err\":\"some error string\"}")},
 			}
 		})
@@ -126,7 +126,8 @@ var _ = Describe("RemoteClient", func() {
 		It("should be able to unmount", func() {
 
 			validHttpUnmountResponse := &http.Response{
-				StatusCode: 200,
+				StatusCode: driverhttp.StatusOK,
+				Body: stringCloser{bytes.NewBufferString("{\"Err\":\"\"}")},
 			}
 
 			httpClient.DoReturns(validHttpUnmountResponse, nil)
@@ -156,7 +157,7 @@ var _ = Describe("RemoteClient", func() {
 		It("should not be able to mount", func() {
 
 			validHttpMountResponse = &http.Response{
-				StatusCode: 200,
+				StatusCode: driverhttp.StatusOK,
 				Body:       stringCloser{bytes.NewBufferString("i am trying to pown your system")},
 			}
 
@@ -173,7 +174,7 @@ var _ = Describe("RemoteClient", func() {
 		It("should still not be able to mount", func() {
 
 			invalidHttpResponse := &http.Response{
-				StatusCode: 500,
+				StatusCode: driverhttp.StatusInternalServerError,
 				Body:       stringCloser{bytes.NewBufferString("i am trying to pown your system")},
 			}
 
@@ -190,7 +191,7 @@ var _ = Describe("RemoteClient", func() {
 		It("should not be able to unmount", func() {
 
 			validHttpUnmountResponse := &http.Response{
-				StatusCode: 500,
+				StatusCode: driverhttp.StatusInternalServerError,
 				Body:       stringCloser{bytes.NewBufferString("i am trying to pown your system")},
 			}
 
@@ -237,7 +238,7 @@ var _ = Describe("RemoteClient", func() {
 		It("should still fail to unmount", func() {
 
 			invalidHttpResponse := &http.Response{
-				StatusCode: 500,
+				StatusCode: driverhttp.StatusInternalServerError,
 				Body:       errCloser{bytes.NewBufferString("")},
 			}
 
@@ -293,7 +294,7 @@ var _ = Describe("RemoteClient", func() {
 			fakeClock = fakeclock.NewFakeClock(time.Now())
 			driver = driverhttp.NewRemoteClientWithClient(socketPath, httpClient, fakeClock)
 			validHttpMountResponse = &http.Response{
-				StatusCode: 200,
+				StatusCode: driverhttp.StatusOK,
 				Body:       stringCloser{bytes.NewBufferString("{\"Mountpoint\":\"somePath\"}")},
 			}
 		})
@@ -314,7 +315,8 @@ var _ = Describe("RemoteClient", func() {
 		It("should be able to unmount", func() {
 
 			validHttpUnmountResponse := &http.Response{
-				StatusCode: 200,
+				StatusCode: driverhttp.StatusOK,
+				Body: stringCloser{bytes.NewBufferString("{\"Err\":\"\"}")},
 			}
 
 			httpClient.DoReturns(validHttpUnmountResponse, nil)

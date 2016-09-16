@@ -13,9 +13,9 @@ import (
 
 	"code.cloudfoundry.org/cfhttp"
 	"code.cloudfoundry.org/clock"
+	"code.cloudfoundry.org/goshims/http_wrap"
 	"code.cloudfoundry.org/lager"
 	"code.cloudfoundry.org/voldriver"
-	"code.cloudfoundry.org/goshims/http_wrap"
 	"github.com/tedsuo/rata"
 
 	os_http "net/http"
@@ -97,13 +97,8 @@ func (r *remoteClient) Activate(logger lager.Logger) voldriver.ActivateResponse 
 		return voldriver.ActivateResponse{Err: err.Error()}
 	}
 
-	if response.StatusCode == 500 {
-		var remoteError voldriver.ActivateResponse
-		if err := unmarshallJSON(logger, response.Body, &remoteError); err != nil {
-			logger.Error("failed-parsing-error-response", err)
-			return voldriver.ActivateResponse{Err: err.Error()}
-		}
-		return remoteError
+	if response.Body == nil {
+		return voldriver.ActivateResponse{Err: "Invalid response from driver."}
 	}
 
 	var activate voldriver.ActivateResponse
@@ -134,13 +129,14 @@ func (r *remoteClient) Create(logger lager.Logger, createRequest voldriver.Creat
 		return voldriver.ErrorResponse{Err: err.Error()}
 	}
 
-	if response.StatusCode == 500 {
-		var remoteError voldriver.ErrorResponse
-		if err := unmarshallJSON(logger, response.Body, &remoteError); err != nil {
-			logger.Error("failed-parsing-error-response", err)
-			return voldriver.ErrorResponse{Err: err.Error()}
-		}
-		return remoteError
+	var remoteError voldriver.ErrorResponse
+	if response.Body == nil {
+		return voldriver.ErrorResponse{Err: "Invalid response from driver."}
+	}
+
+	if err := unmarshallJSON(logger, response.Body, &remoteError); err != nil {
+		logger.Error("failed-parsing-error-response", err)
+		return voldriver.ErrorResponse{Err: err.Error()}
 	}
 
 	return voldriver.ErrorResponse{}
@@ -159,13 +155,8 @@ func (r *remoteClient) List(logger lager.Logger) voldriver.ListResponse {
 		return voldriver.ListResponse{Err: err.Error()}
 	}
 
-	if response.StatusCode == 500 {
-		var remoteError voldriver.ListResponse
-		if err := unmarshallJSON(logger, response.Body, &remoteError); err != nil {
-			logger.Error("failed-parsing-error-response", err)
-			return voldriver.ListResponse{Err: err.Error()}
-		}
-		return remoteError
+	if response.Body == nil {
+		return voldriver.ListResponse{Err: "Invalid response from driver."}
 	}
 
 	var list voldriver.ListResponse
@@ -196,13 +187,8 @@ func (r *remoteClient) Mount(logger lager.Logger, mountRequest voldriver.MountRe
 		return voldriver.MountResponse{Err: err.Error()}
 	}
 
-	if response.StatusCode == 500 {
-		var remoteError voldriver.MountResponse
-		if err := unmarshallJSON(logger, response.Body, &remoteError); err != nil {
-			logger.Error("failed-parsing-error-response", err)
-			return voldriver.MountResponse{Err: err.Error()}
-		}
-		return remoteError
+	if response.Body == nil {
+		return  voldriver.MountResponse{Err: "Invalid response from driver."}
 	}
 
 	var mountPoint voldriver.MountResponse
@@ -233,13 +219,8 @@ func (r *remoteClient) Path(logger lager.Logger, pathRequest voldriver.PathReque
 		return voldriver.PathResponse{Err: err.Error()}
 	}
 
-	if response.StatusCode == 500 {
-		var remoteErrorResponse voldriver.PathResponse
-		if err := unmarshallJSON(logger, response.Body, &remoteErrorResponse); err != nil {
-			logger.Error("failed-parsing-error-response", err)
-			return voldriver.PathResponse{Err: err.Error()}
-		}
-		return remoteErrorResponse
+	if response.Body == nil {
+		return voldriver.PathResponse{Err: "Invalid response from driver."}
 	}
 
 	var mountPoint voldriver.PathResponse
@@ -270,16 +251,16 @@ func (r *remoteClient) Unmount(logger lager.Logger, unmountRequest voldriver.Unm
 		return voldriver.ErrorResponse{Err: err.Error()}
 	}
 
-	if response.StatusCode == 500 {
-		var remoteErrorResponse voldriver.ErrorResponse
-		if err := unmarshallJSON(logger, response.Body, &remoteErrorResponse); err != nil {
-			logger.Error("failed-parsing-error-response", err)
-			return voldriver.ErrorResponse{Err: err.Error()}
-		}
-		return remoteErrorResponse
+	if response.Body == nil {
+		return voldriver.ErrorResponse{Err: "Invalid response from driver."}
 	}
 
-	return voldriver.ErrorResponse{}
+	var remoteErrorResponse voldriver.ErrorResponse
+	if err := unmarshallJSON(logger, response.Body, &remoteErrorResponse); err != nil {
+		logger.Error("failed-parsing-error-response", err)
+		return voldriver.ErrorResponse{Err: err.Error()}
+	}
+	return remoteErrorResponse
 }
 
 func (r *remoteClient) Remove(logger lager.Logger, removeRequest voldriver.RemoveRequest) voldriver.ErrorResponse {
@@ -301,16 +282,17 @@ func (r *remoteClient) Remove(logger lager.Logger, removeRequest voldriver.Remov
 		return voldriver.ErrorResponse{Err: err.Error()}
 	}
 
-	if response.StatusCode == 500 {
-		var remoteErrorResponse voldriver.ErrorResponse
-		if err := unmarshallJSON(logger, response.Body, &remoteErrorResponse); err != nil {
-			logger.Error("failed-parsing-error-response", err)
-			return voldriver.ErrorResponse{Err: err.Error()}
-		}
-		return remoteErrorResponse
+	if response.Body == nil {
+		return voldriver.ErrorResponse{Err: "Invalid response from driver."}
 	}
 
-	return voldriver.ErrorResponse{}
+	var remoteErrorResponse voldriver.ErrorResponse
+	if err := unmarshallJSON(logger, response.Body, &remoteErrorResponse); err != nil {
+		logger.Error("failed-parsing-error-response", err)
+		return voldriver.ErrorResponse{Err: err.Error()}
+	}
+
+	return remoteErrorResponse
 }
 
 func (r *remoteClient) Get(logger lager.Logger, getRequest voldriver.GetRequest) voldriver.GetResponse {
@@ -332,16 +314,17 @@ func (r *remoteClient) Get(logger lager.Logger, getRequest voldriver.GetRequest)
 		return voldriver.GetResponse{Err: err.Error()}
 	}
 
-	if response.StatusCode == 500 {
-		var remoteErrorResponse voldriver.GetResponse
-		if err := unmarshallJSON(logger, response.Body, &remoteErrorResponse); err != nil {
-			logger.Error("failed-parsing-error-response", err)
-			return voldriver.GetResponse{Err: err.Error()}
-		}
-		return remoteErrorResponse
+	if response.Body == nil {
+		return voldriver.GetResponse{Err: "Invalid response from driver."}
 	}
 
-	return voldriver.GetResponse{}
+	var remoteResponse voldriver.GetResponse
+	if err := unmarshallJSON(logger, response.Body, &remoteResponse); err != nil {
+		logger.Error("failed-parsing-error-response", err)
+		return voldriver.GetResponse{Err: err.Error()}
+	}
+
+	return remoteResponse
 }
 
 func (r *remoteClient) Capabilities(logger lager.Logger) voldriver.CapabilitiesResponse {
@@ -357,12 +340,8 @@ func (r *remoteClient) Capabilities(logger lager.Logger) voldriver.CapabilitiesR
 		return voldriver.CapabilitiesResponse{}
 	}
 
-	if response.StatusCode == 500 {
-		var remoteError voldriver.CapabilitiesResponse
-		if err := unmarshallJSON(logger, response.Body, &remoteError); err != nil {
-			logger.Error("failed-parsing-error-response", err)
-			return voldriver.CapabilitiesResponse{}
-		}
+	var remoteError voldriver.CapabilitiesResponse
+	if response.Body == nil {
 		return remoteError
 	}
 
