@@ -22,6 +22,7 @@ import (
 
 	"time"
 
+	"context"
 	"errors"
 )
 
@@ -168,7 +169,7 @@ func (r *remoteClient) List(logger lager.Logger) voldriver.ListResponse {
 	return list
 }
 
-func (r *remoteClient) Mount(logger lager.Logger, mountRequest voldriver.MountRequest) voldriver.MountResponse {
+func (r *remoteClient) Mount(logger lager.Logger, ctx context.Context, mountRequest voldriver.MountRequest) voldriver.MountResponse {
 	logger = logger.Session("remoteclient-mount", lager.Data{"mount_request": mountRequest})
 	logger.Info("start")
 	defer logger.Info("end")
@@ -188,7 +189,7 @@ func (r *remoteClient) Mount(logger lager.Logger, mountRequest voldriver.MountRe
 	}
 
 	if response.Body == nil {
-		return  voldriver.MountResponse{Err: "Invalid response from driver."}
+		return voldriver.MountResponse{Err: "Invalid response from driver."}
 	}
 
 	var mountPoint voldriver.MountResponse

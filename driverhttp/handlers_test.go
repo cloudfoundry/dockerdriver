@@ -9,13 +9,30 @@ import (
 
 	"fmt"
 
+	"code.cloudfoundry.org/lager"
 	"code.cloudfoundry.org/lager/lagertest"
 	"code.cloudfoundry.org/voldriver"
 	"code.cloudfoundry.org/voldriver/driverhttp"
 	"code.cloudfoundry.org/voldriver/voldriverfakes"
+	"context"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"sync"
+	"time"
 )
+
+type RecordingCloseNotifier struct {
+	*httptest.ResponseRecorder
+	cn chan bool
+}
+
+func (rcn *RecordingCloseNotifier) CloseNotify() <-chan bool {
+	return rcn.cn
+}
+
+func (rcn *RecordingCloseNotifier) SimulateClientCancel() {
+	rcn.cn <- true
+}
 
 var _ = Describe("Volman Driver Handlers", func() {
 
@@ -87,41 +104,110 @@ var _ = Describe("Volman Driver Handlers", func() {
 			Expect(listResponse.Volumes[0].Name).Should(Equal("fake-volume"))
 		})
 
-		It("should produce a handler with a mount route", func() {
-			By("faking out the driver")
-			driver := &voldriverfakes.FakeDriver{}
-			driver.MountReturns(voldriver.MountResponse{Mountpoint: "dummy_path"})
-			handler, err := driverhttp.NewHandler(testLogger, driver)
-			Expect(err).NotTo(HaveOccurred())
+		Context("Mount", func() {
 
-			httpResponseRecorder := httptest.NewRecorder()
-			volumeId := "something"
-			MountRequest := voldriver.MountRequest{
-				Name: "some-volume",
-				Opts: map[string]interface{}{"volume_id": volumeId},
+			var (
+				err    error
+				req    *http.Request
+				res    *RecordingCloseNotifier
+				driver *voldriverfakes.FakeDriver
+				wg     sync.WaitGroup
+
+				subject http.Handler
+			)
+
+			var ExpectMountPointToEqual = func(value string) voldriver.MountResponse {
+				mountResponse := voldriver.MountResponse{}
+				body, err := ioutil.ReadAll(res.Body)
+
+				err = json.Unmarshal(body, &mountResponse)
+				Expect(err).ToNot(HaveOccurred())
+
+				Expect(mountResponse.Mountpoint).Should(Equal(value))
+				return mountResponse
 			}
-			mountJSONRequest, err := json.Marshal(MountRequest)
-			Expect(err).NotTo(HaveOccurred())
 
-			By("then fake serving the response using the handler")
-			route, found := voldriver.Routes.FindRouteByName(voldriver.MountRoute)
-			Expect(found).To(BeTrue())
+			BeforeEach(func() {
+				driver = &voldriverfakes.FakeDriver{}
 
-			path := fmt.Sprintf("http://0.0.0.0%s", route.Path)
-			httpRequest, err := http.NewRequest("POST", path, bytes.NewReader(mountJSONRequest))
-			Expect(err).NotTo(HaveOccurred())
+				subject, err = driverhttp.NewHandler(testLogger, driver)
+				Expect(err).NotTo(HaveOccurred())
 
-			testLogger.Info(fmt.Sprintf("%#v", httpResponseRecorder.Body))
-			handler.ServeHTTP(httpResponseRecorder, httpRequest)
+				volumeId := "something"
+				MountRequest := voldriver.MountRequest{
+					Name: "some-volume",
+					Opts: map[string]interface{}{"volume_id": volumeId},
+				}
+				mountJSONRequest, err := json.Marshal(MountRequest)
+				Expect(err).NotTo(HaveOccurred())
 
-			By("then deserialing the HTTP response")
-			mountResponse := voldriver.MountResponse{}
-			body, err := ioutil.ReadAll(httpResponseRecorder.Body)
-			err = json.Unmarshal(body, &mountResponse)
+				res = &RecordingCloseNotifier{
+					ResponseRecorder: httptest.NewRecorder(),
+					cn:               make(chan bool, 1),
+				}
 
-			By("then expecting correct JSON conversion")
-			Expect(err).ToNot(HaveOccurred())
-			Expect(mountResponse.Mountpoint).Should(Equal("dummy_path"))
+				route, found := voldriver.Routes.FindRouteByName(voldriver.MountRoute)
+				Expect(found).To(BeTrue())
+
+				path := fmt.Sprintf("http://0.0.0.0%s", route.Path)
+				req, err = http.NewRequest("POST", path, bytes.NewReader(mountJSONRequest))
+				Expect(err).NotTo(HaveOccurred())
+			})
+
+			Context("when mount is successful", func() {
+
+				JustBeforeEach(func() {
+					driver.MountReturns(voldriver.MountResponse{Mountpoint: "dummy_path"})
+
+					wg.Add(1)
+					testLogger.Info(fmt.Sprintf("%#v", res.Body))
+
+					go func() {
+						subject.ServeHTTP(res, req)
+						wg.Done()
+					}()
+
+				})
+
+				It("should produce a handler with a mount route", func() {
+					wg.Wait()
+					ExpectMountPointToEqual("dummy_path")
+				})
+			})
+
+			Context("when the mount hangs and the client closes the connection", func() {
+				JustBeforeEach(func() {
+					driver.MountStub = func(logger lager.Logger, ctx context.Context, mountRequest voldriver.MountRequest) voldriver.MountResponse {
+						for true {
+							time.Sleep(time.Second * 1)
+
+							select {
+							case <-ctx.Done():
+								logger.Error("from ctx", ctx.Err())
+								return voldriver.MountResponse{Err: ctx.Err().Error()}
+							}
+						}
+						return voldriver.MountResponse{}
+					}
+					wg.Add(2)
+
+					go func() {
+						subject.ServeHTTP(res, req)
+						wg.Done()
+					}()
+
+					go func() {
+						res.SimulateClientCancel()
+						wg.Done()
+					}()
+				})
+
+				It("should respond with context canceled", func() {
+					wg.Wait()
+					mountResponse := ExpectMountPointToEqual("")
+					Expect(mountResponse.Err).Should(ContainSubstring("context canceled"))
+				})
+			})
 		})
 
 		It("should produce a handler with an unmount route", func() {

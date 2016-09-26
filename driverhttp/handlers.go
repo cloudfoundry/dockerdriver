@@ -10,6 +10,7 @@ import (
 	cf_http_handlers "code.cloudfoundry.org/cfhttp/handlers"
 	"code.cloudfoundry.org/lager"
 	"code.cloudfoundry.org/voldriver"
+	"context"
 	"github.com/tedsuo/rata"
 )
 
@@ -17,7 +18,7 @@ import (
 // comply with this API, we will return 200 in all cases
 const (
 	StatusInternalServerError = http.StatusOK
-	StatusOK = http.StatusOK
+	StatusOK                  = http.StatusOK
 )
 
 func NewHandler(logger lager.Logger, client voldriver.Driver) (http.Handler, error) {
@@ -174,6 +175,9 @@ func newMountHandler(logger lager.Logger, client voldriver.Driver) http.HandlerF
 		logger.Info("start")
 		defer logger.Info("end")
 
+		ctx, cancel := context.WithCancel(context.TODO())
+		defer cancel()
+
 		body, err := ioutil.ReadAll(req.Body)
 		if err != nil {
 			logger.Error("failed-reading-mount-request-body", err)
@@ -188,7 +192,18 @@ func newMountHandler(logger lager.Logger, client voldriver.Driver) http.HandlerF
 			return
 		}
 
-		mountResponse := client.Mount(logger, mountRequest)
+		if closer, ok := w.(http.CloseNotifier); ok {
+			go func() {
+				select {
+				case <-ctx.Done(): // timeout or done
+				case <-closer.CloseNotify(): // canceled
+					logger.Info("signalling channel")
+					cancel()
+				}
+			}()
+		}
+
+		mountResponse := client.Mount(logger, ctx, mountRequest)
 		if mountResponse.Err != "" {
 			logger.Error("failed-mounting-volume", errors.New(mountResponse.Err), lager.Data{"volume": mountRequest.Name})
 			cf_http_handlers.WriteJSONResponse(w, StatusInternalServerError, mountResponse)

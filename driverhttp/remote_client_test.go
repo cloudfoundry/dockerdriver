@@ -19,10 +19,11 @@ import (
 	"os/exec"
 	"path"
 
+	"code.cloudfoundry.org/goshims/http_wrap/http_fake"
 	"code.cloudfoundry.org/lager/lagertest"
 	"code.cloudfoundry.org/voldriver"
 	"code.cloudfoundry.org/voldriver/driverhttp"
-	"code.cloudfoundry.org/goshims/http_wrap/http_fake"
+	"context"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/tedsuo/ifrit"
@@ -33,6 +34,7 @@ var _ = Describe("RemoteClient", func() {
 
 	var (
 		testLogger                = lagertest.NewTestLogger("LocalDriver Server Test")
+		ctx                       context.Context
 		httpClient                *http_fake.FakeClient
 		driver                    voldriver.Driver
 		validHttpMountResponse    *http.Response
@@ -43,6 +45,8 @@ var _ = Describe("RemoteClient", func() {
 	)
 
 	BeforeEach(func() {
+		ctx = context.TODO()
+
 		httpClient = new(http_fake.FakeClient)
 		fakeClock = fakeclock.NewFakeClock(time.Now())
 		driver = driverhttp.NewRemoteClientWithClient("http://127.0.0.1:8080", httpClient, fakeClock)
@@ -80,7 +84,7 @@ var _ = Describe("RemoteClient", func() {
 			httpClient.DoReturns(invalidHttpResponse, nil)
 
 			volumeId := "fake-volume"
-			mountResponse := driver.Mount(testLogger, voldriver.MountRequest{Name: volumeId})
+			mountResponse := driver.Mount(testLogger, ctx, voldriver.MountRequest{Name: volumeId})
 
 			By("signaling an error")
 			Expect(mountResponse.Err).To(Equal("some error string"))
@@ -106,7 +110,7 @@ var _ = Describe("RemoteClient", func() {
 		It("should be able to mount", func() {
 			httpClient.DoReturns(validHttpMountResponse, nil)
 
-			mountResponse := driver.Mount(testLogger, voldriver.MountRequest{Name: volumeId, Opts: map[string]interface{}{"volume_id": volumeId}})
+			mountResponse := driver.Mount(testLogger, ctx, voldriver.MountRequest{Name: volumeId, Opts: map[string]interface{}{"volume_id": volumeId}})
 
 			By("giving back a path with no error")
 			Expect(mountResponse.Err).To(Equal(""))
@@ -127,7 +131,7 @@ var _ = Describe("RemoteClient", func() {
 
 			validHttpUnmountResponse := &http.Response{
 				StatusCode: driverhttp.StatusOK,
-				Body: stringCloser{bytes.NewBufferString("{\"Err\":\"\"}")},
+				Body:       stringCloser{bytes.NewBufferString("{\"Err\":\"\"}")},
 			}
 
 			httpClient.DoReturns(validHttpUnmountResponse, nil)
@@ -164,7 +168,7 @@ var _ = Describe("RemoteClient", func() {
 			httpClient.DoReturns(validHttpMountResponse, nil)
 
 			volumeId := "fake-volume"
-			mountResponse := driver.Mount(testLogger, voldriver.MountRequest{Name: volumeId, Opts: map[string]interface{}{"volume_id": volumeId}})
+			mountResponse := driver.Mount(testLogger, ctx, voldriver.MountRequest{Name: volumeId, Opts: map[string]interface{}{"volume_id": volumeId}})
 
 			By("signaling an error")
 			Expect(mountResponse.Err).NotTo(Equal(""))
@@ -181,7 +185,7 @@ var _ = Describe("RemoteClient", func() {
 			httpClient.DoReturns(invalidHttpResponse, nil)
 
 			volumeId := "fake-volume"
-			mountResponse := driver.Mount(testLogger, voldriver.MountRequest{Name: volumeId, Opts: map[string]interface{}{"volume_id": volumeId}})
+			mountResponse := driver.Mount(testLogger, ctx, voldriver.MountRequest{Name: volumeId, Opts: map[string]interface{}{"volume_id": volumeId}})
 
 			By("signaling an error")
 			Expect(mountResponse.Err).NotTo(Equal(""))
@@ -218,7 +222,7 @@ var _ = Describe("RemoteClient", func() {
 			httpClient.DoReturns(nil, fmt.Errorf("connection failed"))
 
 			volumeId := "fake-volume"
-			mountResponse := driver.Mount(testLogger, voldriver.MountRequest{Name: volumeId})
+			mountResponse := driver.Mount(testLogger, ctx, voldriver.MountRequest{Name: volumeId})
 
 			By("signaling an error")
 			Expect(mountResponse.Err).To(Equal("connection failed"))
@@ -305,7 +309,7 @@ var _ = Describe("RemoteClient", func() {
 
 		It("should be able to mount", func() {
 			httpClient.DoReturns(validHttpMountResponse, nil)
-			mountResponse := driver.Mount(testLogger, voldriver.MountRequest{Name: volumeId})
+			mountResponse := driver.Mount(testLogger, ctx, voldriver.MountRequest{Name: volumeId})
 
 			By("returning a mountpoint without errors")
 			Expect(mountResponse.Err).To(Equal(""))
@@ -316,7 +320,7 @@ var _ = Describe("RemoteClient", func() {
 
 			validHttpUnmountResponse := &http.Response{
 				StatusCode: driverhttp.StatusOK,
-				Body: stringCloser{bytes.NewBufferString("{\"Err\":\"\"}")},
+				Body:       stringCloser{bytes.NewBufferString("{\"Err\":\"\"}")},
 			}
 
 			httpClient.DoReturns(validHttpUnmountResponse, nil)
@@ -374,7 +378,7 @@ var _ = Describe("RemoteClient", func() {
 				go fastForward(fakeClock, 10)
 
 				volumeId = "fake-volume"
-				mountResponse = driver.Mount(testLogger, voldriver.MountRequest{Name: volumeId})
+				mountResponse = driver.Mount(testLogger, ctx, voldriver.MountRequest{Name: volumeId})
 			})
 
 			It("should have the correct number of retries, submit the same request each time and eventually recieve the correct response", func() {
@@ -406,7 +410,7 @@ var _ = Describe("RemoteClient", func() {
 
 				timestamp = fakeClock.Now()
 				volumeId = "fake-volume"
-				mountResponse = driver.Mount(testLogger, voldriver.MountRequest{Name: volumeId})
+				mountResponse = driver.Mount(testLogger, ctx, voldriver.MountRequest{Name: volumeId})
 			})
 
 			It("should return an error after 30 seconds have passed", func() {
