@@ -193,10 +193,13 @@ func newMountHandler(logger lager.Logger, client voldriver.Driver) http.HandlerF
 		}
 
 		if closer, ok := w.(http.CloseNotifier); ok {
+			// Note: make calls in this thread to ensure reference on context
+			doneOrTimeoutChannel := ctx.Done()
+			cancelChannel := closer.CloseNotify()
 			go func() {
 				select {
-				case <-ctx.Done(): // timeout or done
-				case <-closer.CloseNotify(): // canceled
+				case <-doneOrTimeoutChannel:
+				case <-cancelChannel:
 					logger.Info("signalling channel")
 					cancel()
 				}
