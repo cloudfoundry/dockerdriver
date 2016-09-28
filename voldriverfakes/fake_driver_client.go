@@ -2,7 +2,6 @@
 package voldriverfakes
 
 import (
-	"context"
 	"sync"
 
 	"code.cloudfoundry.org/lager"
@@ -35,11 +34,10 @@ type FakeDriver struct {
 	listReturns struct {
 		result1 voldriver.ListResponse
 	}
-	MountStub        func(logger lager.Logger, ctx context.Context, mountRequest voldriver.MountRequest) voldriver.MountResponse
+	MountStub        func(logger lager.Logger, mountRequest voldriver.MountRequest) voldriver.MountResponse
 	mountMutex       sync.RWMutex
 	mountArgsForCall []struct {
 		logger       lager.Logger
-		ctx          context.Context
 		mountRequest voldriver.MountRequest
 	}
 	mountReturns struct {
@@ -188,16 +186,15 @@ func (fake *FakeDriver) ListReturns(result1 voldriver.ListResponse) {
 	}{result1}
 }
 
-func (fake *FakeDriver) Mount(logger lager.Logger, ctx context.Context, mountRequest voldriver.MountRequest) voldriver.MountResponse {
+func (fake *FakeDriver) Mount(logger lager.Logger, mountRequest voldriver.MountRequest) voldriver.MountResponse {
 	fake.mountMutex.Lock()
 	fake.mountArgsForCall = append(fake.mountArgsForCall, struct {
 		logger       lager.Logger
-		ctx          context.Context
 		mountRequest voldriver.MountRequest
-	}{logger, ctx, mountRequest})
+	}{logger, mountRequest})
 	fake.mountMutex.Unlock()
 	if fake.MountStub != nil {
-		return fake.MountStub(logger, ctx, mountRequest)
+		return fake.MountStub(logger, mountRequest)
 	} else {
 		return fake.mountReturns.result1
 	}
@@ -209,10 +206,10 @@ func (fake *FakeDriver) MountCallCount() int {
 	return len(fake.mountArgsForCall)
 }
 
-func (fake *FakeDriver) MountArgsForCall(i int) (lager.Logger, context.Context, voldriver.MountRequest) {
+func (fake *FakeDriver) MountArgsForCall(i int) (lager.Logger, voldriver.MountRequest) {
 	fake.mountMutex.RLock()
 	defer fake.mountMutex.RUnlock()
-	return fake.mountArgsForCall[i].logger, fake.mountArgsForCall[i].ctx, fake.mountArgsForCall[i].mountRequest
+	return fake.mountArgsForCall[i].logger, fake.mountArgsForCall[i].mountRequest
 }
 
 func (fake *FakeDriver) MountReturns(result1 voldriver.MountResponse) {

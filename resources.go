@@ -2,7 +2,6 @@ package voldriver
 
 import (
 	"code.cloudfoundry.org/lager"
-	"context"
 	"github.com/tedsuo/rata"
 )
 
@@ -36,7 +35,7 @@ type Driver interface {
 	Activate(logger lager.Logger) ActivateResponse
 	Get(logger lager.Logger, getRequest GetRequest) GetResponse
 	List(logger lager.Logger) ListResponse
-	Mount(logger lager.Logger, ctx context.Context, mountRequest MountRequest) MountResponse
+	Mount(logger lager.Logger, mountRequest MountRequest) MountResponse
 	Path(logger lager.Logger, pathRequest PathRequest) PathResponse
 	Unmount(logger lager.Logger, unmountRequest UnmountRequest) ErrorResponse
 	Capabilities(logger lager.Logger) CapabilitiesResponse

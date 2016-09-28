@@ -14,7 +14,6 @@ import (
 	"code.cloudfoundry.org/voldriver"
 	"code.cloudfoundry.org/voldriver/driverhttp"
 	"code.cloudfoundry.org/voldriver/voldriverfakes"
-	"context"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"sync"
@@ -177,7 +176,8 @@ var _ = Describe("Volman Driver Handlers", func() {
 
 			Context("when the mount hangs and the client closes the connection", func() {
 				JustBeforeEach(func() {
-					driver.MountStub = func(logger lager.Logger, ctx context.Context, mountRequest voldriver.MountRequest) voldriver.MountResponse {
+					driver.MountStub = func(logger lager.Logger, mountRequest voldriver.MountRequest) voldriver.MountResponse {
+						ctx := logger.(lager.Context)
 						for true {
 							time.Sleep(time.Second * 1)
 
