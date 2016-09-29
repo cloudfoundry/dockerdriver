@@ -11,6 +11,7 @@ import (
 	"code.cloudfoundry.org/lager"
 	"code.cloudfoundry.org/voldriver"
 	"github.com/tedsuo/rata"
+	"context"
 )
 
 // At present, Docker ignores HTTP status codes, and requires errors to be returned in the response body.  To
@@ -46,7 +47,10 @@ func newActivateHandler(logger lager.Logger, client voldriver.Driver) http.Handl
 		logger.Info("start")
 		defer logger.Info("end")
 
-		activateResponse := client.Activate(logger)
+		ctx, cancel := withCancel(logger, req.Context(), w)
+		defer cancel()
+
+		activateResponse := client.Activate(ctx)
 		if activateResponse.Err != "" {
 			logger.Error("failed-activating-driver", fmt.Errorf(activateResponse.Err))
 			cf_http_handlers.WriteJSONResponse(w, StatusInternalServerError, activateResponse)
@@ -64,6 +68,9 @@ func newGetHandler(logger lager.Logger, client voldriver.Driver) http.HandlerFun
 		logger.Info("start")
 		defer logger.Info("end")
 
+		ctx, cancel := withCancel(logger, req.Context(), w)
+		defer cancel()
+
 		body, err := ioutil.ReadAll(req.Body)
 		if err != nil {
 			logger.Error("failed-reading-get-request-body", err)
@@ -78,7 +85,7 @@ func newGetHandler(logger lager.Logger, client voldriver.Driver) http.HandlerFun
 			return
 		}
 
-		getResponse := client.Get(logger, getRequest)
+		getResponse := client.Get(ctx, getRequest)
 		if getResponse.Err != "" {
 			logger.Error("failed-getting-volume", err, lager.Data{"volume": getRequest.Name})
 			cf_http_handlers.WriteJSONResponse(w, StatusInternalServerError, getResponse)
@@ -95,7 +102,10 @@ func newListHandler(logger lager.Logger, client voldriver.Driver) http.HandlerFu
 		logger.Info("start")
 		defer logger.Info("end")
 
-		listResponse := client.List(logger)
+		ctx, cancel := withCancel(logger, req.Context(), w)
+		defer cancel()
+
+		listResponse := client.List(ctx)
 		if listResponse.Err != "" {
 			logger.Error("failed-listing-volumes", fmt.Errorf("%s", listResponse.Err))
 			cf_http_handlers.WriteJSONResponse(w, StatusInternalServerError, listResponse)
@@ -112,6 +122,9 @@ func newPathHandler(logger lager.Logger, client voldriver.Driver) http.HandlerFu
 		logger.Info("start")
 		defer logger.Info("end")
 
+		ctx, cancel := withCancel(logger, req.Context(), w)
+		defer cancel()
+
 		body, err := ioutil.ReadAll(req.Body)
 		if err != nil {
 			logger.Error("failed-reading-path-request-body", err)
@@ -126,7 +139,7 @@ func newPathHandler(logger lager.Logger, client voldriver.Driver) http.HandlerFu
 			return
 		}
 
-		pathResponse := client.Path(logger, pathRequest)
+		pathResponse := client.Path(ctx, pathRequest)
 		if pathResponse.Err != "" {
 			logger.Error("failed-activating-driver", fmt.Errorf(pathResponse.Err))
 			cf_http_handlers.WriteJSONResponse(w, StatusInternalServerError, pathResponse)
@@ -137,11 +150,26 @@ func newPathHandler(logger lager.Logger, client voldriver.Driver) http.HandlerFu
 	}
 }
 
+func newCapabilitiesHandler(logger lager.Logger, client voldriver.Driver) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		logger := logger.Session("handle-capabilities")
+		logger.Info("start")
+		defer logger.Info("end")
+
+		capabilitiesResponse := client.Capabilities(logger)
+		logger.Debug("capabilities-response", lager.Data{"capabilities": capabilitiesResponse})
+		cf_http_handlers.WriteJSONResponse(w, StatusOK, capabilitiesResponse)
+	}
+}
+
 func newCreateHandler(logger lager.Logger, client voldriver.Driver) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		logger := logger.Session("handle-create")
 		logger.Info("start")
 		defer logger.Info("end")
+
+		ctx, cancel := withCancel(logger, req.Context(), w)
+		defer cancel()
 
 		body, err := ioutil.ReadAll(req.Body)
 		if err != nil {
@@ -157,7 +185,7 @@ func newCreateHandler(logger lager.Logger, client voldriver.Driver) http.Handler
 			return
 		}
 
-		createResponse := client.Create(logger, createRequest)
+		createResponse := client.Create(ctx, createRequest)
 		if createResponse.Err != "" {
 			logger.Error("failed-creating-volume", errors.New(createResponse.Err))
 			cf_http_handlers.WriteJSONResponse(w, StatusInternalServerError, createResponse)
@@ -174,7 +202,7 @@ func newMountHandler(logger lager.Logger, client voldriver.Driver) http.HandlerF
 		logger.Info("start")
 		defer logger.Info("end")
 
-		ctx, cancel := lager.WithCancel(lager.NewContext(req.Context(), logger))
+		ctx, cancel := withCancel(logger, req.Context(), w)
 		defer cancel()
 
 		body, err := ioutil.ReadAll(req.Body)
@@ -189,20 +217,6 @@ func newMountHandler(logger lager.Logger, client voldriver.Driver) http.HandlerF
 			logger.Error("failed-unmarshalling-mount-request-body", err)
 			cf_http_handlers.WriteJSONResponse(w, StatusInternalServerError, voldriver.MountResponse{Err: err.Error()})
 			return
-		}
-
-		if closer, ok := w.(http.CloseNotifier); ok {
-			// Note: make calls in this thread to ensure reference on context
-			doneOrTimeoutChannel := ctx.Done()
-			cancelChannel := closer.CloseNotify()
-			go func() {
-				select {
-				case <-doneOrTimeoutChannel:
-				case <-cancelChannel:
-					logger.Info("signalling channel")
-					cancel()
-				}
-			}()
 		}
 
 		mountResponse := client.Mount(ctx, mountRequest)
@@ -222,6 +236,9 @@ func newUnmountHandler(logger lager.Logger, client voldriver.Driver) http.Handle
 		logger.Info("start")
 		defer logger.Info("end")
 
+		ctx, cancel := withCancel(logger, req.Context(), w)
+		defer cancel()
+
 		body, err := ioutil.ReadAll(req.Body)
 		if err != nil {
 			logger.Error("failed-reading-unmount-request-body", err)
@@ -236,7 +253,7 @@ func newUnmountHandler(logger lager.Logger, client voldriver.Driver) http.Handle
 			return
 		}
 
-		unmountResponse := client.Unmount(logger, unmountRequest)
+		unmountResponse := client.Unmount(ctx, unmountRequest)
 		if unmountResponse.Err != "" {
 			logger.Error("failed-unmount-volume", errors.New(unmountResponse.Err), lager.Data{"volume": unmountRequest.Name})
 			cf_http_handlers.WriteJSONResponse(w, StatusInternalServerError, unmountResponse)
@@ -253,6 +270,9 @@ func newRemoveHandler(logger lager.Logger, client voldriver.Driver) http.Handler
 		logger.Info("start")
 		defer logger.Info("end")
 
+		ctx, cancel := withCancel(logger, req.Context(), w)
+		defer cancel()
+
 		body, err := ioutil.ReadAll(req.Body)
 		if err != nil {
 			logger.Error("failed-reading-remove-request-body", err)
@@ -267,7 +287,7 @@ func newRemoveHandler(logger lager.Logger, client voldriver.Driver) http.Handler
 			return
 		}
 
-		removeResponse := client.Remove(logger, removeRequest)
+		removeResponse := client.Remove(ctx, removeRequest)
 		if removeResponse.Err != "" {
 			logger.Error("failed-remove-volume", errors.New(removeResponse.Err))
 			cf_http_handlers.WriteJSONResponse(w, StatusInternalServerError, removeResponse)
@@ -278,14 +298,26 @@ func newRemoveHandler(logger lager.Logger, client voldriver.Driver) http.Handler
 	}
 }
 
-func newCapabilitiesHandler(logger lager.Logger, client voldriver.Driver) http.HandlerFunc {
-	return func(w http.ResponseWriter, req *http.Request) {
-		logger := logger.Session("handle-capabilities")
-		logger.Info("start")
-		defer logger.Info("end")
+func withCancel(logger lager.Logger, ctx context.Context, res http.ResponseWriter) (lager.Context, context.CancelFunc) {
+	logger = logger.Session("with-cancel")
+	logger.Info("start")
+	defer logger.Info("end")
 
-		capabilitiesResponse := client.Capabilities(logger)
-		logger.Debug("capabilities-response", lager.Data{"capabilities": capabilitiesResponse})
-		cf_http_handlers.WriteJSONResponse(w, StatusOK, capabilitiesResponse)
+	newctx, cancel := lager.WithCancel(lager.NewContext(ctx, logger))
+
+	if closer, ok := res.(http.CloseNotifier); ok {
+		// Note: make calls in this thread to ensure reference on context
+		doneOrTimeoutChannel := newctx.Done()
+		cancelChannel := closer.CloseNotify()
+		go func() {
+			select {
+			case <-doneOrTimeoutChannel:
+			case <-cancelChannel:
+				logger.Info("signalling cancel")
+				cancel()
+			}
+		}()
 	}
+
+	return newctx, cancel
 }
