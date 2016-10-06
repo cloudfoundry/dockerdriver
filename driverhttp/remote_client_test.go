@@ -38,7 +38,6 @@ var _ = Describe("RemoteClient", func() {
 		validHttpMountResponse    *http.Response
 		validHttpPathResponse     *http.Response
 		validHttpActivateResponse *http.Response
-		invalidHttpResponse       *http.Response
 		fakeClock                 *fakeclock.FakeClock
 	)
 
@@ -69,15 +68,17 @@ var _ = Describe("RemoteClient", func() {
 			fakeClock = fakeclock.NewFakeClock(time.Now())
 			httpClient = new(http_fake.FakeClient)
 			driver = driverhttp.NewRemoteClientWithClient("http://127.0.0.1:8080", httpClient, fakeClock)
-			invalidHttpResponse = &http.Response{
-				StatusCode: driverhttp.StatusInternalServerError,
-				Body:       stringCloser{bytes.NewBufferString("{\"Err\":\"some error string\"}")},
+			httpClient.DoStub = func(req *http.Request) (*http.Response, error) {
+				return &http.Response{
+					StatusCode: driverhttp.StatusInternalServerError,
+					Body:       stringCloser{bytes.NewBufferString("{\"Err\":\"some error string\"}")},
+				}, nil
 			}
+
+			go fastForward(fakeClock, 40)
 		})
 
 		It("should not be able to mount", func() {
-
-			httpClient.DoReturns(invalidHttpResponse, nil)
 
 			volumeId := "fake-volume"
 			mountResponse := driver.Mount(testLogger, voldriver.MountRequest{Name: volumeId})
@@ -88,8 +89,6 @@ var _ = Describe("RemoteClient", func() {
 		})
 
 		It("should not be able to unmount", func() {
-
-			httpClient.DoReturns(invalidHttpResponse, nil)
 
 			volumeId := "fake-volume"
 			unmountResponse := driver.Unmount(testLogger, voldriver.UnmountRequest{Name: volumeId})
@@ -152,33 +151,17 @@ var _ = Describe("RemoteClient", func() {
 	Context("when the driver is malicious and the transport is TCP", func() {
 
 		BeforeEach(func() {
+			httpClient.DoStub = func(req *http.Request) (*http.Response, error) {
+				return &http.Response{
+					StatusCode: driverhttp.StatusOK,
+					Body:       stringCloser{bytes.NewBufferString("i am trying to pown your system")},
+				}, nil
+			}
+
+			go fastForward(fakeClock, 40)
 		})
 
 		It("should not be able to mount", func() {
-
-			validHttpMountResponse = &http.Response{
-				StatusCode: driverhttp.StatusOK,
-				Body:       stringCloser{bytes.NewBufferString("i am trying to pown your system")},
-			}
-
-			httpClient.DoReturns(validHttpMountResponse, nil)
-
-			volumeId := "fake-volume"
-			mountResponse := driver.Mount(testLogger, voldriver.MountRequest{Name: volumeId, Opts: map[string]interface{}{"volume_id": volumeId}})
-
-			By("signaling an error")
-			Expect(mountResponse.Err).NotTo(Equal(""))
-			Expect(mountResponse.Mountpoint).To(Equal(""))
-		})
-
-		It("should still not be able to mount", func() {
-
-			invalidHttpResponse := &http.Response{
-				StatusCode: driverhttp.StatusInternalServerError,
-				Body:       stringCloser{bytes.NewBufferString("i am trying to pown your system")},
-			}
-
-			httpClient.DoReturns(invalidHttpResponse, nil)
 
 			volumeId := "fake-volume"
 			mountResponse := driver.Mount(testLogger, voldriver.MountRequest{Name: volumeId, Opts: map[string]interface{}{"volume_id": volumeId}})
@@ -189,13 +172,6 @@ var _ = Describe("RemoteClient", func() {
 		})
 
 		It("should not be able to unmount", func() {
-
-			validHttpUnmountResponse := &http.Response{
-				StatusCode: driverhttp.StatusInternalServerError,
-				Body:       stringCloser{bytes.NewBufferString("i am trying to pown your system")},
-			}
-
-			httpClient.DoReturns(validHttpUnmountResponse, nil)
 
 			volumeId := "fake-volume"
 			unmountResponse := driver.Unmount(testLogger, voldriver.UnmountRequest{Name: volumeId})
@@ -347,6 +323,9 @@ var _ = Describe("RemoteClient", func() {
 			volumeId      string
 		)
 
+		BeforeEach(func() {
+			retryCount = 0
+		})
 		Context("when it fails first time and then succeeds", func() {
 
 			var (
@@ -416,12 +395,60 @@ var _ = Describe("RemoteClient", func() {
 				Expect(elapsed.Seconds()).To(BeNumerically(">", 30))
 			})
 		})
+
+		Context("when it fails with a voldriver error and then succeeds", func() {
+			var (
+				requestBody []byte
+				err         error
+			)
+
+			BeforeEach(func() {
+				httpClient.DoStub = func(req *os_http.Request) (resp *os_http.Response, err error) {
+
+					defer func() {
+						retryCount = retryCount + 1
+					}()
+
+					requestBody, err = ioutil.ReadAll(req.Body)
+					Expect(err).NotTo(HaveOccurred())
+
+					if retryCount == 0 {
+						return &http.Response{
+							StatusCode: driverhttp.StatusOK,
+							Body:       stringCloser{bytes.NewBufferString("{\"Err\":\"some error string\"}")},
+						}, nil
+					}
+
+					return validHttpMountResponse, nil
+				}
+
+				go fastForward(fakeClock, 10)
+
+				volumeId = "fake-volume"
+				mountResponse = driver.Mount(testLogger, voldriver.MountRequest{Name: volumeId})
+			})
+
+			It("should have the correct number of retries, submit the same request each time and eventually recieve the correct response", func() {
+				// retries
+				Expect(retryCount).To(Equal(2))
+
+				// request
+				var expectedRequestBody []byte
+				expectedRequestBody, err = json.Marshal(voldriver.MountRequest{Name: volumeId})
+				Expect(err).NotTo(HaveOccurred())
+				Expect(requestBody).To(Equal(expectedRequestBody))
+
+				// response
+				Expect(mountResponse.Err).To(Equal(""))
+				Expect(mountResponse.Mountpoint).NotTo(Equal(""))
+			})
+		})
 	})
 })
 
 func fastForward(fakeClock *fakeclock.FakeClock, seconds int) {
 	for i := 0; i < seconds; i++ {
-		time.Sleep(time.Millisecond * 1)
+		time.Sleep(time.Millisecond * 3)
 		fakeClock.IncrementBySeconds(1)
 	}
 }
