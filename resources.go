@@ -3,6 +3,7 @@ package voldriver
 import (
 	"code.cloudfoundry.org/lager"
 	"github.com/tedsuo/rata"
+	"context"
 )
 
 const (
@@ -29,16 +30,23 @@ var Routes = rata.Routes{
 	{Path: "/VolumeDriver.Capabilities", Method: "POST", Name: CapabilitiesRoute},
 }
 
+//go:generate counterfeiter -o voldriverfakes/fake_env.go . Env
+
+type Env interface {
+	Logger() *lager.Logger
+	Context() *context.Context
+}
+
 //go:generate counterfeiter -o voldriverfakes/fake_driver_client.go . Driver
 
 type Driver interface {
-	Activate(logger lager.Logger) ActivateResponse
-	Get(logger lager.Logger, getRequest GetRequest) GetResponse
-	List(logger lager.Logger) ListResponse
-	Mount(logger lager.Logger, mountRequest MountRequest) MountResponse
-	Path(logger lager.Logger, pathRequest PathRequest) PathResponse
-	Unmount(logger lager.Logger, unmountRequest UnmountRequest) ErrorResponse
-	Capabilities(logger lager.Logger) CapabilitiesResponse
+	Activate(env Env) ActivateResponse
+	Get(env Env, getRequest GetRequest) GetResponse
+	List(env Env) ListResponse
+	Mount(env Env, mountRequest MountRequest) MountResponse
+	Path(env Env, pathRequest PathRequest) PathResponse
+	Unmount(env Env, unmountRequest UnmountRequest) ErrorResponse
+	Capabilities(env Env) CapabilitiesResponse
 
 	Provisioner
 }
@@ -46,8 +54,8 @@ type Driver interface {
 //go:generate counterfeiter -o voldriverfakes/fake_provisioner.go . Provisioner
 
 type Provisioner interface {
-	Create(logger lager.Logger, createRequest CreateRequest) ErrorResponse
-	Remove(logger lager.Logger, removeRequest RemoveRequest) ErrorResponse
+	Create(env Env, createRequest CreateRequest) ErrorResponse
+	Remove(env Env, removeRequest RemoveRequest) ErrorResponse
 }
 
 type ActivateResponse struct {

@@ -83,8 +83,8 @@ func NewRemoteClientWithClient(socketPath string, client http_wrap.Client, clock
 	}
 }
 
-func (r *remoteClient) Activate(logger lager.Logger) voldriver.ActivateResponse {
-	logger = logger.Session("activate")
+func (r *remoteClient) Activate(env voldriver.Env) voldriver.ActivateResponse {
+	logger := (*env.Logger()).Session("activate")
 	logger.Info("start")
 	defer logger.Info("end")
 
@@ -109,8 +109,8 @@ func (r *remoteClient) Activate(logger lager.Logger) voldriver.ActivateResponse 
 	return activate
 }
 
-func (r *remoteClient) Create(logger lager.Logger, createRequest voldriver.CreateRequest) voldriver.ErrorResponse {
-	logger = logger.Session("create", lager.Data{"create_request": createRequest})
+func (r *remoteClient) Create(env voldriver.Env, createRequest voldriver.CreateRequest) voldriver.ErrorResponse {
+	logger := (*env.Logger()).Session("create", lager.Data{"create_request": createRequest})
 	logger.Info("start")
 	defer logger.Info("end")
 
@@ -141,8 +141,8 @@ func (r *remoteClient) Create(logger lager.Logger, createRequest voldriver.Creat
 	return voldriver.ErrorResponse{}
 }
 
-func (r *remoteClient) List(logger lager.Logger) voldriver.ListResponse {
-	logger = logger.Session("remoteclient-list")
+func (r *remoteClient) List(env voldriver.Env) voldriver.ListResponse {
+	logger := (*env.Logger()).Session("remoteclient-list")
 	logger.Info("start")
 	defer logger.Info("end")
 
@@ -167,8 +167,8 @@ func (r *remoteClient) List(logger lager.Logger) voldriver.ListResponse {
 	return list
 }
 
-func (r *remoteClient) Mount(logger lager.Logger, mountRequest voldriver.MountRequest) voldriver.MountResponse {
-	logger = logger.Session("remoteclient-mount", lager.Data{"mount_request": mountRequest})
+func (r *remoteClient) Mount(env voldriver.Env, mountRequest voldriver.MountRequest) voldriver.MountResponse {
+	logger := (*env.Logger()).Session("remoteclient-mount", lager.Data{"mount_request": mountRequest})
 	logger.Info("start")
 	defer logger.Info("end")
 
@@ -199,8 +199,8 @@ func (r *remoteClient) Mount(logger lager.Logger, mountRequest voldriver.MountRe
 	return mountPoint
 }
 
-func (r *remoteClient) Path(logger lager.Logger, pathRequest voldriver.PathRequest) voldriver.PathResponse {
-	logger = logger.Session("path")
+func (r *remoteClient) Path(env voldriver.Env, pathRequest voldriver.PathRequest) voldriver.PathResponse {
+	logger := (*env.Logger()).Session("path")
 	logger.Info("start")
 	defer logger.Info("end")
 
@@ -231,8 +231,8 @@ func (r *remoteClient) Path(logger lager.Logger, pathRequest voldriver.PathReque
 	return mountPoint
 }
 
-func (r *remoteClient) Unmount(logger lager.Logger, unmountRequest voldriver.UnmountRequest) voldriver.ErrorResponse {
-	logger = logger.Session("mount")
+func (r *remoteClient) Unmount(env voldriver.Env, unmountRequest voldriver.UnmountRequest) voldriver.ErrorResponse {
+	logger := (*env.Logger()).Session("mount")
 	logger.Info("start")
 	defer logger.Info("end")
 
@@ -262,8 +262,8 @@ func (r *remoteClient) Unmount(logger lager.Logger, unmountRequest voldriver.Unm
 	return remoteErrorResponse
 }
 
-func (r *remoteClient) Remove(logger lager.Logger, removeRequest voldriver.RemoveRequest) voldriver.ErrorResponse {
-	logger = logger.Session("remove")
+func (r *remoteClient) Remove(env voldriver.Env, removeRequest voldriver.RemoveRequest) voldriver.ErrorResponse {
+	logger := (*env.Logger()).Session("remove")
 	logger.Info("start")
 	defer logger.Info("end")
 
@@ -294,8 +294,8 @@ func (r *remoteClient) Remove(logger lager.Logger, removeRequest voldriver.Remov
 	return remoteErrorResponse
 }
 
-func (r *remoteClient) Get(logger lager.Logger, getRequest voldriver.GetRequest) voldriver.GetResponse {
-	logger = logger.Session("get")
+func (r *remoteClient) Get(env voldriver.Env, getRequest voldriver.GetRequest) voldriver.GetResponse {
+	logger := (*env.Logger()).Session("get")
 	logger.Info("start")
 	defer logger.Info("end")
 
@@ -326,8 +326,8 @@ func (r *remoteClient) Get(logger lager.Logger, getRequest voldriver.GetRequest)
 	return remoteResponse
 }
 
-func (r *remoteClient) Capabilities(logger lager.Logger) voldriver.CapabilitiesResponse {
-	logger = logger.Session("capabilities")
+func (r *remoteClient) Capabilities(env voldriver.Env) voldriver.CapabilitiesResponse {
+	logger := (*env.Logger()).Session("capabilities")
 	logger.Info("start")
 	defer logger.Info("end")
 
