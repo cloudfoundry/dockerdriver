@@ -35,8 +35,6 @@ var Routes = rata.Routes{
 type Env interface {
 	Logger() *lager.Logger
 	Context() *context.Context
-	WithLogger(logger *lager.Logger)
-	WithContext(ctx *context.Context)
 }
 
 //go:generate counterfeiter -o voldriverfakes/fake_driver_client.go . Driver
