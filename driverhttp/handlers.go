@@ -31,12 +31,12 @@ func (v *voldriverEnv) Context() *context.Context {
 	return v.aContext
 }
 
-func (v *voldriverEnv) WithLogger(logger *lager.Logger){
-	v.logger = logger
+func EnvWithLogger(logger *lager.Logger, env voldriver.Env) voldriver.Env{
+	return &voldriverEnv{logger, env.Context()}
 }
 
-func (v *voldriverEnv) WithContext(ctx *context.Context){
-	v.aContext = ctx
+func EnvWithContext(ctx *context.Context, env voldriver.Env) voldriver.Env{
+	return &voldriverEnv{env.Logger(), ctx}
 }
 
 
