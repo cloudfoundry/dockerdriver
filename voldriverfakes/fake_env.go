@@ -22,16 +22,6 @@ type FakeEnv struct {
 	contextReturns     struct {
 		result1 *context.Context
 	}
-	WithLoggerStub        func(logger *lager.Logger)
-	withLoggerMutex       sync.RWMutex
-	withLoggerArgsForCall []struct {
-		logger *lager.Logger
-	}
-	WithContextStub        func(ctx *context.Context)
-	withContextMutex       sync.RWMutex
-	withContextArgsForCall []struct {
-		ctx *context.Context
-	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
 }
@@ -86,54 +76,6 @@ func (fake *FakeEnv) ContextReturns(result1 *context.Context) {
 	}{result1}
 }
 
-func (fake *FakeEnv) WithLogger(logger *lager.Logger) {
-	fake.withLoggerMutex.Lock()
-	fake.withLoggerArgsForCall = append(fake.withLoggerArgsForCall, struct {
-		logger *lager.Logger
-	}{logger})
-	fake.recordInvocation("WithLogger", []interface{}{logger})
-	fake.withLoggerMutex.Unlock()
-	if fake.WithLoggerStub != nil {
-		fake.WithLoggerStub(logger)
-	}
-}
-
-func (fake *FakeEnv) WithLoggerCallCount() int {
-	fake.withLoggerMutex.RLock()
-	defer fake.withLoggerMutex.RUnlock()
-	return len(fake.withLoggerArgsForCall)
-}
-
-func (fake *FakeEnv) WithLoggerArgsForCall(i int) *lager.Logger {
-	fake.withLoggerMutex.RLock()
-	defer fake.withLoggerMutex.RUnlock()
-	return fake.withLoggerArgsForCall[i].logger
-}
-
-func (fake *FakeEnv) WithContext(ctx *context.Context) {
-	fake.withContextMutex.Lock()
-	fake.withContextArgsForCall = append(fake.withContextArgsForCall, struct {
-		ctx *context.Context
-	}{ctx})
-	fake.recordInvocation("WithContext", []interface{}{ctx})
-	fake.withContextMutex.Unlock()
-	if fake.WithContextStub != nil {
-		fake.WithContextStub(ctx)
-	}
-}
-
-func (fake *FakeEnv) WithContextCallCount() int {
-	fake.withContextMutex.RLock()
-	defer fake.withContextMutex.RUnlock()
-	return len(fake.withContextArgsForCall)
-}
-
-func (fake *FakeEnv) WithContextArgsForCall(i int) *context.Context {
-	fake.withContextMutex.RLock()
-	defer fake.withContextMutex.RUnlock()
-	return fake.withContextArgsForCall[i].ctx
-}
-
 func (fake *FakeEnv) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
@@ -141,10 +83,6 @@ func (fake *FakeEnv) Invocations() map[string][][]interface{} {
 	defer fake.loggerMutex.RUnlock()
 	fake.contextMutex.RLock()
 	defer fake.contextMutex.RUnlock()
-	fake.withLoggerMutex.RLock()
-	defer fake.withLoggerMutex.RUnlock()
-	fake.withContextMutex.RLock()
-	defer fake.withContextMutex.RUnlock()
 	return fake.invocations
 }
 
