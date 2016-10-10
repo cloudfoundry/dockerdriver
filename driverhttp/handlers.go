@@ -31,6 +31,14 @@ func (v *voldriverEnv) Context() *context.Context {
 	return v.aContext
 }
 
+func (v *voldriverEnv) WithLogger(logger *lager.Logger){
+	v.logger = logger
+}
+
+func (v *voldriverEnv) WithContext(ctx *context.Context){
+	v.aContext = ctx
+}
+
 
 // At present, Docker ignores HTTP status codes, and requires errors to be returned in the response body.  To
 // comply with this API, we will return 200 in all cases
