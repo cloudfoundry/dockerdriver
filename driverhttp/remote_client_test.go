@@ -36,13 +36,13 @@ var _ = Describe("RemoteClient", func() {
 	var (
 		testLogger                lager.Logger
 		ctx												context.Context
+		env												voldriver.Env
 		httpClient                *http_fake.FakeClient
 		driver                    voldriver.Driver
 		validHttpMountResponse    *http.Response
 		validHttpPathResponse     *http.Response
 		validHttpActivateResponse *http.Response
 		fakeClock                 *fakeclock.FakeClock
-		env												voldriver.Env
 	)
 
 	BeforeEach(func() {
