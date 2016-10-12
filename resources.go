@@ -33,8 +33,8 @@ var Routes = rata.Routes{
 //go:generate counterfeiter -o voldriverfakes/fake_env.go . Env
 
 type Env interface {
-	Logger() *lager.Logger
-	Context() *context.Context
+	Logger() lager.Logger
+	Context() context.Context
 }
 
 //go:generate counterfeiter -o voldriverfakes/fake_driver_client.go . Driver

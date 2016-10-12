@@ -10,23 +10,23 @@ import (
 )
 
 type FakeEnv struct {
-	LoggerStub        func() *lager.Logger
+	LoggerStub        func() lager.Logger
 	loggerMutex       sync.RWMutex
 	loggerArgsForCall []struct{}
 	loggerReturns     struct {
-		result1 *lager.Logger
+		result1 lager.Logger
 	}
-	ContextStub        func() *context.Context
+	ContextStub        func() context.Context
 	contextMutex       sync.RWMutex
 	contextArgsForCall []struct{}
 	contextReturns     struct {
-		result1 *context.Context
+		result1 context.Context
 	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeEnv) Logger() *lager.Logger {
+func (fake *FakeEnv) Logger() lager.Logger {
 	fake.loggerMutex.Lock()
 	fake.loggerArgsForCall = append(fake.loggerArgsForCall, struct{}{})
 	fake.recordInvocation("Logger", []interface{}{})
@@ -44,14 +44,14 @@ func (fake *FakeEnv) LoggerCallCount() int {
 	return len(fake.loggerArgsForCall)
 }
 
-func (fake *FakeEnv) LoggerReturns(result1 *lager.Logger) {
+func (fake *FakeEnv) LoggerReturns(result1 lager.Logger) {
 	fake.LoggerStub = nil
 	fake.loggerReturns = struct {
-		result1 *lager.Logger
+		result1 lager.Logger
 	}{result1}
 }
 
-func (fake *FakeEnv) Context() *context.Context {
+func (fake *FakeEnv) Context() context.Context {
 	fake.contextMutex.Lock()
 	fake.contextArgsForCall = append(fake.contextArgsForCall, struct{}{})
 	fake.recordInvocation("Context", []interface{}{})
@@ -69,10 +69,10 @@ func (fake *FakeEnv) ContextCallCount() int {
 	return len(fake.contextArgsForCall)
 }
 
-func (fake *FakeEnv) ContextReturns(result1 *context.Context) {
+func (fake *FakeEnv) ContextReturns(result1 context.Context) {
 	fake.ContextStub = nil
 	fake.contextReturns = struct {
-		result1 *context.Context
+		result1 context.Context
 	}{result1}
 }
 

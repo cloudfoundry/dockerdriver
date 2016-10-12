@@ -111,8 +111,8 @@ var _ = Describe("Volman Driver Handlers", func() {
 		Context("when activate hangs and the client closes the connection", func() {
 			JustBeforeEach(func() {
 				driver.ActivateStub = func(env voldriver.Env) voldriver.ActivateResponse {
-					ctx := *env.Context()
-					logger := (*env.Logger())
+					ctx := env.Context()
+					logger := env.Logger()
 					for true {
 						time.Sleep(time.Second * 1)
 
@@ -229,8 +229,8 @@ var _ = Describe("Volman Driver Handlers", func() {
 		Context("when the list hangs and the client closes the connection", func() {
 			JustBeforeEach(func() {
 				driver.ListStub = func(env voldriver.Env) voldriver.ListResponse {
-					ctx := *env.Context()
-					logger := (*env.Logger())
+					ctx := env.Context()
+					logger := env.Logger()
 					for true {
 						time.Sleep(time.Second * 1)
 
@@ -350,8 +350,8 @@ var _ = Describe("Volman Driver Handlers", func() {
 		Context("when the mount hangs and the client closes the connection", func() {
 			JustBeforeEach(func() {
 				driver.MountStub = func(env voldriver.Env, mountRequest voldriver.MountRequest) voldriver.MountResponse {
-					ctx := *env.Context()
-					logger := (*env.Logger())
+					ctx := env.Context()
+					logger := env.Logger()
 					for true {
 						time.Sleep(time.Second * 1)
 
@@ -443,8 +443,8 @@ var _ = Describe("Volman Driver Handlers", func() {
 		Context("when the unmount hangs and the client closes the connection", func() {
 			JustBeforeEach(func() {
 				driver.UnmountStub = func(env voldriver.Env, unmountRequest voldriver.UnmountRequest) voldriver.ErrorResponse {
-					ctx := *env.Context()
-					logger := (*env.Logger())
+					ctx := env.Context()
+					logger := env.Logger()
 					for true {
 						time.Sleep(time.Second * 1)
 
@@ -546,8 +546,8 @@ var _ = Describe("Volman Driver Handlers", func() {
 		Context("when the get hangs and the client closes the connection", func() {
 			JustBeforeEach(func() {
 				driver.GetStub = func(env voldriver.Env, getRequest voldriver.GetRequest) voldriver.GetResponse {
-					ctx := *env.Context()
-					logger := (*env.Logger())
+					ctx := env.Context()
+					logger := env.Logger()
 					for true {
 						time.Sleep(time.Second * 1)
 
@@ -649,8 +649,8 @@ var _ = Describe("Volman Driver Handlers", func() {
 		Context("when the path hangs and the client closes the connection", func() {
 			JustBeforeEach(func() {
 				driver.PathStub = func(env voldriver.Env, pathRequest voldriver.PathRequest) voldriver.PathResponse {
-					ctx := *env.Context()
-					logger := (*env.Logger())
+					ctx := env.Context()
+					logger := env.Logger()
 					for true {
 						time.Sleep(time.Second * 1)
 
@@ -746,8 +746,8 @@ var _ = Describe("Volman Driver Handlers", func() {
 		Context("when the create hangs and the client closes the connection", func() {
 			JustBeforeEach(func() {
 				driver.CreateStub = func(env voldriver.Env, createRequest voldriver.CreateRequest) voldriver.ErrorResponse {
-					ctx := *env.Context()
-					logger := (*env.Logger())
+					ctx := env.Context()
+					logger := env.Logger()
 					for true {
 						time.Sleep(time.Second * 1)
 
@@ -843,8 +843,8 @@ var _ = Describe("Volman Driver Handlers", func() {
 		Context("when the remove hangs and the client closes the connection", func() {
 			JustBeforeEach(func() {
 				driver.RemoveStub = func(env voldriver.Env, removeRequest voldriver.RemoveRequest) voldriver.ErrorResponse {
-					ctx := *env.Context()
-					logger := (*env.Logger())
+					ctx := env.Context()
+					logger := env.Logger()
 					for true {
 						time.Sleep(time.Second * 1)
 

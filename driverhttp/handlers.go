@@ -14,28 +14,28 @@ import (
 	"context"
 )
 
-func NewHttpDriverEnv(logger *lager.Logger, ctx *context.Context) voldriver.Env{
+func NewHttpDriverEnv(logger lager.Logger, ctx context.Context) voldriver.Env{
 	return &voldriverEnv{logger, ctx}
 }
 
 type voldriverEnv struct {
-	logger *lager.Logger
-	aContext *context.Context
+	logger lager.Logger
+	aContext context.Context
 }
 
-func (v *voldriverEnv) Logger() *lager.Logger {
+func (v *voldriverEnv) Logger() lager.Logger {
 	return v.logger
 }
 
-func (v *voldriverEnv) Context() *context.Context {
+func (v *voldriverEnv) Context() context.Context {
 	return v.aContext
 }
 
-func EnvWithLogger(logger *lager.Logger, env voldriver.Env) voldriver.Env{
+func EnvWithLogger(logger lager.Logger, env voldriver.Env) voldriver.Env{
 	return &voldriverEnv{logger, env.Context()}
 }
 
-func EnvWithContext(ctx *context.Context, env voldriver.Env) voldriver.Env{
+func EnvWithContext(ctx context.Context, env voldriver.Env) voldriver.Env{
 	return &voldriverEnv{env.Logger(), ctx}
 }
 
@@ -307,7 +307,7 @@ func environmentWithMonitor(logger lager.Logger, ctx context.Context, res http.R
 
 	cancelCtx, cancel := context.WithCancel(ctx)
 
-	env := &voldriverEnv{&logger, &cancelCtx}
+	env := &voldriverEnv{logger, cancelCtx}
 
 	if closer, ok := res.(http.CloseNotifier); ok {
 		// Note: make calls in this thread to ensure reference on context

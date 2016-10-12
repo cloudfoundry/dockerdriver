@@ -66,7 +66,7 @@ var _ = Describe("RemoteClient", func() {
 		}
 		testLogger = lagertest.NewTestLogger("LocalDriver Server Test")
 		ctx = context.TODO()
-		env = driverhttp.NewHttpDriverEnv(&testLogger, &ctx)
+		env = driverhttp.NewHttpDriverEnv(testLogger, ctx)
 	})
 
 	Context("when the driver returns as error and the transport is TCP", func() {
