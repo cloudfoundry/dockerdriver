@@ -9,9 +9,10 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"sync"
 )
 
-var _ = Describe("Volbackoff", func() {
+var _ = Describe("Backoff", func() {
 
 	var (
 		err error
@@ -24,17 +25,19 @@ var _ = Describe("Volbackoff", func() {
 		fakeClock *fakeclock.FakeClock
 
 		op   func(context.Context) error
-		done bool
+		done *sync.Mutex
 	)
 
 	JustBeforeEach(func() {
 		backerOffer = backoff.NewExponentialBackOff(ctx, fakeClock)
-		err = nil
 
-		done = false
+		err = nil
+		done = &sync.Mutex{}
+		done.Lock()
+
 		go func() {
+			defer done.Unlock()
 			err = backerOffer.Retry(op)
-			done = true
 		}()
 	})
 
@@ -50,7 +53,8 @@ var _ = Describe("Volbackoff", func() {
 	})
 
 	It("should succeed", func() {
-		Eventually(func() bool { return done }).Should(BeTrue())
+		done.Lock()
+		defer done.Unlock()
 		Expect(err).NotTo(HaveOccurred())
 	})
 
@@ -63,12 +67,12 @@ var _ = Describe("Volbackoff", func() {
 
 		JustBeforeEach(func() {
 			fakeClock.WaitForWatcherAndIncrement(time.Second * 31)
+			done.Lock()
+			defer done.Unlock()
 		})
 
 		It("Retry should return an error", func() {
-			Eventually(func() bool {
-				return err != nil
-			}).Should(BeTrue())
+			Expect(err).To(HaveOccurred())
 		})
 	})
 
@@ -87,12 +91,12 @@ var _ = Describe("Volbackoff", func() {
 		JustBeforeEach(func() {
 			fakeClock.WaitForWatcherAndIncrement(time.Second * 15)
 			fakeClock.WaitForWatcherAndIncrement(time.Second * 20)
+			done.Lock()
+			defer done.Unlock()
 		})
 
 		It("Retry should retry and eventually return an error", func() {
-			Eventually(func() bool {
-				return err != nil
-			}).Should(BeTrue())
+			Expect(err).To(HaveOccurred())
 			Expect(count).To(Equal(3))
 		})
 	})
@@ -115,12 +119,12 @@ var _ = Describe("Volbackoff", func() {
 
 		JustBeforeEach(func() {
 			fakeClock.WaitForWatcherAndIncrement(time.Second * 15)
+			done.Lock()
+			defer done.Unlock()
 		})
 
 		It("Retry should not retry", func() {
-			Eventually(func() bool {
-				return err != nil
-			}).Should(BeTrue())
+			Expect(err).To(HaveOccurred())
 			Expect(count).To(Equal(1))
 			Expect(err).To(Equal(context.Canceled))
 		})
@@ -148,10 +152,11 @@ var _ = Describe("Volbackoff", func() {
 
 		JustBeforeEach(func() {
 			fakeClock.WaitForWatcherAndIncrement(time.Second * 15)
+			done.Lock()
+			defer done.Unlock()
 		})
 
 		It("should succeed", func() {
-			Eventually(func() bool { return done }).Should(BeTrue())
 			Expect(count).To(Equal(2))
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -171,14 +176,13 @@ var _ = Describe("Volbackoff", func() {
 		JustBeforeEach(func() {
 			fakeClock.WaitForWatcherAndIncrement(time.Second * 15)
 			fakeClock.WaitForWatcherAndIncrement(time.Second * 20)
+			done.Lock()
+			defer done.Unlock()
 		})
 
 		It("Retry should retry and eventually return an error", func() {
-			Eventually(func() bool {
-				return err != nil
-			}).Should(BeTrue())
+			Expect(err).To(HaveOccurred())
 			Expect(count).To(Equal(3))
 		})
 	})
-
 })
