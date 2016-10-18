@@ -20,23 +20,23 @@ import (
 	"path"
 
 	"code.cloudfoundry.org/goshims/http_wrap/http_fake"
+	"code.cloudfoundry.org/lager"
 	"code.cloudfoundry.org/lager/lagertest"
 	"code.cloudfoundry.org/voldriver"
 	"code.cloudfoundry.org/voldriver/driverhttp"
+	"context"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/tedsuo/ifrit"
 	"github.com/tedsuo/ifrit/ginkgomon"
-	"context"
-	"code.cloudfoundry.org/lager"
 )
 
 var _ = Describe("RemoteClient", func() {
 
 	var (
 		testLogger                lager.Logger
-		ctx												context.Context
-		env												voldriver.Env
+		ctx                       context.Context
+		env                       voldriver.Env
 		httpClient                *http_fake.FakeClient
 		driver                    voldriver.Driver
 		validHttpMountResponse    *http.Response
@@ -416,6 +416,34 @@ var _ = Describe("RemoteClient", func() {
 
 				elapsed := fakeClock.Now().Sub(timestamp)
 				Expect(elapsed.Seconds()).To(BeNumerically(">", 30))
+			})
+		})
+
+		Context("when it fails and then gets cancelled", func() {
+
+			var timestamp time.Time
+
+			BeforeEach(func() {
+				ctx, canceller := context.WithCancel(env.Context())
+				childEnv := driverhttp.NewHttpDriverEnv(env.Logger(), ctx)
+
+				httpClient.DoStub = func(req *os_http.Request) (resp *os_http.Response, err error) {
+					canceller()
+					return nil, fmt.Errorf("connection failed")
+				}
+
+				go fastForward(fakeClock, 40)
+
+				timestamp = fakeClock.Now()
+				volumeId = "fake-volume"
+				mountResponse = driver.Mount(childEnv, voldriver.MountRequest{Name: volumeId})
+			})
+
+			It("should return an error before 30 seconds have passed", func() {
+				Expect(mountResponse.Err).To(ContainSubstring("context canceled"))
+
+				elapsed := fakeClock.Now().Sub(timestamp)
+				Expect(elapsed.Seconds()).To(BeNumerically("<", 30))
 			})
 		})
 

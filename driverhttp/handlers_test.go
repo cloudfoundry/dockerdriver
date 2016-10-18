@@ -184,7 +184,6 @@ var _ = Describe("Volman Driver Handlers", func() {
 			req, err = http.NewRequest("POST", path, bytes.NewReader([]byte{}))
 			Expect(err).NotTo(HaveOccurred())
 
-
 		})
 
 		Context("when list is successful", func() {

@@ -10,16 +10,16 @@ import (
 	cf_http_handlers "code.cloudfoundry.org/cfhttp/handlers"
 	"code.cloudfoundry.org/lager"
 	"code.cloudfoundry.org/voldriver"
-	"github.com/tedsuo/rata"
 	"context"
+	"github.com/tedsuo/rata"
 )
 
-func NewHttpDriverEnv(logger lager.Logger, ctx context.Context) voldriver.Env{
+func NewHttpDriverEnv(logger lager.Logger, ctx context.Context) voldriver.Env {
 	return &voldriverEnv{logger, ctx}
 }
 
 type voldriverEnv struct {
-	logger lager.Logger
+	logger   lager.Logger
 	aContext context.Context
 }
 
@@ -31,14 +31,13 @@ func (v *voldriverEnv) Context() context.Context {
 	return v.aContext
 }
 
-func EnvWithLogger(logger lager.Logger, env voldriver.Env) voldriver.Env{
+func EnvWithLogger(logger lager.Logger, env voldriver.Env) voldriver.Env {
 	return &voldriverEnv{logger, env.Context()}
 }
 
-func EnvWithContext(ctx context.Context, env voldriver.Env) voldriver.Env{
+func EnvWithContext(ctx context.Context, env voldriver.Env) voldriver.Env {
 	return &voldriverEnv{env.Logger(), ctx}
 }
-
 
 // At present, Docker ignores HTTP status codes, and requires errors to be returned in the response body.  To
 // comply with this API, we will return 200 in all cases

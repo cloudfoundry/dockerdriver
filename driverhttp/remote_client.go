@@ -21,6 +21,8 @@ import (
 
 	"time"
 
+	"code.cloudfoundry.org/voldriver/backoff"
+	"context"
 	"errors"
 )
 
@@ -90,7 +92,7 @@ func (r *remoteClient) Activate(env voldriver.Env) voldriver.ActivateResponse {
 
 	request := newReqFactory(r.reqGen, voldriver.ActivateRoute, nil)
 
-	response, err := r.do(logger, request)
+	response, err := r.do(env.Context(), logger, request)
 	if err != nil {
 		logger.Error("failed-activate", err)
 		return voldriver.ActivateResponse{Err: err.Error()}
@@ -122,7 +124,7 @@ func (r *remoteClient) Create(env voldriver.Env, createRequest voldriver.CreateR
 
 	request := newReqFactory(r.reqGen, voldriver.CreateRoute, payload)
 
-	response, err := r.do(logger, request)
+	response, err := r.do(env.Context(), logger, request)
 	if err != nil {
 		logger.Error("failed-creating-volume", err)
 		return voldriver.ErrorResponse{Err: err.Error()}
@@ -148,7 +150,7 @@ func (r *remoteClient) List(env voldriver.Env) voldriver.ListResponse {
 
 	request := newReqFactory(r.reqGen, voldriver.ListRoute, nil)
 
-	response, err := r.do(logger, request)
+	response, err := r.do(env.Context(), logger, request)
 	if err != nil {
 		logger.Error("failed-list", err)
 		return voldriver.ListResponse{Err: err.Error()}
@@ -180,7 +182,7 @@ func (r *remoteClient) Mount(env voldriver.Env, mountRequest voldriver.MountRequ
 
 	request := newReqFactory(r.reqGen, voldriver.MountRoute, sendingJson)
 
-	response, err := r.do(logger, request)
+	response, err := r.do(env.Context(), logger, request)
 	if err != nil {
 		logger.Error("failed-mounting-volume", err)
 		return voldriver.MountResponse{Err: err.Error()}
@@ -212,7 +214,7 @@ func (r *remoteClient) Path(env voldriver.Env, pathRequest voldriver.PathRequest
 
 	request := newReqFactory(r.reqGen, voldriver.PathRoute, payload)
 
-	response, err := r.do(logger, request)
+	response, err := r.do(env.Context(), logger, request)
 	if err != nil {
 		logger.Error("failed-volume-path", err)
 		return voldriver.PathResponse{Err: err.Error()}
@@ -244,7 +246,7 @@ func (r *remoteClient) Unmount(env voldriver.Env, unmountRequest voldriver.Unmou
 
 	request := newReqFactory(r.reqGen, voldriver.UnmountRoute, payload)
 
-	response, err := r.do(logger, request)
+	response, err := r.do(env.Context(), logger, request)
 	if err != nil {
 		logger.Error("failed-unmounting-volume", err)
 		return voldriver.ErrorResponse{Err: err.Error()}
@@ -275,7 +277,7 @@ func (r *remoteClient) Remove(env voldriver.Env, removeRequest voldriver.RemoveR
 
 	request := newReqFactory(r.reqGen, voldriver.RemoveRoute, payload)
 
-	response, err := r.do(logger, request)
+	response, err := r.do(env.Context(), logger, request)
 	if err != nil {
 		logger.Error("failed-removing-volume", err)
 		return voldriver.ErrorResponse{Err: err.Error()}
@@ -307,7 +309,7 @@ func (r *remoteClient) Get(env voldriver.Env, getRequest voldriver.GetRequest) v
 
 	request := newReqFactory(r.reqGen, voldriver.GetRoute, payload)
 
-	response, err := r.do(logger, request)
+	response, err := r.do(env.Context(), logger, request)
 	if err != nil {
 		logger.Error("failed-getting-volume", err)
 		return voldriver.GetResponse{Err: err.Error()}
@@ -333,7 +335,7 @@ func (r *remoteClient) Capabilities(env voldriver.Env) voldriver.CapabilitiesRes
 
 	request := newReqFactory(r.reqGen, voldriver.CapabilitiesRoute, nil)
 
-	response, err := r.do(logger, request)
+	response, err := r.do(env.Context(), logger, request)
 	if err != nil {
 		logger.Error("failed-capabilities", err)
 		return voldriver.CapabilitiesResponse{}
@@ -358,12 +360,14 @@ func (r *remoteClient) clientError(logger lager.Logger, err error, msg string) s
 	return err.Error()
 }
 
-func (r *remoteClient) do(logger lager.Logger, requestFactory *reqFactory) ([]byte, error) {
+func (r *remoteClient) do(ctx context.Context, logger lager.Logger, requestFactory *reqFactory) ([]byte, error) {
 	var data []byte
 
-	backoff := newExponentialBackOff(30*time.Second, r.clock)
+	childContext, _ := context.WithDeadline(ctx, r.clock.Now().Add(30*time.Second))
 
-	err := backoff.Retry(func() error {
+	backoff := backoff.NewExponentialBackOff(childContext, r.clock)
+
+	err := backoff.Retry(func(ctx context.Context) error {
 		var (
 			err      error
 			request  *os_http.Request
@@ -375,6 +379,7 @@ func (r *remoteClient) do(logger lager.Logger, requestFactory *reqFactory) ([]by
 			logger.Error("request-gen-failed", err)
 			return err
 		}
+		request = request.WithContext(ctx)
 
 		response, err = r.HttpClient.Do(request)
 		if err != nil {
