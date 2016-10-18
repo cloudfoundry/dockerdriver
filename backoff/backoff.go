@@ -80,11 +80,14 @@ func (b *exponentialBackOff) incrementInterval(startTime time.Time, currentInter
 		return 0, true
 	}
 
+	elapsedTime := b.clock.Now().Sub(startTime)
+	maxElapsedTime := b.deadline.Sub(startTime)
+
 	switch {
 	case currentInterval == 0:
 		nextInterval = backoffInitialInterval
-	//case elapsedTime+backoff(currentInterval) > b.deadline:
-	//	nextInterval = time.Millisecond + b.maxElapsedTime - elapsedTime
+	case elapsedTime+backoff(currentInterval) > maxElapsedTime: //b.clock.Now().Add(backoff(currentInterval)).After(b.deadline):
+		nextInterval = time.Millisecond + maxElapsedTime - elapsedTime
 	default:
 		nextInterval = backoff(currentInterval)
 	}
