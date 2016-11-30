@@ -1,13 +1,14 @@
 package invoker
 
 import (
+	"fmt"
+
 	"code.cloudfoundry.org/goshims/execshim"
 	"code.cloudfoundry.org/lager"
 	"code.cloudfoundry.org/voldriver"
-	"fmt"
 )
 
-//go:generate counterfeiter -o ./voldriverfakes/fake_invoker.go . Invoker
+//go:generate counterfeiter -o ../voldriverfakes/fake_invoker.go . Invoker
 
 type Invoker interface {
 	Invoke(env voldriver.Env, executable string, args []string) ([]byte, error)
