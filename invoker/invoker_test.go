@@ -1,7 +1,6 @@
 package invoker_test
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 
@@ -38,37 +37,25 @@ var _ = Describe("RealInvoker", func() {
 			subject = invoker.NewRealInvokerWithExec(fakeExec)
 		})
 
-		It("should report an error when unable to attach to stdout", func() {
-			fakeCmd.StdoutPipeReturns(errCloser{bytes.NewBufferString("")}, fmt.Errorf("unable to attach to stdout"))
-			err := subject.Invoke(testEnv, cmd, args)
-			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(Equal("unable to attach to stdout"))
-		})
-
-		It("should report an error when unable to attach to stderr", func() {
-			fakeCmd.StderrPipeReturns(errCloser{bytes.NewBufferString("")}, fmt.Errorf("unable to attach to stderr"))
-			err := subject.Invoke(testEnv, cmd, args)
-			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(Equal("unable to attach to stderr"))
-		})
-
-		It("should report an error when unable to start binary", func() {
-			fakeCmd.StdoutPipeReturns(errCloser{bytes.NewBufferString("cmdfails")}, nil)
-			fakeCmd.StartReturns(fmt.Errorf("unable to start binary"))
-			err := subject.Invoke(testEnv, cmd, args)
-			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(Equal("unable to start binary"))
-		})
-		It("should report an error when executing the driver binary fails", func() {
-			fakeCmd.WaitReturns(fmt.Errorf("executing driver binary fails"))
-
-			err := subject.Invoke(testEnv, cmd, args)
-			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(Equal("executing driver binary fails"))
-		})
 		It("should successfully invoke cli", func() {
-			err := subject.Invoke(testEnv, cmd, args)
+			_, err := subject.Invoke(testEnv, cmd, args)
 			Expect(err).ToNot(HaveOccurred())
+		})
+
+		Context("when command fails", func() {
+			BeforeEach(func() {
+				fakeCmd.CombinedOutputReturns([]byte("an error occured"), fmt.Errorf("executing binary fails"))
+			})
+
+			It("should report an error", func() {
+				_, err := subject.Invoke(testEnv, cmd, args)
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(Equal("executing binary fails - details:\nan error occured"))
+			})
+			It("should return command output", func() {
+				output, _ := subject.Invoke(testEnv, cmd, args)
+				Expect(string(output)).To(Equal("an error occured"))
+			})
 		})
 	})
 })

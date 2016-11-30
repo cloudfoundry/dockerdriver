@@ -4,12 +4,13 @@ import (
 	"code.cloudfoundry.org/goshims/execshim"
 	"code.cloudfoundry.org/lager"
 	"code.cloudfoundry.org/voldriver"
+	"fmt"
 )
 
-//go:generate counterfeiter -o ./cephfakes/fake_invoker.go . Invoker
+//go:generate counterfeiter -o ./voldriverfakes/fake_invoker.go . Invoker
 
 type Invoker interface {
-	Invoke(env voldriver.Env, executable string, args []string) error
+	Invoke(env voldriver.Env, executable string, args []string) ([]byte, error)
 }
 
 type realInvoker struct {
@@ -24,35 +25,18 @@ func NewRealInvokerWithExec(useExec execshim.Exec) Invoker {
 	return &realInvoker{useExec}
 }
 
-func (r *realInvoker) Invoke(env voldriver.Env, executable string, cmdArgs []string) error {
+func (r *realInvoker) Invoke(env voldriver.Env, executable string, cmdArgs []string) ([]byte, error) {
 	logger := env.Logger().Session("invoking-command", lager.Data{"executable": executable, "args": cmdArgs})
 	logger.Info("start")
 	defer logger.Info("end")
 
 	cmdHandle := r.useExec.CommandContext(env.Context(), executable, cmdArgs...)
 
-	_, err := cmdHandle.StdoutPipe()
+	output, err := cmdHandle.CombinedOutput()
 	if err != nil {
-		logger.Error("unable to get stdout", err)
-		return err
+		logger.Error(fmt.Sprintf("%s invocation failed", executable), err, lager.Data{"err": output})
+		return output, fmt.Errorf("%s - details:\n%s", err.Error(), output)
 	}
 
-	_, err = cmdHandle.StderrPipe()
-	if err != nil {
-		logger.Error("unable to get stderr", err)
-		return err
-	}
-
-	if err = cmdHandle.Start(); err != nil {
-		logger.Error("starting command", err)
-		return err
-	}
-
-	if err = cmdHandle.Wait(); err != nil {
-		logger.Error("command-exited", err)
-		return err
-	}
-
-	// could validate stdout, but defer until actually need it
-	return nil
+	return output, nil
 }
