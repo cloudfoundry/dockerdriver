@@ -45,6 +45,13 @@ var _ = Describe("RealInvoker", func() {
 			Expect(err.Error()).To(Equal("unable to attach to stdout"))
 		})
 
+		It("should report an error when unable to attach to stderr", func() {
+			fakeCmd.StderrPipeReturns(errCloser{bytes.NewBufferString("")}, fmt.Errorf("unable to attach to stderr"))
+			err := subject.Invoke(testEnv, cmd, args)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(Equal("unable to attach to stderr"))
+		})
+
 		It("should report an error when unable to start binary", func() {
 			fakeCmd.StdoutPipeReturns(errCloser{bytes.NewBufferString("cmdfails")}, nil)
 			fakeCmd.StartReturns(fmt.Errorf("unable to start binary"))

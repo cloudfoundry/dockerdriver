@@ -1,9 +1,9 @@
 package invoker
 
 import (
-	"code.cloudfoundry.org/voldriver"
 	"code.cloudfoundry.org/goshims/execshim"
 	"code.cloudfoundry.org/lager"
+	"code.cloudfoundry.org/voldriver"
 )
 
 //go:generate counterfeiter -o ./cephfakes/fake_invoker.go . Invoker
@@ -34,6 +34,12 @@ func (r *realInvoker) Invoke(env voldriver.Env, executable string, cmdArgs []str
 	_, err := cmdHandle.StdoutPipe()
 	if err != nil {
 		logger.Error("unable to get stdout", err)
+		return err
+	}
+
+	_, err = cmdHandle.StderrPipe()
+	if err != nil {
+		logger.Error("unable to get stderr", err)
 		return err
 	}
 
