@@ -310,10 +310,8 @@ var _ = Describe("Volman Driver Handlers", func() {
 
 			path := fmt.Sprintf("http://0.0.0.0%s", route.Path)
 
-			volumeId := "something"
 			MountRequest := voldriver.MountRequest{
 				Name: "some-volume",
-				Opts: map[string]interface{}{"volume_id": volumeId},
 			}
 			mountJSONRequest, err := json.Marshal(MountRequest)
 			Expect(err).NotTo(HaveOccurred())

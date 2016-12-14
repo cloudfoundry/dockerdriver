@@ -2,8 +2,8 @@ package voldriver
 
 import (
 	"code.cloudfoundry.org/lager"
-	"github.com/tedsuo/rata"
 	"context"
+	"github.com/tedsuo/rata"
 )
 
 const (
@@ -70,7 +70,6 @@ type CreateRequest struct {
 
 type MountRequest struct {
 	Name string
-	Opts map[string]interface{}
 }
 
 type MountResponse struct {

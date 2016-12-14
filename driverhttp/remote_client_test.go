@@ -112,7 +112,7 @@ var _ = Describe("RemoteClient", func() {
 		It("should be able to mount", func() {
 			httpClient.DoReturns(validHttpMountResponse, nil)
 
-			mountResponse := driver.Mount(env, voldriver.MountRequest{Name: volumeId, Opts: map[string]interface{}{"volume_id": volumeId}})
+			mountResponse := driver.Mount(env, voldriver.MountRequest{Name: volumeId})
 
 			By("giving back a path with no error")
 			Expect(mountResponse.Err).To(Equal(""))
@@ -170,7 +170,7 @@ var _ = Describe("RemoteClient", func() {
 
 		It("should not be able to mount", func() {
 			volumeId := "fake-volume"
-			mountResponse := driver.Mount(env, voldriver.MountRequest{Name: volumeId, Opts: map[string]interface{}{"volume_id": volumeId}})
+			mountResponse := driver.Mount(env, voldriver.MountRequest{Name: volumeId})
 
 			By("signaling an error")
 			Expect(mountResponse.Err).NotTo(Equal(""))
@@ -187,7 +187,7 @@ var _ = Describe("RemoteClient", func() {
 			httpClient.DoReturns(invalidHttpResponse, nil)
 
 			volumeId := "fake-volume"
-			mountResponse := driver.Mount(env, voldriver.MountRequest{Name: volumeId, Opts: map[string]interface{}{"volume_id": volumeId}})
+			mountResponse := driver.Mount(env, voldriver.MountRequest{Name: volumeId})
 
 			By("signaling an error")
 			Expect(mountResponse.Err).NotTo(Equal(""))
