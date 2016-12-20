@@ -214,6 +214,8 @@ func newCreateHandler(logger lager.Logger, client voldriver.Driver) http.Handler
 			return
 		}
 
+		logger.Info(fmt.Sprintf("%s", string(body)))
+
 		var createRequest voldriver.CreateRequest
 		if err = json.Unmarshal(body, &createRequest); err != nil {
 			logger.Error("failed-unmarshalling-create-request-body", err)
