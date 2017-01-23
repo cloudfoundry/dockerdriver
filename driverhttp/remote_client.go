@@ -48,10 +48,13 @@ type remoteClient struct {
 	HttpClient http_wrap.Client
 	reqGen     *rata.RequestGenerator
 	clock      clock.Clock
+	url        string
+	tls        *voldriver.TLSConfig
 }
 
 func NewRemoteClient(url string, tls *voldriver.TLSConfig) (*remoteClient, error) {
 	client := cfhttp.NewClient()
+	input_url := url
 
 	if strings.Contains(url, ".sock") {
 		client = cfhttp.NewUnixClient(url)
@@ -74,7 +77,10 @@ func NewRemoteClient(url string, tls *voldriver.TLSConfig) (*remoteClient, error
 
 	}
 
-	return NewRemoteClientWithClient(url, client, clock.NewClock()), nil
+	driver := NewRemoteClientWithClient(url, client, clock.NewClock())
+	driver.tls = tls
+	driver.url = input_url
+	return driver, nil
 }
 
 func NewRemoteClientWithClient(socketPath string, client http_wrap.Client, clock clock.Clock) *remoteClient {
@@ -83,6 +89,29 @@ func NewRemoteClientWithClient(socketPath string, client http_wrap.Client, clock
 		reqGen:     rata.NewRequestGenerator(socketPath, voldriver.Routes),
 		clock:      clock,
 	}
+}
+
+func (r *remoteClient) Matches(loggerIn lager.Logger, url string, tls *voldriver.TLSConfig) bool {
+	logger := loggerIn.Session("matches")
+	logger.Info("start")
+	defer logger.Info("end")
+
+	if url != r.url {
+		return false
+	}
+	var tls1, tls2 []byte
+	var err error
+	if tls != nil {
+		tls1, err = json.Marshal(tls)
+		logger.Error("failed-json-Marshall", err)
+		return false
+	}
+	if r.tls != nil {
+		tls2, err = json.Marshal(r.tls)
+		logger.Error("failed-json-Marshall", err)
+		return false
+	}
+	return string(tls1) == string(tls2)
 }
 
 func (r *remoteClient) Activate(env voldriver.Env) voldriver.ActivateResponse {

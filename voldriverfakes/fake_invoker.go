@@ -40,9 +40,8 @@ func (fake *FakeInvoker) Invoke(env voldriver.Env, executable string, args []str
 	fake.invokeMutex.Unlock()
 	if fake.InvokeStub != nil {
 		return fake.InvokeStub(env, executable, args)
-	} else {
-		return fake.invokeReturns.result1, fake.invokeReturns.result2
 	}
+	return fake.invokeReturns.result1, fake.invokeReturns.result2
 }
 
 func (fake *FakeInvoker) InvokeCallCount() int {

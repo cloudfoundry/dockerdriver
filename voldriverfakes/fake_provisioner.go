@@ -40,9 +40,8 @@ func (fake *FakeProvisioner) Create(env voldriver.Env, createRequest voldriver.C
 	fake.createMutex.Unlock()
 	if fake.CreateStub != nil {
 		return fake.CreateStub(env, createRequest)
-	} else {
-		return fake.createReturns.result1
 	}
+	return fake.createReturns.result1
 }
 
 func (fake *FakeProvisioner) CreateCallCount() int {
@@ -74,9 +73,8 @@ func (fake *FakeProvisioner) Remove(env voldriver.Env, removeRequest voldriver.R
 	fake.removeMutex.Unlock()
 	if fake.RemoveStub != nil {
 		return fake.RemoveStub(env, removeRequest)
-	} else {
-		return fake.removeReturns.result1
 	}
+	return fake.removeReturns.result1
 }
 
 func (fake *FakeProvisioner) RemoveCallCount() int {

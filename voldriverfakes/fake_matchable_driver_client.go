@@ -4,10 +4,21 @@ package voldriverfakes
 import (
 	"sync"
 
+	"code.cloudfoundry.org/lager"
 	"code.cloudfoundry.org/voldriver"
 )
 
-type FakeDriver struct {
+type FakeMatchableDriver struct {
+	MatchesStub        func(lager.Logger, string, *voldriver.TLSConfig) bool
+	matchesMutex       sync.RWMutex
+	matchesArgsForCall []struct {
+		arg1 lager.Logger
+		arg2 string
+		arg3 *voldriver.TLSConfig
+	}
+	matchesReturns struct {
+		result1 bool
+	}
 	ActivateStub        func(env voldriver.Env) voldriver.ActivateResponse
 	activateMutex       sync.RWMutex
 	activateArgsForCall []struct {
@@ -90,7 +101,41 @@ type FakeDriver struct {
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeDriver) Activate(env voldriver.Env) voldriver.ActivateResponse {
+func (fake *FakeMatchableDriver) Matches(arg1 lager.Logger, arg2 string, arg3 *voldriver.TLSConfig) bool {
+	fake.matchesMutex.Lock()
+	fake.matchesArgsForCall = append(fake.matchesArgsForCall, struct {
+		arg1 lager.Logger
+		arg2 string
+		arg3 *voldriver.TLSConfig
+	}{arg1, arg2, arg3})
+	fake.recordInvocation("Matches", []interface{}{arg1, arg2, arg3})
+	fake.matchesMutex.Unlock()
+	if fake.MatchesStub != nil {
+		return fake.MatchesStub(arg1, arg2, arg3)
+	}
+	return fake.matchesReturns.result1
+}
+
+func (fake *FakeMatchableDriver) MatchesCallCount() int {
+	fake.matchesMutex.RLock()
+	defer fake.matchesMutex.RUnlock()
+	return len(fake.matchesArgsForCall)
+}
+
+func (fake *FakeMatchableDriver) MatchesArgsForCall(i int) (lager.Logger, string, *voldriver.TLSConfig) {
+	fake.matchesMutex.RLock()
+	defer fake.matchesMutex.RUnlock()
+	return fake.matchesArgsForCall[i].arg1, fake.matchesArgsForCall[i].arg2, fake.matchesArgsForCall[i].arg3
+}
+
+func (fake *FakeMatchableDriver) MatchesReturns(result1 bool) {
+	fake.MatchesStub = nil
+	fake.matchesReturns = struct {
+		result1 bool
+	}{result1}
+}
+
+func (fake *FakeMatchableDriver) Activate(env voldriver.Env) voldriver.ActivateResponse {
 	fake.activateMutex.Lock()
 	fake.activateArgsForCall = append(fake.activateArgsForCall, struct {
 		env voldriver.Env
@@ -103,26 +148,26 @@ func (fake *FakeDriver) Activate(env voldriver.Env) voldriver.ActivateResponse {
 	return fake.activateReturns.result1
 }
 
-func (fake *FakeDriver) ActivateCallCount() int {
+func (fake *FakeMatchableDriver) ActivateCallCount() int {
 	fake.activateMutex.RLock()
 	defer fake.activateMutex.RUnlock()
 	return len(fake.activateArgsForCall)
 }
 
-func (fake *FakeDriver) ActivateArgsForCall(i int) voldriver.Env {
+func (fake *FakeMatchableDriver) ActivateArgsForCall(i int) voldriver.Env {
 	fake.activateMutex.RLock()
 	defer fake.activateMutex.RUnlock()
 	return fake.activateArgsForCall[i].env
 }
 
-func (fake *FakeDriver) ActivateReturns(result1 voldriver.ActivateResponse) {
+func (fake *FakeMatchableDriver) ActivateReturns(result1 voldriver.ActivateResponse) {
 	fake.ActivateStub = nil
 	fake.activateReturns = struct {
 		result1 voldriver.ActivateResponse
 	}{result1}
 }
 
-func (fake *FakeDriver) Get(env voldriver.Env, getRequest voldriver.GetRequest) voldriver.GetResponse {
+func (fake *FakeMatchableDriver) Get(env voldriver.Env, getRequest voldriver.GetRequest) voldriver.GetResponse {
 	fake.getMutex.Lock()
 	fake.getArgsForCall = append(fake.getArgsForCall, struct {
 		env        voldriver.Env
@@ -136,26 +181,26 @@ func (fake *FakeDriver) Get(env voldriver.Env, getRequest voldriver.GetRequest) 
 	return fake.getReturns.result1
 }
 
-func (fake *FakeDriver) GetCallCount() int {
+func (fake *FakeMatchableDriver) GetCallCount() int {
 	fake.getMutex.RLock()
 	defer fake.getMutex.RUnlock()
 	return len(fake.getArgsForCall)
 }
 
-func (fake *FakeDriver) GetArgsForCall(i int) (voldriver.Env, voldriver.GetRequest) {
+func (fake *FakeMatchableDriver) GetArgsForCall(i int) (voldriver.Env, voldriver.GetRequest) {
 	fake.getMutex.RLock()
 	defer fake.getMutex.RUnlock()
 	return fake.getArgsForCall[i].env, fake.getArgsForCall[i].getRequest
 }
 
-func (fake *FakeDriver) GetReturns(result1 voldriver.GetResponse) {
+func (fake *FakeMatchableDriver) GetReturns(result1 voldriver.GetResponse) {
 	fake.GetStub = nil
 	fake.getReturns = struct {
 		result1 voldriver.GetResponse
 	}{result1}
 }
 
-func (fake *FakeDriver) List(env voldriver.Env) voldriver.ListResponse {
+func (fake *FakeMatchableDriver) List(env voldriver.Env) voldriver.ListResponse {
 	fake.listMutex.Lock()
 	fake.listArgsForCall = append(fake.listArgsForCall, struct {
 		env voldriver.Env
@@ -168,26 +213,26 @@ func (fake *FakeDriver) List(env voldriver.Env) voldriver.ListResponse {
 	return fake.listReturns.result1
 }
 
-func (fake *FakeDriver) ListCallCount() int {
+func (fake *FakeMatchableDriver) ListCallCount() int {
 	fake.listMutex.RLock()
 	defer fake.listMutex.RUnlock()
 	return len(fake.listArgsForCall)
 }
 
-func (fake *FakeDriver) ListArgsForCall(i int) voldriver.Env {
+func (fake *FakeMatchableDriver) ListArgsForCall(i int) voldriver.Env {
 	fake.listMutex.RLock()
 	defer fake.listMutex.RUnlock()
 	return fake.listArgsForCall[i].env
 }
 
-func (fake *FakeDriver) ListReturns(result1 voldriver.ListResponse) {
+func (fake *FakeMatchableDriver) ListReturns(result1 voldriver.ListResponse) {
 	fake.ListStub = nil
 	fake.listReturns = struct {
 		result1 voldriver.ListResponse
 	}{result1}
 }
 
-func (fake *FakeDriver) Mount(env voldriver.Env, mountRequest voldriver.MountRequest) voldriver.MountResponse {
+func (fake *FakeMatchableDriver) Mount(env voldriver.Env, mountRequest voldriver.MountRequest) voldriver.MountResponse {
 	fake.mountMutex.Lock()
 	fake.mountArgsForCall = append(fake.mountArgsForCall, struct {
 		env          voldriver.Env
@@ -201,26 +246,26 @@ func (fake *FakeDriver) Mount(env voldriver.Env, mountRequest voldriver.MountReq
 	return fake.mountReturns.result1
 }
 
-func (fake *FakeDriver) MountCallCount() int {
+func (fake *FakeMatchableDriver) MountCallCount() int {
 	fake.mountMutex.RLock()
 	defer fake.mountMutex.RUnlock()
 	return len(fake.mountArgsForCall)
 }
 
-func (fake *FakeDriver) MountArgsForCall(i int) (voldriver.Env, voldriver.MountRequest) {
+func (fake *FakeMatchableDriver) MountArgsForCall(i int) (voldriver.Env, voldriver.MountRequest) {
 	fake.mountMutex.RLock()
 	defer fake.mountMutex.RUnlock()
 	return fake.mountArgsForCall[i].env, fake.mountArgsForCall[i].mountRequest
 }
 
-func (fake *FakeDriver) MountReturns(result1 voldriver.MountResponse) {
+func (fake *FakeMatchableDriver) MountReturns(result1 voldriver.MountResponse) {
 	fake.MountStub = nil
 	fake.mountReturns = struct {
 		result1 voldriver.MountResponse
 	}{result1}
 }
 
-func (fake *FakeDriver) Path(env voldriver.Env, pathRequest voldriver.PathRequest) voldriver.PathResponse {
+func (fake *FakeMatchableDriver) Path(env voldriver.Env, pathRequest voldriver.PathRequest) voldriver.PathResponse {
 	fake.pathMutex.Lock()
 	fake.pathArgsForCall = append(fake.pathArgsForCall, struct {
 		env         voldriver.Env
@@ -234,26 +279,26 @@ func (fake *FakeDriver) Path(env voldriver.Env, pathRequest voldriver.PathReques
 	return fake.pathReturns.result1
 }
 
-func (fake *FakeDriver) PathCallCount() int {
+func (fake *FakeMatchableDriver) PathCallCount() int {
 	fake.pathMutex.RLock()
 	defer fake.pathMutex.RUnlock()
 	return len(fake.pathArgsForCall)
 }
 
-func (fake *FakeDriver) PathArgsForCall(i int) (voldriver.Env, voldriver.PathRequest) {
+func (fake *FakeMatchableDriver) PathArgsForCall(i int) (voldriver.Env, voldriver.PathRequest) {
 	fake.pathMutex.RLock()
 	defer fake.pathMutex.RUnlock()
 	return fake.pathArgsForCall[i].env, fake.pathArgsForCall[i].pathRequest
 }
 
-func (fake *FakeDriver) PathReturns(result1 voldriver.PathResponse) {
+func (fake *FakeMatchableDriver) PathReturns(result1 voldriver.PathResponse) {
 	fake.PathStub = nil
 	fake.pathReturns = struct {
 		result1 voldriver.PathResponse
 	}{result1}
 }
 
-func (fake *FakeDriver) Unmount(env voldriver.Env, unmountRequest voldriver.UnmountRequest) voldriver.ErrorResponse {
+func (fake *FakeMatchableDriver) Unmount(env voldriver.Env, unmountRequest voldriver.UnmountRequest) voldriver.ErrorResponse {
 	fake.unmountMutex.Lock()
 	fake.unmountArgsForCall = append(fake.unmountArgsForCall, struct {
 		env            voldriver.Env
@@ -267,26 +312,26 @@ func (fake *FakeDriver) Unmount(env voldriver.Env, unmountRequest voldriver.Unmo
 	return fake.unmountReturns.result1
 }
 
-func (fake *FakeDriver) UnmountCallCount() int {
+func (fake *FakeMatchableDriver) UnmountCallCount() int {
 	fake.unmountMutex.RLock()
 	defer fake.unmountMutex.RUnlock()
 	return len(fake.unmountArgsForCall)
 }
 
-func (fake *FakeDriver) UnmountArgsForCall(i int) (voldriver.Env, voldriver.UnmountRequest) {
+func (fake *FakeMatchableDriver) UnmountArgsForCall(i int) (voldriver.Env, voldriver.UnmountRequest) {
 	fake.unmountMutex.RLock()
 	defer fake.unmountMutex.RUnlock()
 	return fake.unmountArgsForCall[i].env, fake.unmountArgsForCall[i].unmountRequest
 }
 
-func (fake *FakeDriver) UnmountReturns(result1 voldriver.ErrorResponse) {
+func (fake *FakeMatchableDriver) UnmountReturns(result1 voldriver.ErrorResponse) {
 	fake.UnmountStub = nil
 	fake.unmountReturns = struct {
 		result1 voldriver.ErrorResponse
 	}{result1}
 }
 
-func (fake *FakeDriver) Capabilities(env voldriver.Env) voldriver.CapabilitiesResponse {
+func (fake *FakeMatchableDriver) Capabilities(env voldriver.Env) voldriver.CapabilitiesResponse {
 	fake.capabilitiesMutex.Lock()
 	fake.capabilitiesArgsForCall = append(fake.capabilitiesArgsForCall, struct {
 		env voldriver.Env
@@ -299,26 +344,26 @@ func (fake *FakeDriver) Capabilities(env voldriver.Env) voldriver.CapabilitiesRe
 	return fake.capabilitiesReturns.result1
 }
 
-func (fake *FakeDriver) CapabilitiesCallCount() int {
+func (fake *FakeMatchableDriver) CapabilitiesCallCount() int {
 	fake.capabilitiesMutex.RLock()
 	defer fake.capabilitiesMutex.RUnlock()
 	return len(fake.capabilitiesArgsForCall)
 }
 
-func (fake *FakeDriver) CapabilitiesArgsForCall(i int) voldriver.Env {
+func (fake *FakeMatchableDriver) CapabilitiesArgsForCall(i int) voldriver.Env {
 	fake.capabilitiesMutex.RLock()
 	defer fake.capabilitiesMutex.RUnlock()
 	return fake.capabilitiesArgsForCall[i].env
 }
 
-func (fake *FakeDriver) CapabilitiesReturns(result1 voldriver.CapabilitiesResponse) {
+func (fake *FakeMatchableDriver) CapabilitiesReturns(result1 voldriver.CapabilitiesResponse) {
 	fake.CapabilitiesStub = nil
 	fake.capabilitiesReturns = struct {
 		result1 voldriver.CapabilitiesResponse
 	}{result1}
 }
 
-func (fake *FakeDriver) Create(env voldriver.Env, createRequest voldriver.CreateRequest) voldriver.ErrorResponse {
+func (fake *FakeMatchableDriver) Create(env voldriver.Env, createRequest voldriver.CreateRequest) voldriver.ErrorResponse {
 	fake.createMutex.Lock()
 	fake.createArgsForCall = append(fake.createArgsForCall, struct {
 		env           voldriver.Env
@@ -332,26 +377,26 @@ func (fake *FakeDriver) Create(env voldriver.Env, createRequest voldriver.Create
 	return fake.createReturns.result1
 }
 
-func (fake *FakeDriver) CreateCallCount() int {
+func (fake *FakeMatchableDriver) CreateCallCount() int {
 	fake.createMutex.RLock()
 	defer fake.createMutex.RUnlock()
 	return len(fake.createArgsForCall)
 }
 
-func (fake *FakeDriver) CreateArgsForCall(i int) (voldriver.Env, voldriver.CreateRequest) {
+func (fake *FakeMatchableDriver) CreateArgsForCall(i int) (voldriver.Env, voldriver.CreateRequest) {
 	fake.createMutex.RLock()
 	defer fake.createMutex.RUnlock()
 	return fake.createArgsForCall[i].env, fake.createArgsForCall[i].createRequest
 }
 
-func (fake *FakeDriver) CreateReturns(result1 voldriver.ErrorResponse) {
+func (fake *FakeMatchableDriver) CreateReturns(result1 voldriver.ErrorResponse) {
 	fake.CreateStub = nil
 	fake.createReturns = struct {
 		result1 voldriver.ErrorResponse
 	}{result1}
 }
 
-func (fake *FakeDriver) Remove(env voldriver.Env, removeRequest voldriver.RemoveRequest) voldriver.ErrorResponse {
+func (fake *FakeMatchableDriver) Remove(env voldriver.Env, removeRequest voldriver.RemoveRequest) voldriver.ErrorResponse {
 	fake.removeMutex.Lock()
 	fake.removeArgsForCall = append(fake.removeArgsForCall, struct {
 		env           voldriver.Env
@@ -365,28 +410,30 @@ func (fake *FakeDriver) Remove(env voldriver.Env, removeRequest voldriver.Remove
 	return fake.removeReturns.result1
 }
 
-func (fake *FakeDriver) RemoveCallCount() int {
+func (fake *FakeMatchableDriver) RemoveCallCount() int {
 	fake.removeMutex.RLock()
 	defer fake.removeMutex.RUnlock()
 	return len(fake.removeArgsForCall)
 }
 
-func (fake *FakeDriver) RemoveArgsForCall(i int) (voldriver.Env, voldriver.RemoveRequest) {
+func (fake *FakeMatchableDriver) RemoveArgsForCall(i int) (voldriver.Env, voldriver.RemoveRequest) {
 	fake.removeMutex.RLock()
 	defer fake.removeMutex.RUnlock()
 	return fake.removeArgsForCall[i].env, fake.removeArgsForCall[i].removeRequest
 }
 
-func (fake *FakeDriver) RemoveReturns(result1 voldriver.ErrorResponse) {
+func (fake *FakeMatchableDriver) RemoveReturns(result1 voldriver.ErrorResponse) {
 	fake.RemoveStub = nil
 	fake.removeReturns = struct {
 		result1 voldriver.ErrorResponse
 	}{result1}
 }
 
-func (fake *FakeDriver) Invocations() map[string][][]interface{} {
+func (fake *FakeMatchableDriver) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
+	fake.matchesMutex.RLock()
+	defer fake.matchesMutex.RUnlock()
 	fake.activateMutex.RLock()
 	defer fake.activateMutex.RUnlock()
 	fake.getMutex.RLock()
@@ -408,7 +455,7 @@ func (fake *FakeDriver) Invocations() map[string][][]interface{} {
 	return fake.invocations
 }
 
-func (fake *FakeDriver) recordInvocation(key string, args []interface{}) {
+func (fake *FakeMatchableDriver) recordInvocation(key string, args []interface{}) {
 	fake.invocationsMutex.Lock()
 	defer fake.invocationsMutex.Unlock()
 	if fake.invocations == nil {
@@ -420,4 +467,4 @@ func (fake *FakeDriver) recordInvocation(key string, args []interface{}) {
 	fake.invocations[key] = append(fake.invocations[key], args)
 }
 
-var _ voldriver.Driver = new(FakeDriver)
+var _ voldriver.MatchableDriver = new(FakeMatchableDriver)

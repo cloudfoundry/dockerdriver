@@ -33,9 +33,8 @@ func (fake *FakeEnv) Logger() lager.Logger {
 	fake.loggerMutex.Unlock()
 	if fake.LoggerStub != nil {
 		return fake.LoggerStub()
-	} else {
-		return fake.loggerReturns.result1
 	}
+	return fake.loggerReturns.result1
 }
 
 func (fake *FakeEnv) LoggerCallCount() int {
@@ -58,9 +57,8 @@ func (fake *FakeEnv) Context() context.Context {
 	fake.contextMutex.Unlock()
 	if fake.ContextStub != nil {
 		return fake.ContextStub()
-	} else {
-		return fake.contextReturns.result1
 	}
+	return fake.contextReturns.result1
 }
 
 func (fake *FakeEnv) ContextCallCount() int {

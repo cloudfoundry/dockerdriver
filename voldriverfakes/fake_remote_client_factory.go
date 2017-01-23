@@ -33,9 +33,8 @@ func (fake *FakeRemoteClientFactory) NewRemoteClient(url string, tls *voldriver.
 	fake.newRemoteClientMutex.Unlock()
 	if fake.NewRemoteClientStub != nil {
 		return fake.NewRemoteClientStub(url, tls)
-	} else {
-		return fake.newRemoteClientReturns.result1, fake.newRemoteClientReturns.result2
 	}
+	return fake.newRemoteClientReturns.result1, fake.newRemoteClientReturns.result2
 }
 
 func (fake *FakeRemoteClientFactory) NewRemoteClientCallCount() int {

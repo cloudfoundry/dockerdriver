@@ -109,6 +109,36 @@ var _ = Describe("RemoteClient", func() {
 	Context("when the driver returns successful and the transport is TCP", func() {
 		var volumeId string
 
+		Context("when match is called to check for driver reuse", func() {
+			var (
+				ret       bool
+				matchable voldriver.MatchableDriver
+			)
+
+			BeforeEach(func() {
+				matchable, ret = driver.(voldriver.MatchableDriver)
+				Expect(ret).To(BeTrue())
+			})
+
+			Context("when stuff matches", func() {
+				BeforeEach(func() {
+					ret = matchable.Matches(testLogger, "", nil)
+				})
+				It("should match", func() {
+					Expect(ret).To(BeTrue())
+				})
+			})
+
+			Context("when stuff doesn't match", func() {
+				BeforeEach(func() {
+					ret = matchable.Matches(testLogger, "", &voldriver.TLSConfig{InsecureSkipVerify: true, CAFile: "foo", CertFile: "foo", KeyFile: "foo"})
+				})
+				It("should not match", func() {
+					Expect(ret).To(BeFalse())
+				})
+			})
+		})
+
 		It("should be able to mount", func() {
 			httpClient.DoReturns(validHttpMountResponse, nil)
 
