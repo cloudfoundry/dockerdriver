@@ -103,12 +103,12 @@ func (r *remoteClient) Matches(loggerIn lager.Logger, url string, tls *voldriver
 	var err error
 	if tls != nil {
 		tls1, err = json.Marshal(tls)
-		logger.Error("failed-json-Marshall", err)
+		logger.Error("failed-json-marshall", err)
 		return false
 	}
 	if r.tls != nil {
 		tls2, err = json.Marshal(r.tls)
-		logger.Error("failed-json-Marshall", err)
+		logger.Error("failed-json-marshall", err)
 		return false
 	}
 	return string(tls1) == string(tls2)
@@ -382,11 +382,6 @@ func (r *remoteClient) Capabilities(env voldriver.Env) voldriver.CapabilitiesRes
 	}
 
 	return capabilities
-}
-
-func (r *remoteClient) clientError(logger lager.Logger, err error, msg string) string {
-	logger.Error(msg, err)
-	return err.Error()
 }
 
 func (r *remoteClient) do(ctx context.Context, logger lager.Logger, requestFactory *reqFactory) ([]byte, error) {

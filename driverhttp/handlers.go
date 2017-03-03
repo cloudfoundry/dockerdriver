@@ -56,7 +56,7 @@ func EnvWithMonitor(logger lager.Logger, ctx context.Context, res http.ResponseW
 			select {
 			case <-doneOrTimeoutChannel:
 			case <-cancelChannel:
-				logger.Info("signalling cancel")
+				logger.Info("signalling-cancel")
 				cancel()
 			}
 		}()
@@ -213,8 +213,6 @@ func newCreateHandler(logger lager.Logger, client voldriver.Driver) http.Handler
 			writeJSONResponse(w, StatusInternalServerError, voldriver.ErrorResponse{Err: err.Error()}, req)
 			return
 		}
-
-		logger.Info(fmt.Sprintf("%s", string(body)))
 
 		var createRequest voldriver.CreateRequest
 		if err = json.Unmarshal(body, &createRequest); err != nil {

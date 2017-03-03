@@ -118,7 +118,7 @@ var _ = Describe("Volman Driver Handlers", func() {
 
 						select {
 						case <-ctx.Done():
-							logger.Error("from ctx", ctx.Err())
+							logger.Error("from-ctx", ctx.Err())
 							return voldriver.ActivateResponse{Err: ctx.Err().Error()}
 						}
 					}
@@ -235,7 +235,7 @@ var _ = Describe("Volman Driver Handlers", func() {
 
 						select {
 						case <-ctx.Done():
-							logger.Error("from ctx", ctx.Err())
+							logger.Error("from-ctx", ctx.Err())
 							return voldriver.ListResponse{Err: ctx.Err().Error()}
 						}
 					}
@@ -326,7 +326,6 @@ var _ = Describe("Volman Driver Handlers", func() {
 				driver.MountReturns(voldriver.MountResponse{Mountpoint: "dummy_path"})
 
 				wg.Add(1)
-				testLogger.Info(fmt.Sprintf("%#v", res.Body))
 
 				go func() {
 					subject.ServeHTTP(res, req)
@@ -354,7 +353,7 @@ var _ = Describe("Volman Driver Handlers", func() {
 
 						select {
 						case <-ctx.Done():
-							logger.Error("from ctx", ctx.Err())
+							logger.Error("from-ctx", ctx.Err())
 							return voldriver.MountResponse{Err: ctx.Err().Error()}
 						}
 					}
@@ -447,7 +446,7 @@ var _ = Describe("Volman Driver Handlers", func() {
 
 						select {
 						case <-ctx.Done():
-							logger.Error("from ctx", ctx.Err())
+							logger.Error("from-ctx", ctx.Err())
 							return voldriver.ErrorResponse{Err: ctx.Err().Error()}
 						}
 					}
@@ -550,7 +549,7 @@ var _ = Describe("Volman Driver Handlers", func() {
 
 						select {
 						case <-ctx.Done():
-							logger.Error("from ctx", ctx.Err())
+							logger.Error("from-ctx", ctx.Err())
 							return voldriver.GetResponse{Err: ctx.Err().Error()}
 						}
 					}
@@ -653,7 +652,7 @@ var _ = Describe("Volman Driver Handlers", func() {
 
 						select {
 						case <-ctx.Done():
-							logger.Error("from ctx", ctx.Err())
+							logger.Error("from-ctx", ctx.Err())
 							return voldriver.PathResponse{Err: ctx.Err().Error()}
 						}
 					}
@@ -750,7 +749,7 @@ var _ = Describe("Volman Driver Handlers", func() {
 
 						select {
 						case <-ctx.Done():
-							logger.Error("from ctx", ctx.Err())
+							logger.Error("from-ctx", ctx.Err())
 							return voldriver.ErrorResponse{Err: ctx.Err().Error()}
 						}
 					}
@@ -847,7 +846,7 @@ var _ = Describe("Volman Driver Handlers", func() {
 
 						select {
 						case <-ctx.Done():
-							logger.Error("from ctx", ctx.Err())
+							logger.Error("from-ctx", ctx.Err())
 							return voldriver.ErrorResponse{Err: ctx.Err().Error()}
 						}
 					}

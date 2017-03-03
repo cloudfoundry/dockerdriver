@@ -35,7 +35,7 @@ func (r *realInvoker) Invoke(env voldriver.Env, executable string, cmdArgs []str
 
 	output, err := cmdHandle.CombinedOutput()
 	if err != nil {
-		logger.Error(fmt.Sprintf("%s invocation failed", executable), err, lager.Data{"err": output})
+		logger.Error("invocation-failed", err, lager.Data{"output": output, "exe": executable})
 		return output, fmt.Errorf("%s - details:\n%s", err.Error(), output)
 	}
 
