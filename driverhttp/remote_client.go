@@ -141,7 +141,7 @@ func (r *remoteClient) Activate(env voldriver.Env) voldriver.ActivateResponse {
 }
 
 func (r *remoteClient) Create(env voldriver.Env, createRequest voldriver.CreateRequest) voldriver.ErrorResponse {
-	logger := env.Logger().Session("create", lager.Data{"create_request": createRequest})
+	logger := env.Logger().Session("create", lager.Data{"create_request.Name": createRequest.Name})
 	logger.Info("start")
 	defer logger.Info("end")
 
