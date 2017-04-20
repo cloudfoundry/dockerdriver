@@ -41,8 +41,8 @@ func EnvWithContext(ctx context.Context, env voldriver.Env) voldriver.Env {
 
 func EnvWithMonitor(logger lager.Logger, ctx context.Context, res http.ResponseWriter) voldriver.Env {
 	logger = logger.Session("with-cancel")
-	logger.Info("start")
-	defer logger.Info("end")
+	logger.Debug("start")
+	defer logger.Debug("end")
 
 	cancelCtx, cancel := context.WithCancel(ctx)
 
@@ -56,7 +56,7 @@ func EnvWithMonitor(logger lager.Logger, ctx context.Context, res http.ResponseW
 			select {
 			case <-doneOrTimeoutChannel:
 			case <-cancelChannel:
-				logger.Info("signalling-cancel")
+				logger.Debug("signalling-cancel")
 				cancel()
 			}
 		}()
