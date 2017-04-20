@@ -95,8 +95,8 @@ func NewHandler(logger lager.Logger, client voldriver.Driver) (http.Handler, err
 func newActivateHandler(logger lager.Logger, client voldriver.Driver) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		logger := logger.Session("handle-activate")
-		logger.Info("start")
-		defer logger.Info("end")
+		logger.Debug("start")
+		defer logger.Debug("end")
 
 		activateResponse := client.Activate(EnvWithMonitor(logger, req.Context(), w))
 		if activateResponse.Err != "" {
