@@ -71,12 +71,14 @@ func (dw *driverWrapper) Matches(logger lager.Logger, address string, tlsConfig 
 	logger.Info("start")
 	defer logger.Info("end")
 
+	var matches bool
 	matchableDriver, ok := dw.Driver.(MatchableDriver)
-	logger.Info("is-matchable", lager.Data{"matchable": ok})
+	logger.Info("matches", lager.Data{"is-matchable": ok})
 	if ok {
-		return matchableDriver.Matches(logger, address, tlsConfig)
+		matches = matchableDriver.Matches(logger, address, tlsConfig)
 	}
-	return false
+	logger.Info("matches", lager.Data{"matches": matches})
+	return matches
 }
 
 func NewVoldriverPlugin(driver Driver) Plugin {
