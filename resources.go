@@ -46,7 +46,7 @@ type MatchableDriver interface {
 
 //go:generate counterfeiter -o voldriverfakes/fake_plugin_client.go . Plugin
 type Plugin interface {
-	// Eventually this method will have List, Mount and Unmount methods
+	// Eventually this method will have List, Mount, Unmount and Matches methods
 	// allowing LocalClient and Purger to interact with Plugin without having
 	// to know if they are a docker volume driver or a CSI plugin.
 	//
@@ -54,6 +54,35 @@ type Plugin interface {
 	// the interface with a method that allows LocalClient and Purger to get at the
 	// underlying Voldriver
 	GetVoldriver() Driver
+
+	Matches(lager.Logger, string, *TLSConfig) bool
+}
+
+type driverWrapper struct {
+	Driver Driver
+}
+
+func (dw *driverWrapper) GetVoldriver() Driver {
+	return dw.Driver
+}
+
+func (dw *driverWrapper) Matches(logger lager.Logger, address string, tlsConfig *TLSConfig) bool {
+	logger = logger.Session("matches")
+	logger.Info("start")
+	defer logger.Info("end")
+
+	matchableDriver, ok := dw.Driver.(MatchableDriver)
+	logger.Info("is-matchable", lager.Data{"matchable": ok})
+	if ok {
+		return matchableDriver.Matches(logger, address, tlsConfig)
+	}
+	return false
+}
+
+func NewVoldriverPlugin(driver Driver) Plugin {
+	return &driverWrapper{
+		Driver: driver,
+	}
 }
 
 //go:generate counterfeiter -o voldriverfakes/fake_driver_client.go . Driver
@@ -66,7 +95,6 @@ type Driver interface {
 	Unmount(env Env, unmountRequest UnmountRequest) ErrorResponse
 	Capabilities(env Env) CapabilitiesResponse
 
-	Plugin
 	Provisioner
 }
 

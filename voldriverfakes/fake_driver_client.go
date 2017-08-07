@@ -89,15 +89,6 @@ type FakeDriver struct {
 	capabilitiesReturnsOnCall map[int]struct {
 		result1 voldriver.CapabilitiesResponse
 	}
-	GetVoldriverStub        func() voldriver.Driver
-	getVoldriverMutex       sync.RWMutex
-	getVoldriverArgsForCall []struct{}
-	getVoldriverReturns     struct {
-		result1 voldriver.Driver
-	}
-	getVoldriverReturnsOnCall map[int]struct {
-		result1 voldriver.Driver
-	}
 	CreateStub        func(env voldriver.Env, createRequest voldriver.CreateRequest) voldriver.ErrorResponse
 	createMutex       sync.RWMutex
 	createArgsForCall []struct {
@@ -466,46 +457,6 @@ func (fake *FakeDriver) CapabilitiesReturnsOnCall(i int, result1 voldriver.Capab
 	}{result1}
 }
 
-func (fake *FakeDriver) GetVoldriver() voldriver.Driver {
-	fake.getVoldriverMutex.Lock()
-	ret, specificReturn := fake.getVoldriverReturnsOnCall[len(fake.getVoldriverArgsForCall)]
-	fake.getVoldriverArgsForCall = append(fake.getVoldriverArgsForCall, struct{}{})
-	fake.recordInvocation("GetVoldriver", []interface{}{})
-	fake.getVoldriverMutex.Unlock()
-	if fake.GetVoldriverStub != nil {
-		return fake.GetVoldriverStub()
-	}
-	if specificReturn {
-		return ret.result1
-	}
-	return fake.getVoldriverReturns.result1
-}
-
-func (fake *FakeDriver) GetVoldriverCallCount() int {
-	fake.getVoldriverMutex.RLock()
-	defer fake.getVoldriverMutex.RUnlock()
-	return len(fake.getVoldriverArgsForCall)
-}
-
-func (fake *FakeDriver) GetVoldriverReturns(result1 voldriver.Driver) {
-	fake.GetVoldriverStub = nil
-	fake.getVoldriverReturns = struct {
-		result1 voldriver.Driver
-	}{result1}
-}
-
-func (fake *FakeDriver) GetVoldriverReturnsOnCall(i int, result1 voldriver.Driver) {
-	fake.GetVoldriverStub = nil
-	if fake.getVoldriverReturnsOnCall == nil {
-		fake.getVoldriverReturnsOnCall = make(map[int]struct {
-			result1 voldriver.Driver
-		})
-	}
-	fake.getVoldriverReturnsOnCall[i] = struct {
-		result1 voldriver.Driver
-	}{result1}
-}
-
 func (fake *FakeDriver) Create(env voldriver.Env, createRequest voldriver.CreateRequest) voldriver.ErrorResponse {
 	fake.createMutex.Lock()
 	ret, specificReturn := fake.createReturnsOnCall[len(fake.createArgsForCall)]
@@ -621,8 +572,6 @@ func (fake *FakeDriver) Invocations() map[string][][]interface{} {
 	defer fake.unmountMutex.RUnlock()
 	fake.capabilitiesMutex.RLock()
 	defer fake.capabilitiesMutex.RUnlock()
-	fake.getVoldriverMutex.RLock()
-	defer fake.getVoldriverMutex.RUnlock()
 	fake.createMutex.RLock()
 	defer fake.createMutex.RUnlock()
 	fake.removeMutex.RLock()
