@@ -3,8 +3,9 @@ package backoff
 import (
 	"time"
 
-	"code.cloudfoundry.org/clock"
 	"context"
+
+	"code.cloudfoundry.org/clock"
 )
 
 const (

@@ -1,8 +1,9 @@
 package voldriver
 
 import (
-	"code.cloudfoundry.org/lager"
 	"context"
+
+	"code.cloudfoundry.org/lager"
 	"github.com/tedsuo/rata"
 )
 
@@ -43,6 +44,18 @@ type MatchableDriver interface {
 	Driver
 }
 
+//go:generate counterfeiter -o voldriverfakes/fake_plugin_client.go . Plugin
+type Plugin interface {
+	// Eventually this method will have List, Mount and Unmount methods
+	// allowing LocalClient and Purger to interact with Plugin without having
+	// to know if they are a docker volume driver or a CSI plugin.
+	//
+	// However, in order to do a step-wise refactor we are initially introducing
+	// the interface with a method that allows LocalClient and Purger to get at the
+	// underlying Voldriver
+	GetVoldriver() Driver
+}
+
 //go:generate counterfeiter -o voldriverfakes/fake_driver_client.go . Driver
 type Driver interface {
 	Activate(env Env) ActivateResponse
@@ -53,6 +66,7 @@ type Driver interface {
 	Unmount(env Env, unmountRequest UnmountRequest) ErrorResponse
 	Capabilities(env Env) CapabilitiesResponse
 
+	Plugin
 	Provisioner
 }
 

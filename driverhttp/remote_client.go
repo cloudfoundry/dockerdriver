@@ -384,6 +384,10 @@ func (r *remoteClient) Capabilities(env voldriver.Env) voldriver.CapabilitiesRes
 	return capabilities
 }
 
+func (r *remoteClient) GetVoldriver() voldriver.Driver {
+	return r;
+}
+
 func (r *remoteClient) do(ctx context.Context, logger lager.Logger, requestFactory *reqFactory) ([]byte, error) {
 	var data []byte
 
