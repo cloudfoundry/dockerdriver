@@ -5,6 +5,7 @@ import (
 
 	"code.cloudfoundry.org/lager"
 	"github.com/tedsuo/rata"
+	"code.cloudfoundry.org/volman"
 )
 
 const (
@@ -44,29 +45,15 @@ type MatchableDriver interface {
 	Driver
 }
 
-//go:generate counterfeiter -o voldriverfakes/fake_plugin_client.go . Plugin
-type Plugin interface {
-	// Eventually this method will have List, Mount, Unmount and Matches methods
-	// allowing LocalClient and Purger to interact with Plugin without having
-	// to know if they are a docker volume driver or a CSI plugin.
-	//
-	// However, in order to do a step-wise refactor we are initially introducing
-	// the interface with a method that allows LocalClient and Purger to get at the
-	// underlying Voldriver
-	GetVoldriver() Driver
-
-	Matches(lager.Logger, string, *TLSConfig) bool
-}
-
 type driverWrapper struct {
-	Driver Driver
+	Driver interface{}
 }
 
-func (dw *driverWrapper) GetVoldriver() Driver {
+func (dw *driverWrapper) GetImplementation() interface{} {
 	return dw.Driver
 }
 
-func (dw *driverWrapper) Matches(logger lager.Logger, address string, tlsConfig *TLSConfig) bool {
+func (dw *driverWrapper) Matches(logger lager.Logger, pluginSpec volman.PluginSpec) bool {
 	logger = logger.Session("matches")
 	logger.Info("start")
 	defer logger.Info("end")
@@ -75,13 +62,22 @@ func (dw *driverWrapper) Matches(logger lager.Logger, address string, tlsConfig 
 	matchableDriver, ok := dw.Driver.(MatchableDriver)
 	logger.Info("matches", lager.Data{"is-matchable": ok})
 	if ok {
-		matches = matchableDriver.Matches(logger, address, tlsConfig)
+		var tlsConfig *TLSConfig
+		if pluginSpec.TLSConfig != nil {
+			tlsConfig = &TLSConfig{
+				InsecureSkipVerify: pluginSpec.TLSConfig.InsecureSkipVerify,
+				CAFile: pluginSpec.TLSConfig.CAFile,
+				CertFile: pluginSpec.TLSConfig.CertFile,
+				KeyFile: pluginSpec.TLSConfig.KeyFile,
+			}
+		}
+		matches = matchableDriver.Matches(logger, pluginSpec.Address, tlsConfig)
 	}
 	logger.Info("matches", lager.Data{"matches": matches})
 	return matches
 }
 
-func NewVoldriverPlugin(driver Driver) Plugin {
+func NewVoldriverPlugin(driver Driver) volman.Plugin {
 	return &driverWrapper{
 		Driver: driver,
 	}
