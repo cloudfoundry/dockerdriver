@@ -15,25 +15,20 @@ import (
 
 var _ = Describe("DockerDriverMounter", func() {
 	var (
+		volumeId      string
 		logger        *lagertest.TestLogger
 		dockerPlugin  volman.Plugin
 		fakeVoldriver *voldriverfakes.FakeDriver
 	)
 
 	BeforeEach(func() {
+		volumeId = "fake-volume"
 		logger = lagertest.NewTestLogger("docker-mounter-test")
 		fakeVoldriver = &voldriverfakes.FakeDriver{}
 		dockerPlugin = driverhttp.NewDockerPluginWithDriver(fakeVoldriver)
 	})
 
 	Describe("Mount", func() {
-		var (
-			volumeId string
-		)
-		BeforeEach(func() {
-			volumeId = "fake-volume"
-		})
-
 		Context("when given a driver", func() {
 
 			Context("mount", func() {
@@ -75,6 +70,21 @@ var _ = Describe("DockerDriverMounter", func() {
 				})
 
 			})
+		})
+	})
+
+	Describe("Unmount", func() {
+		It("should be able to unmount", func() {
+			err := dockerPlugin.Unmount(logger, "fakedriver", volumeId)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(fakeVoldriver.UnmountCallCount()).To(Equal(1))
+			Expect(fakeVoldriver.RemoveCallCount()).To(Equal(0))
+		})
+
+		It("should not be able to unmount when driver unmount fails", func() {
+			fakeVoldriver.UnmountReturns(voldriver.ErrorResponse{Err: "unmount failure"})
+			err := dockerPlugin.Unmount(logger, "fakedriver", volumeId)
+			Expect(err).To(HaveOccurred())
 		})
 	})
 })
