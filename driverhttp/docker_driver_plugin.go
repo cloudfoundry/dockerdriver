@@ -45,17 +45,21 @@ func (dw *DockerDriverPlugin) Matches(logger lager.Logger, pluginSpec volman.Plu
 	return matches
 }
 
-func (d *DockerDriverPlugin) Mount(logger lager.Logger, pluginId string, volumeId string, opts map[string]interface{}) (volman.MountResponse, error) {
+func (d *DockerDriverPlugin) Mount(logger lager.Logger, volumeId string, opts map[string]interface{}) (volman.MountResponse, error) {
+	logger = logger.Session("mount")
+	logger.Info("start")
+	defer logger.Info("end")
+
 	env := NewHttpDriverEnv(logger, context.TODO())
 
-	logger.Debug("creating-volume", lager.Data{"volumeId": volumeId, "pluginId": pluginId})
+	logger.Debug("creating-volume", lager.Data{"volumeId": volumeId})
 	response := d.DockerDriver.(voldriver.Driver).Create(env, voldriver.CreateRequest{Name: volumeId, Opts: opts})
 	if response.Err != "" {
 		return volman.MountResponse{}, errors.New(response.Err)
 	}
 
 	mountRequest := voldriver.MountRequest{Name: volumeId}
-	logger.Debug("calling-docker-driver-with-mount-request", lager.Data{"pluginId": pluginId, "mountRequest": mountRequest})
+	logger.Debug("calling-docker-driver-with-mount-request", lager.Data{"mountRequest": mountRequest})
 	mountResponse := d.DockerDriver.(voldriver.Driver).Mount(env, mountRequest)
 	logger.Debug("response-from-docker-driver", lager.Data{"response": mountResponse})
 
@@ -70,7 +74,11 @@ func (d *DockerDriverPlugin) Mount(logger lager.Logger, pluginId string, volumeI
 	return volman.MountResponse{Path: mountResponse.Mountpoint}, nil
 }
 
-func (d *DockerDriverPlugin) Unmount(logger lager.Logger, pluginId string, volumeId string) error {
+func (d *DockerDriverPlugin) Unmount(logger lager.Logger, volumeId string) error {
+	logger = logger.Session("unmount")
+	logger.Info("start")
+	defer logger.Info("end")
+
 	env := NewHttpDriverEnv(logger, context.TODO())
 
 	if response := d.DockerDriver.(voldriver.Driver).Unmount(env, voldriver.UnmountRequest{Name: volumeId}); response.Err != "" {
