@@ -87,4 +87,42 @@ var _ = Describe("DockerDriverMounter", func() {
 			Expect(err).To(HaveOccurred())
 		})
 	})
+
+	Describe("ListVolumes", func() {
+		var (
+			volumes []string
+			err     error
+		)
+		BeforeEach(func() {
+			listResponse := voldriver.ListResponse{Volumes: []voldriver.VolumeInfo{
+				{Name: "fake_volume_1"},
+				{Name: "fake_volume_2"},
+			}}
+			fakeVoldriver.ListReturns(listResponse)
+		})
+
+		JustBeforeEach(func() {
+			volumes, err = dockerPlugin.ListVolumes(logger)
+		})
+
+		It("should be able list volumes", func() {
+			Expect(err).NotTo(HaveOccurred())
+			Expect(volumes).To(ContainElement("fake_volume_1"))
+			Expect(volumes).To(ContainElement("fake_volume_2"))
+		})
+
+		Context("when the driver returns an err response", func() {
+			BeforeEach(func() {
+				listResponse := voldriver.ListResponse{Volumes: []voldriver.VolumeInfo{
+					{Name: "fake_volume_1"},
+					{Name: "fake_volume_2"},
+				}, Err: "badness"}
+				fakeVoldriver.ListReturns(listResponse)
+			})
+			It("should return an error", func() {
+				Expect(err).To(HaveOccurred())
+			})
+		})
+	})
+
 })

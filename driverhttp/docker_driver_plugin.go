@@ -45,6 +45,26 @@ func (dw *DockerDriverPlugin) Matches(logger lager.Logger, pluginSpec volman.Plu
 	return matches
 }
 
+func (d *DockerDriverPlugin) ListVolumes(logger lager.Logger) ([]string, error) {
+	logger = logger.Session("list-volumes")
+	logger.Info("start")
+	defer logger.Info("end")
+
+	volumes := []string{}
+	env := NewHttpDriverEnv(logger, context.TODO())
+
+	response := d.DockerDriver.(voldriver.Driver).List(env)
+	if response.Err != "" {
+		return volumes, errors.New(response.Err)
+	}
+
+	for _, volumeInfo := range response.Volumes {
+		volumes = append(volumes, volumeInfo.Name)
+	}
+
+	return volumes, nil
+}
+
 func (d *DockerDriverPlugin) Mount(logger lager.Logger, volumeId string, opts map[string]interface{}) (volman.MountResponse, error) {
 	logger = logger.Session("mount")
 	logger.Info("start")
@@ -87,8 +107,4 @@ func (d *DockerDriverPlugin) Unmount(logger lager.Logger, volumeId string) error
 		return err
 	}
 	return nil
-}
-
-func (d *DockerDriverPlugin) GetImplementation() interface{} {
-	return d.DockerDriver
 }
