@@ -18,7 +18,7 @@ func WriteDriverSpec(logger lager.Logger, pluginsDirectory string, driver string
 		return err
 	}
 
-	f, err := os.Create(pluginsDirectory + "/" + driver + "." + extension)
+	f, err := os.Create(path.Join(pluginsDirectory, driver+"."+extension))
 	if err != nil {
 		logger.Error("error-creating-file ", err)
 		return err
