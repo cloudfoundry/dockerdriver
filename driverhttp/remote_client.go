@@ -21,9 +21,10 @@ import (
 
 	"time"
 
-	"code.cloudfoundry.org/voldriver/backoff"
 	"context"
 	"errors"
+
+	"code.cloudfoundry.org/voldriver/backoff"
 )
 
 type reqFactory struct {
@@ -385,7 +386,7 @@ func (r *remoteClient) Capabilities(env voldriver.Env) voldriver.CapabilitiesRes
 }
 
 func (r *remoteClient) GetVoldriver() voldriver.Driver {
-	return r;
+	return r
 }
 
 func (r *remoteClient) do(ctx context.Context, logger lager.Logger, requestFactory *reqFactory) ([]byte, error) {
