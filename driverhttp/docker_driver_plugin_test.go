@@ -1,6 +1,9 @@
 package driverhttp_test
 
 import (
+	"encoding/json"
+	"errors"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -69,6 +72,66 @@ var _ = Describe("DockerDriverMounter", func() {
 					})
 				})
 
+				Context("with safe error", func() {
+					var (
+						err         error
+						safeError   voldriver.SafeError
+						unsafeError error
+						errString   string
+					)
+
+					JustBeforeEach(func() {
+
+						mountResponse := voldriver.MountResponse{Err: errString}
+						fakeVoldriver.MountReturns(mountResponse)
+						_, err = dockerPlugin.Mount(logger, volumeId, map[string]interface{}{"volume_id": volumeId})
+					})
+
+					Context("with safe error msg", func() {
+						BeforeEach(func() {
+							safeError = voldriver.SafeError{SafeDescription: "safe-badness"}
+							errBytes, err := json.Marshal(safeError)
+							Expect(err).NotTo(HaveOccurred())
+							errString = string(errBytes[:])
+						})
+
+						It("should return a safe error", func() {
+							Expect(err).To(HaveOccurred())
+							_, ok := err.(voldriver.SafeError)
+							Expect(ok).To(Equal(true))
+							Expect(err.Error()).To(Equal("safe-badness"))
+						})
+					})
+
+					Context("with unsafe error msg", func() {
+						BeforeEach(func() {
+							unsafeError = errors.New("unsafe-badness")
+							errString = unsafeError.Error()
+						})
+
+						It("should return regular error", func() {
+							Expect(err).To(HaveOccurred())
+							_, ok := err.(voldriver.SafeError)
+							Expect(ok).To(Equal(false))
+							Expect(err.Error()).To(Equal("unsafe-badness"))
+						})
+
+					})
+
+					Context("with a really unsafe error msg", func() {
+						BeforeEach(func() {
+							errString = "{ badness"
+						})
+
+						It("should return regular error", func() {
+							Expect(err).To(HaveOccurred())
+							_, ok := err.(voldriver.SafeError)
+							Expect(ok).To(Equal(false))
+							Expect(err.Error()).To(Equal("{ badness"))
+						})
+					})
+				})
+
 			})
 		})
 	})
@@ -86,6 +149,65 @@ var _ = Describe("DockerDriverMounter", func() {
 			err := dockerPlugin.Unmount(logger, volumeId)
 			Expect(err).To(HaveOccurred())
 		})
+
+		Context("with safe error", func() {
+			var (
+				err         error
+				safeError   voldriver.SafeError
+				unsafeError error
+				errString   string
+			)
+
+			JustBeforeEach(func() {
+				fakeVoldriver.UnmountReturns(voldriver.ErrorResponse{Err: errString})
+				err = dockerPlugin.Unmount(logger, volumeId)
+			})
+
+			Context("with safe error msg", func() {
+				BeforeEach(func() {
+					safeError = voldriver.SafeError{SafeDescription: "safe-badness"}
+					errBytes, err := json.Marshal(safeError)
+					Expect(err).NotTo(HaveOccurred())
+					errString = string(errBytes[:])
+				})
+
+				It("should return a safe error", func() {
+					Expect(err).To(HaveOccurred())
+					_, ok := err.(voldriver.SafeError)
+					Expect(ok).To(Equal(true))
+					Expect(err.Error()).To(Equal("safe-badness"))
+				})
+			})
+
+			Context("with unsafe error msg", func() {
+				BeforeEach(func() {
+					unsafeError = errors.New("unsafe-badness")
+					errString = unsafeError.Error()
+				})
+
+				It("should return regular error", func() {
+					Expect(err).To(HaveOccurred())
+					_, ok := err.(voldriver.SafeError)
+					Expect(ok).To(Equal(false))
+					Expect(err.Error()).To(Equal("unsafe-badness"))
+				})
+
+			})
+
+			Context("with a really unsafe error msg", func() {
+				BeforeEach(func() {
+					errString = "{ badness"
+				})
+
+				It("should return regular error", func() {
+					Expect(err).To(HaveOccurred())
+					_, ok := err.(voldriver.SafeError)
+					Expect(ok).To(Equal(false))
+					Expect(err.Error()).To(Equal("{ badness"))
+				})
+			})
+		})
+
 	})
 
 	Describe("ListVolumes", func() {

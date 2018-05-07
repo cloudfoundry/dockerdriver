@@ -2,6 +2,7 @@ package driverhttp
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -88,7 +89,13 @@ func (d *DockerDriverPlugin) Mount(logger lager.Logger, volumeId string, opts ma
 	}
 
 	if mountResponse.Err != "" {
-		return volman.MountResponse{}, errors.New(mountResponse.Err)
+		safeError := voldriver.SafeError{}
+		err := json.Unmarshal([]byte(mountResponse.Err), &safeError)
+		if err == nil {
+			return volman.MountResponse{}, safeError
+		} else {
+			return volman.MountResponse{}, errors.New(mountResponse.Err)
+		}
 	}
 
 	return volman.MountResponse{Path: mountResponse.Mountpoint}, nil
@@ -102,7 +109,15 @@ func (d *DockerDriverPlugin) Unmount(logger lager.Logger, volumeId string) error
 	env := NewHttpDriverEnv(logger, context.TODO())
 
 	if response := d.DockerDriver.(voldriver.Driver).Unmount(env, voldriver.UnmountRequest{Name: volumeId}); response.Err != "" {
-		err := errors.New(response.Err)
+
+		safeError := voldriver.SafeError{}
+		err := json.Unmarshal([]byte(response.Err), &safeError)
+		if err == nil {
+			err = safeError
+		} else {
+			err = errors.New(response.Err)
+		}
+
 		logger.Error("unmount-failed", err)
 		return err
 	}

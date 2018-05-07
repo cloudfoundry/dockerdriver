@@ -390,6 +390,7 @@ func (r *remoteClient) GetVoldriver() voldriver.Driver {
 }
 
 func (r *remoteClient) do(ctx context.Context, logger lager.Logger, requestFactory *reqFactory) ([]byte, error) {
+
 	var data []byte
 
 	childContext, _ := context.WithDeadline(ctx, r.clock.Now().Add(30*time.Second))
