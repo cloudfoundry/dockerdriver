@@ -19,12 +19,8 @@ import (
 
 	os_http "net/http"
 
-	"time"
-
 	"context"
 	"errors"
-
-	"code.cloudfoundry.org/voldriver/backoff"
 )
 
 type reqFactory struct {
@@ -393,48 +389,35 @@ func (r *remoteClient) do(ctx context.Context, logger lager.Logger, requestFacto
 
 	var data []byte
 
-	childContext, _ := context.WithDeadline(ctx, r.clock.Now().Add(30*time.Second))
+	request, err := requestFactory.Request()
+	if err != nil {
+		logger.Error("request-gen-failed", err)
+		return data, err
+	}
+	request = request.WithContext(ctx)
 
-	backoff := backoff.NewExponentialBackOff(childContext, r.clock)
+	response, err := r.HttpClient.Do(request)
+	if err != nil {
+		logger.Error("request-failed", err)
+		return data, err
+	}
+	logger.Debug("response", lager.Data{"response": response.Status})
 
-	err := backoff.Retry(func(ctx context.Context) error {
-		var (
-			err      error
-			request  *os_http.Request
-			response *os_http.Response
-		)
+	data, err = ioutil.ReadAll(response.Body)
+	if err != nil {
+		return data, err
+	}
 
-		request, err = requestFactory.Request()
-		if err != nil {
-			logger.Error("request-gen-failed", err)
-			return err
-		}
-		request = request.WithContext(ctx)
+	var remoteErrorResponse voldriver.ErrorResponse
+	if err := json.Unmarshal(data, &remoteErrorResponse); err != nil {
+		logger.Error("failed-parsing-http-response-body", err)
+		return data, err
+	}
 
-		response, err = r.HttpClient.Do(request)
-		if err != nil {
-			logger.Error("request-failed", err)
-			return err
-		}
-		logger.Debug("response", lager.Data{"response": response.Status})
+	if remoteErrorResponse.Err != "" {
+		return data, errors.New(remoteErrorResponse.Err)
+	}
 
-		data, err = ioutil.ReadAll(response.Body)
-		if err != nil {
-			return err
-		}
+	return data, nil
 
-		var remoteErrorResponse voldriver.ErrorResponse
-		if err := json.Unmarshal(data, &remoteErrorResponse); err != nil {
-			logger.Error("failed-parsing-http-response-body", err)
-			return err
-		}
-
-		if remoteErrorResponse.Err != "" {
-			return errors.New(remoteErrorResponse.Err)
-		}
-
-		return nil
-	})
-
-	return data, err
 }
