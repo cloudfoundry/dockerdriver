@@ -101,12 +101,12 @@ func newActivateHandler(logger lager.Logger, client voldriver.Driver) http.Handl
 		activateResponse := client.Activate(EnvWithMonitor(logger, req.Context(), w))
 		if activateResponse.Err != "" {
 			logger.Error("failed-activating-driver", fmt.Errorf(activateResponse.Err))
-			writeJSONResponse(w, StatusInternalServerError, activateResponse, req)
+			writeJSONResponse(w, StatusInternalServerError, activateResponse)
 			return
 		}
 
 		logger.Debug("activate-response", lager.Data{"activation": activateResponse})
-		writeJSONResponse(w, StatusOK, activateResponse, req)
+		writeJSONResponse(w, StatusOK, activateResponse)
 	}
 }
 
@@ -119,25 +119,25 @@ func newGetHandler(logger lager.Logger, client voldriver.Driver) http.HandlerFun
 		body, err := ioutil.ReadAll(req.Body)
 		if err != nil {
 			logger.Error("failed-reading-get-request-body", err)
-			writeJSONResponse(w, StatusInternalServerError, voldriver.MountResponse{Err: err.Error()}, req)
+			writeJSONResponse(w, StatusInternalServerError, voldriver.MountResponse{Err: err.Error()})
 			return
 		}
 
 		var getRequest voldriver.GetRequest
 		if err = json.Unmarshal(body, &getRequest); err != nil {
 			logger.Error("failed-unmarshalling-get-request-body", err)
-			writeJSONResponse(w, StatusInternalServerError, voldriver.GetResponse{Err: err.Error()}, req)
+			writeJSONResponse(w, StatusInternalServerError, voldriver.GetResponse{Err: err.Error()})
 			return
 		}
 
 		getResponse := client.Get(EnvWithMonitor(logger, req.Context(), w), getRequest)
 		if getResponse.Err != "" {
 			logger.Error("failed-getting-volume", err, lager.Data{"volume": getRequest.Name})
-			writeJSONResponse(w, StatusInternalServerError, getResponse, req)
+			writeJSONResponse(w, StatusInternalServerError, getResponse)
 			return
 		}
 
-		writeJSONResponse(w, StatusOK, getResponse, req)
+		writeJSONResponse(w, StatusOK, getResponse)
 	}
 }
 
@@ -150,11 +150,11 @@ func newListHandler(logger lager.Logger, client voldriver.Driver) http.HandlerFu
 		listResponse := client.List(EnvWithMonitor(logger, req.Context(), w))
 		if listResponse.Err != "" {
 			logger.Error("failed-listing-volumes", fmt.Errorf("%s", listResponse.Err))
-			writeJSONResponse(w, StatusInternalServerError, listResponse, req)
+			writeJSONResponse(w, StatusInternalServerError, listResponse)
 			return
 		}
 
-		writeJSONResponse(w, StatusOK, listResponse, req)
+		writeJSONResponse(w, StatusOK, listResponse)
 	}
 }
 
@@ -167,37 +167,37 @@ func newPathHandler(logger lager.Logger, client voldriver.Driver) http.HandlerFu
 		body, err := ioutil.ReadAll(req.Body)
 		if err != nil {
 			logger.Error("failed-reading-path-request-body", err)
-			writeJSONResponse(w, StatusInternalServerError, voldriver.MountResponse{Err: err.Error()}, req)
+			writeJSONResponse(w, StatusInternalServerError, voldriver.MountResponse{Err: err.Error()})
 			return
 		}
 
 		var pathRequest voldriver.PathRequest
 		if err = json.Unmarshal(body, &pathRequest); err != nil {
 			logger.Error("failed-unmarshalling-path-request-body", err)
-			writeJSONResponse(w, StatusInternalServerError, voldriver.GetResponse{Err: err.Error()}, req)
+			writeJSONResponse(w, StatusInternalServerError, voldriver.GetResponse{Err: err.Error()})
 			return
 		}
 
 		pathResponse := client.Path(EnvWithMonitor(logger, req.Context(), w), pathRequest)
 		if pathResponse.Err != "" {
 			logger.Error("failed-activating-driver", fmt.Errorf(pathResponse.Err))
-			writeJSONResponse(w, StatusInternalServerError, pathResponse, req)
+			writeJSONResponse(w, StatusInternalServerError, pathResponse)
 			return
 		}
 
-		writeJSONResponse(w, StatusOK, pathResponse, req)
+		writeJSONResponse(w, StatusOK, pathResponse)
 	}
 }
 
 func newCapabilitiesHandler(logger lager.Logger, client voldriver.Driver) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		logger := logger.Session("handle-capabilities")
-		logger.Info("start", lager.Data{"request.RemoteAddr": req.RemoteAddr})
+		logger.Info("start")
 		defer logger.Info("end")
 
 		capabilitiesResponse := client.Capabilities(EnvWithMonitor(logger, req.Context(), w))
 		logger.Debug("capabilities-response", lager.Data{"capabilities": capabilitiesResponse})
-		writeJSONResponse(w, StatusOK, capabilitiesResponse, req)
+		writeJSONResponse(w, StatusOK, capabilitiesResponse)
 	}
 }
 
@@ -210,25 +210,25 @@ func newCreateHandler(logger lager.Logger, client voldriver.Driver) http.Handler
 		body, err := ioutil.ReadAll(req.Body)
 		if err != nil {
 			logger.Error("failed-reading-create-request-body", err)
-			writeJSONResponse(w, StatusInternalServerError, voldriver.ErrorResponse{Err: err.Error()}, req)
+			writeJSONResponse(w, StatusInternalServerError, voldriver.ErrorResponse{Err: err.Error()})
 			return
 		}
 
 		var createRequest voldriver.CreateRequest
 		if err = json.Unmarshal(body, &createRequest); err != nil {
 			logger.Error("failed-unmarshalling-create-request-body", err)
-			writeJSONResponse(w, StatusInternalServerError, voldriver.ErrorResponse{Err: err.Error()}, req)
+			writeJSONResponse(w, StatusInternalServerError, voldriver.ErrorResponse{Err: err.Error()})
 			return
 		}
 
 		createResponse := client.Create(EnvWithMonitor(logger, req.Context(), w), createRequest)
 		if createResponse.Err != "" {
 			logger.Error("failed-creating-volume", errors.New(createResponse.Err))
-			writeJSONResponse(w, StatusInternalServerError, createResponse, req)
+			writeJSONResponse(w, StatusInternalServerError, createResponse)
 			return
 		}
 
-		writeJSONResponse(w, StatusOK, createResponse, req)
+		writeJSONResponse(w, StatusOK, createResponse)
 	}
 }
 
@@ -241,25 +241,25 @@ func newMountHandler(logger lager.Logger, client voldriver.Driver) http.HandlerF
 		body, err := ioutil.ReadAll(req.Body)
 		if err != nil {
 			logger.Error("failed-reading-mount-request-body", err)
-			writeJSONResponse(w, StatusInternalServerError, voldriver.MountResponse{Err: err.Error()}, req)
+			writeJSONResponse(w, StatusInternalServerError, voldriver.MountResponse{Err: err.Error()})
 			return
 		}
 
 		var mountRequest voldriver.MountRequest
 		if err = json.Unmarshal(body, &mountRequest); err != nil {
 			logger.Error("failed-unmarshalling-mount-request-body", err)
-			writeJSONResponse(w, StatusInternalServerError, voldriver.MountResponse{Err: err.Error()}, req)
+			writeJSONResponse(w, StatusInternalServerError, voldriver.MountResponse{Err: err.Error()})
 			return
 		}
 
 		mountResponse := client.Mount(EnvWithMonitor(logger, req.Context(), w), mountRequest)
 		if mountResponse.Err != "" {
 			logger.Error("failed-mounting-volume", errors.New(mountResponse.Err), lager.Data{"volume": mountRequest.Name})
-			writeJSONResponse(w, StatusInternalServerError, mountResponse, req)
+			writeJSONResponse(w, StatusInternalServerError, mountResponse)
 			return
 		}
 
-		writeJSONResponse(w, StatusOK, mountResponse, req)
+		writeJSONResponse(w, StatusOK, mountResponse)
 	}
 }
 
@@ -272,25 +272,25 @@ func newUnmountHandler(logger lager.Logger, client voldriver.Driver) http.Handle
 		body, err := ioutil.ReadAll(req.Body)
 		if err != nil {
 			logger.Error("failed-reading-unmount-request-body", err)
-			writeJSONResponse(w, StatusInternalServerError, voldriver.ErrorResponse{Err: err.Error()}, req)
+			writeJSONResponse(w, StatusInternalServerError, voldriver.ErrorResponse{Err: err.Error()})
 			return
 		}
 
 		var unmountRequest voldriver.UnmountRequest
 		if err = json.Unmarshal(body, &unmountRequest); err != nil {
 			logger.Error("failed-unmarshalling-unmount-request-body", err)
-			writeJSONResponse(w, StatusInternalServerError, voldriver.ErrorResponse{Err: err.Error()}, req)
+			writeJSONResponse(w, StatusInternalServerError, voldriver.ErrorResponse{Err: err.Error()})
 			return
 		}
 
 		unmountResponse := client.Unmount(EnvWithMonitor(logger, req.Context(), w), unmountRequest)
 		if unmountResponse.Err != "" {
 			logger.Error("failed-unmount-volume", errors.New(unmountResponse.Err), lager.Data{"volume": unmountRequest.Name})
-			writeJSONResponse(w, StatusInternalServerError, unmountResponse, req)
+			writeJSONResponse(w, StatusInternalServerError, unmountResponse)
 			return
 		}
 
-		writeJSONResponse(w, StatusOK, unmountResponse, req)
+		writeJSONResponse(w, StatusOK, unmountResponse)
 	}
 }
 
@@ -303,34 +303,29 @@ func newRemoveHandler(logger lager.Logger, client voldriver.Driver) http.Handler
 		body, err := ioutil.ReadAll(req.Body)
 		if err != nil {
 			logger.Error("failed-reading-remove-request-body", err)
-			writeJSONResponse(w, StatusInternalServerError, voldriver.ErrorResponse{Err: err.Error()}, req)
+			writeJSONResponse(w, StatusInternalServerError, voldriver.ErrorResponse{Err: err.Error()})
 			return
 		}
 
 		var removeRequest voldriver.RemoveRequest
 		if err = json.Unmarshal(body, &removeRequest); err != nil {
 			logger.Error("failed-unmarshalling-unmount-request-body", err)
-			writeJSONResponse(w, StatusInternalServerError, voldriver.ErrorResponse{Err: err.Error()}, req)
+			writeJSONResponse(w, StatusInternalServerError, voldriver.ErrorResponse{Err: err.Error()})
 			return
 		}
 
 		removeResponse := client.Remove(EnvWithMonitor(logger, req.Context(), w), removeRequest)
 		if removeResponse.Err != "" {
 			logger.Error("failed-remove-volume", errors.New(removeResponse.Err))
-			writeJSONResponse(w, StatusInternalServerError, removeResponse, req)
+			writeJSONResponse(w, StatusInternalServerError, removeResponse)
 			return
 		}
 
-		writeJSONResponse(w, StatusOK, removeResponse, req)
+		writeJSONResponse(w, StatusOK, removeResponse)
 	}
 }
 
-func writeJSONResponse(w http.ResponseWriter, statusCode int, jsonObj interface{}, req *http.Request) {
-	// We'd like to request connection close for tcp/http connections, but that causes problems for unix
-	// sockets.  For Unix connections, there's no remote address, so we are programming by side effect
-	// here, and swtiching off of that in the absence of a better way to know the transport. :-(
-	if req.RemoteAddr != "" {
-		w.Header().Set("Connection", "close")
-	}
+func writeJSONResponse(w http.ResponseWriter, statusCode int, jsonObj interface{}) {
+	w.Header().Set("Connection", "close")
 	cf_http_handlers.WriteJSONResponse(w, statusCode, jsonObj)
 }
