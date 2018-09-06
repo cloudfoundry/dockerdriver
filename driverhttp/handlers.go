@@ -329,7 +329,7 @@ func writeJSONResponse(w http.ResponseWriter, statusCode int, jsonObj interface{
 	// We'd like to request connection close for tcp/http connections, but that causes problems for unix
 	// sockets.  For Unix connections, there's no remote address, so we are programming by side effect
 	// here, and swtiching off of that in the absence of a better way to know the transport. :-(
-	if req.RemoteAddr != "" && req.RemoteAddr != "@" {
+	if req.RemoteAddr != "" {
 		w.Header().Set("Connection", "close")
 	}
 	cf_http_handlers.WriteJSONResponse(w, statusCode, jsonObj)
