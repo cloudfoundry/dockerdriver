@@ -147,7 +147,8 @@ type TLSConfig struct {
 }
 
 type DriverSpec struct {
-	Name      string     `json:"Name"`
-	Address   string     `json:"Addr"`
-	TLSConfig *TLSConfig `json:"TLSConfig"`
+	Name            string     `json:"Name"`
+	Address         string     `json:"Addr"`
+	TLSConfig       *TLSConfig `json:"TLSConfig"`
+	UniqueVolumeIds bool       `json:"UniqueVolumeIds"`
 }
