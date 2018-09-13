@@ -78,9 +78,10 @@ func ReadDriverSpec(logger lager.Logger, specName string, driverPath string, spe
 				return nil, err
 			}
 			driverSpec = DriverSpec{
-				Name:      specName,
-				Address:   driverJsonSpec.Address,
-				TLSConfig: driverJsonSpec.TLSConfig,
+				Name:            specName,
+				Address:         driverJsonSpec.Address,
+				TLSConfig:       driverJsonSpec.TLSConfig,
+				UniqueVolumeIds: driverJsonSpec.UniqueVolumeIds,
 			}
 		default:
 			err := fmt.Errorf("unknown-driver-extension: %s", extension)
