@@ -1,15 +1,17 @@
 package backoff_test
 
 import (
-	"code.cloudfoundry.org/clock/fakeclock"
-	"code.cloudfoundry.org/voldriver/backoff"
 	"context"
 	"errors"
 	"time"
 
+	"code.cloudfoundry.org/clock/fakeclock"
+	"code.cloudfoundry.org/voldriver/backoff"
+
+	"sync"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"sync"
 )
 
 var _ = Describe("Backoff", func() {
@@ -132,12 +134,11 @@ var _ = Describe("Backoff", func() {
 
 	Context("when operation fails and then succeeds", func() {
 		var (
-			count     int
-			canceller func()
+			count int
 		)
 
 		BeforeEach(func() {
-			ctx, canceller = context.WithDeadline(ctx, now.Add(30*time.Second))
+			ctx, _ = context.WithDeadline(ctx, now.Add(30*time.Second))
 
 			op = func(context.Context) error {
 				count++
