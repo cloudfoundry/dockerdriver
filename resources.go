@@ -130,12 +130,12 @@ type CapabilityInfo struct {
 	Scope string
 }
 
-type Error struct {
-	Description string `json:"description"`
+type SafeError struct {
+	SafeDescription string `json:"SafeDescription"`
 }
 
-func (e Error) Error() string {
-	return e.Description
+func (s SafeError) Error() string {
+	return s.SafeDescription
 }
 
 type TLSConfig struct {
