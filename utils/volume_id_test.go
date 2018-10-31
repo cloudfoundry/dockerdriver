@@ -4,7 +4,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"code.cloudfoundry.org/voldriver/utils"
+	"code.cloudfoundry.org/dockerdriver/utils"
 )
 
 var _ = Describe("Utils/VolumeId", func() {

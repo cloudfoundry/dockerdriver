@@ -1,13 +1,13 @@
 package driverhttp
 
 import (
-	"code.cloudfoundry.org/voldriver"
+	"code.cloudfoundry.org/dockerdriver"
 )
 
-//go:generate counterfeiter -o ../voldriverfakes/fake_remote_client_factory.go . RemoteClientFactory
+//go:generate counterfeiter -o ../dockerdriverfakes/fake_remote_client_factory.go . RemoteClientFactory
 
 type RemoteClientFactory interface {
-	NewRemoteClient(url string, tls *voldriver.TLSConfig) (voldriver.Driver, error)
+	NewRemoteClient(url string, tls *dockerdriver.TLSConfig) (dockerdriver.Driver, error)
 }
 
 func NewRemoteClientFactory() RemoteClientFactory {
@@ -16,6 +16,6 @@ func NewRemoteClientFactory() RemoteClientFactory {
 
 type remoteClientFactory struct{}
 
-func (_ *remoteClientFactory) NewRemoteClient(url string, tls *voldriver.TLSConfig) (voldriver.Driver, error) {
+func (_ *remoteClientFactory) NewRemoteClient(url string, tls *dockerdriver.TLSConfig) (dockerdriver.Driver, error) {
 	return NewRemoteClient(url, tls)
 }

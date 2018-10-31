@@ -9,10 +9,10 @@ import (
 
 	"fmt"
 
+	"code.cloudfoundry.org/dockerdriver"
+	"code.cloudfoundry.org/dockerdriver/dockerdriverfakes"
+	"code.cloudfoundry.org/dockerdriver/driverhttp"
 	"code.cloudfoundry.org/lager/lagertest"
-	"code.cloudfoundry.org/voldriver"
-	"code.cloudfoundry.org/voldriver/driverhttp"
-	"code.cloudfoundry.org/voldriver/voldriverfakes"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"sync"
@@ -32,12 +32,12 @@ func (rcn *RecordingCloseNotifier) SimulateClientCancel() {
 	rcn.cn <- true
 }
 
-var _ = Describe("Volman Driver Handlers", func() {
+var _ = Describe("Docker Driver Handlers", func() {
 
 	var testLogger = lagertest.NewTestLogger("HandlersTest")
 
-	var ErrorResponse = func(res *RecordingCloseNotifier) voldriver.ErrorResponse {
-		response := voldriver.ErrorResponse{}
+	var ErrorResponse = func(res *RecordingCloseNotifier) dockerdriver.ErrorResponse {
+		response := dockerdriver.ErrorResponse{}
 
 		body, err := ioutil.ReadAll(res.Body)
 		Expect(err).ToNot(HaveOccurred())
@@ -53,14 +53,14 @@ var _ = Describe("Volman Driver Handlers", func() {
 			err    error
 			req    *http.Request
 			res    *RecordingCloseNotifier
-			driver *voldriverfakes.FakeDriver
+			driver *dockerdriverfakes.FakeDriver
 			wg     sync.WaitGroup
 
 			subject http.Handler
 		)
 
 		BeforeEach(func() {
-			driver = &voldriverfakes.FakeDriver{}
+			driver = &dockerdriverfakes.FakeDriver{}
 
 			subject, err = driverhttp.NewHandler(testLogger, driver)
 			Expect(err).NotTo(HaveOccurred())
@@ -70,7 +70,7 @@ var _ = Describe("Volman Driver Handlers", func() {
 				cn:               make(chan bool, 1),
 			}
 
-			route, found := voldriver.Routes.FindRouteByName(voldriver.ActivateRoute)
+			route, found := dockerdriver.Routes.FindRouteByName(dockerdriver.ActivateRoute)
 			Expect(found).To(BeTrue())
 
 			path := fmt.Sprintf("http://0.0.0.0%s", route.Path)
@@ -80,7 +80,7 @@ var _ = Describe("Volman Driver Handlers", func() {
 
 		Context("when activate is successful", func() {
 			JustBeforeEach(func() {
-				driver.ActivateReturns(voldriver.ActivateResponse{Implements: []string{"VolumeDriver"}})
+				driver.ActivateReturns(dockerdriver.ActivateResponse{Implements: []string{"VolumeDriver"}})
 
 				wg.Add(1)
 
@@ -96,7 +96,7 @@ var _ = Describe("Volman Driver Handlers", func() {
 
 				Expect(res.Code).To(Equal(200))
 
-				activateResponse := voldriver.ActivateResponse{}
+				activateResponse := dockerdriver.ActivateResponse{}
 
 				body, err := ioutil.ReadAll(res.Body)
 				Expect(err).ToNot(HaveOccurred())
@@ -110,7 +110,7 @@ var _ = Describe("Volman Driver Handlers", func() {
 
 		Context("when activate hangs and the client closes the connection", func() {
 			JustBeforeEach(func() {
-				driver.ActivateStub = func(env voldriver.Env) voldriver.ActivateResponse {
+				driver.ActivateStub = func(env dockerdriver.Env) dockerdriver.ActivateResponse {
 					ctx := env.Context()
 					logger := env.Logger()
 					for true {
@@ -119,10 +119,10 @@ var _ = Describe("Volman Driver Handlers", func() {
 						select {
 						case <-ctx.Done():
 							logger.Error("from-ctx", ctx.Err())
-							return voldriver.ActivateResponse{Err: ctx.Err().Error()}
+							return dockerdriver.ActivateResponse{Err: ctx.Err().Error()}
 						}
 					}
-					return voldriver.ActivateResponse{}
+					return dockerdriver.ActivateResponse{}
 				}
 				wg.Add(2)
 
@@ -142,7 +142,7 @@ var _ = Describe("Volman Driver Handlers", func() {
 
 				Expect(res.Code).To(Equal(200))
 
-				activateResponse := voldriver.ActivateResponse{}
+				activateResponse := dockerdriver.ActivateResponse{}
 
 				body, err := ioutil.ReadAll(res.Body)
 				Expect(err).ToNot(HaveOccurred())
@@ -160,14 +160,14 @@ var _ = Describe("Volman Driver Handlers", func() {
 			err    error
 			req    *http.Request
 			res    *RecordingCloseNotifier
-			driver *voldriverfakes.FakeDriver
+			driver *dockerdriverfakes.FakeDriver
 			wg     sync.WaitGroup
 
 			subject http.Handler
 		)
 
 		BeforeEach(func() {
-			driver = &voldriverfakes.FakeDriver{}
+			driver = &dockerdriverfakes.FakeDriver{}
 
 			subject, err = driverhttp.NewHandler(testLogger, driver)
 			Expect(err).NotTo(HaveOccurred())
@@ -177,7 +177,7 @@ var _ = Describe("Volman Driver Handlers", func() {
 				cn:               make(chan bool, 1),
 			}
 
-			route, found := voldriver.Routes.FindRouteByName(voldriver.ListRoute)
+			route, found := dockerdriver.Routes.FindRouteByName(dockerdriver.ListRoute)
 			Expect(found).To(BeTrue())
 
 			path := fmt.Sprintf("http://0.0.0.0%s", route.Path)
@@ -188,12 +188,12 @@ var _ = Describe("Volman Driver Handlers", func() {
 
 		Context("when list is successful", func() {
 			JustBeforeEach(func() {
-				volume := voldriver.VolumeInfo{
+				volume := dockerdriver.VolumeInfo{
 					Name:       "fake-volume",
 					Mountpoint: "fake-mountpoint",
 				}
-				listResponse := voldriver.ListResponse{
-					Volumes: []voldriver.VolumeInfo{volume},
+				listResponse := dockerdriver.ListResponse{
+					Volumes: []dockerdriver.VolumeInfo{volume},
 					Err:     "",
 				}
 
@@ -212,7 +212,7 @@ var _ = Describe("Volman Driver Handlers", func() {
 
 				Expect(res.Code).To(Equal(200))
 
-				listResponse := voldriver.ListResponse{}
+				listResponse := dockerdriver.ListResponse{}
 
 				body, err := ioutil.ReadAll(res.Body)
 				Expect(err).ToNot(HaveOccurred())
@@ -227,7 +227,7 @@ var _ = Describe("Volman Driver Handlers", func() {
 
 		Context("when the list hangs and the client closes the connection", func() {
 			JustBeforeEach(func() {
-				driver.ListStub = func(env voldriver.Env) voldriver.ListResponse {
+				driver.ListStub = func(env dockerdriver.Env) dockerdriver.ListResponse {
 					ctx := env.Context()
 					logger := env.Logger()
 					for true {
@@ -236,10 +236,10 @@ var _ = Describe("Volman Driver Handlers", func() {
 						select {
 						case <-ctx.Done():
 							logger.Error("from-ctx", ctx.Err())
-							return voldriver.ListResponse{Err: ctx.Err().Error()}
+							return dockerdriver.ListResponse{Err: ctx.Err().Error()}
 						}
 					}
-					return voldriver.ListResponse{}
+					return dockerdriver.ListResponse{}
 				}
 				wg.Add(2)
 
@@ -259,7 +259,7 @@ var _ = Describe("Volman Driver Handlers", func() {
 
 				Expect(res.Code).To(Equal(200))
 
-				listResponse := voldriver.ListResponse{}
+				listResponse := dockerdriver.ListResponse{}
 
 				body, err := ioutil.ReadAll(res.Body)
 				Expect(err).ToNot(HaveOccurred())
@@ -277,14 +277,14 @@ var _ = Describe("Volman Driver Handlers", func() {
 			err    error
 			req    *http.Request
 			res    *RecordingCloseNotifier
-			driver *voldriverfakes.FakeDriver
+			driver *dockerdriverfakes.FakeDriver
 			wg     sync.WaitGroup
 
 			subject http.Handler
 		)
 
-		var ExpectMountPointToEqual = func(value string) voldriver.MountResponse {
-			mountResponse := voldriver.MountResponse{}
+		var ExpectMountPointToEqual = func(value string) dockerdriver.MountResponse {
+			mountResponse := dockerdriver.MountResponse{}
 			body, err := ioutil.ReadAll(res.Body)
 
 			err = json.Unmarshal(body, &mountResponse)
@@ -295,7 +295,7 @@ var _ = Describe("Volman Driver Handlers", func() {
 		}
 
 		BeforeEach(func() {
-			driver = &voldriverfakes.FakeDriver{}
+			driver = &dockerdriverfakes.FakeDriver{}
 
 			subject, err = driverhttp.NewHandler(testLogger, driver)
 			Expect(err).NotTo(HaveOccurred())
@@ -305,12 +305,12 @@ var _ = Describe("Volman Driver Handlers", func() {
 				cn:               make(chan bool, 1),
 			}
 
-			route, found := voldriver.Routes.FindRouteByName(voldriver.MountRoute)
+			route, found := dockerdriver.Routes.FindRouteByName(dockerdriver.MountRoute)
 			Expect(found).To(BeTrue())
 
 			path := fmt.Sprintf("http://0.0.0.0%s", route.Path)
 
-			MountRequest := voldriver.MountRequest{
+			MountRequest := dockerdriver.MountRequest{
 				Name: "some-volume",
 			}
 			mountJSONRequest, err := json.Marshal(MountRequest)
@@ -323,7 +323,7 @@ var _ = Describe("Volman Driver Handlers", func() {
 		Context("when mount is successful", func() {
 
 			JustBeforeEach(func() {
-				driver.MountReturns(voldriver.MountResponse{Mountpoint: "dummy_path"})
+				driver.MountReturns(dockerdriver.MountResponse{Mountpoint: "dummy_path"})
 
 				wg.Add(1)
 
@@ -345,7 +345,7 @@ var _ = Describe("Volman Driver Handlers", func() {
 
 		Context("when the mount hangs and the client closes the connection", func() {
 			JustBeforeEach(func() {
-				driver.MountStub = func(env voldriver.Env, mountRequest voldriver.MountRequest) voldriver.MountResponse {
+				driver.MountStub = func(env dockerdriver.Env, mountRequest dockerdriver.MountRequest) dockerdriver.MountResponse {
 					ctx := env.Context()
 					logger := env.Logger()
 					for true {
@@ -354,10 +354,10 @@ var _ = Describe("Volman Driver Handlers", func() {
 						select {
 						case <-ctx.Done():
 							logger.Error("from-ctx", ctx.Err())
-							return voldriver.MountResponse{Err: ctx.Err().Error()}
+							return dockerdriver.MountResponse{Err: ctx.Err().Error()}
 						}
 					}
-					return voldriver.MountResponse{}
+					return dockerdriver.MountResponse{}
 				}
 				wg.Add(2)
 
@@ -388,19 +388,19 @@ var _ = Describe("Volman Driver Handlers", func() {
 			err    error
 			req    *http.Request
 			res    *RecordingCloseNotifier
-			driver *voldriverfakes.FakeDriver
+			driver *dockerdriverfakes.FakeDriver
 			wg     sync.WaitGroup
 
 			subject http.Handler
 		)
 
 		BeforeEach(func() {
-			driver = &voldriverfakes.FakeDriver{}
+			driver = &dockerdriverfakes.FakeDriver{}
 
 			subject, err = driverhttp.NewHandler(testLogger, driver)
 			Expect(err).NotTo(HaveOccurred())
 
-			unmountRequest := voldriver.UnmountRequest{}
+			unmountRequest := dockerdriver.UnmountRequest{}
 			unmountJSONRequest, err := json.Marshal(unmountRequest)
 			Expect(err).NotTo(HaveOccurred())
 
@@ -409,7 +409,7 @@ var _ = Describe("Volman Driver Handlers", func() {
 				cn:               make(chan bool, 1),
 			}
 
-			route, found := voldriver.Routes.FindRouteByName(voldriver.UnmountRoute)
+			route, found := dockerdriver.Routes.FindRouteByName(dockerdriver.UnmountRoute)
 			Expect(found).To(BeTrue())
 
 			path := fmt.Sprintf("http://0.0.0.0%s", route.Path)
@@ -419,7 +419,7 @@ var _ = Describe("Volman Driver Handlers", func() {
 
 		Context("when unmount is successful", func() {
 			JustBeforeEach(func() {
-				driver.UnmountReturns(voldriver.ErrorResponse{})
+				driver.UnmountReturns(dockerdriver.ErrorResponse{})
 
 				wg.Add(1)
 
@@ -438,7 +438,7 @@ var _ = Describe("Volman Driver Handlers", func() {
 
 		Context("when the unmount hangs and the client closes the connection", func() {
 			JustBeforeEach(func() {
-				driver.UnmountStub = func(env voldriver.Env, unmountRequest voldriver.UnmountRequest) voldriver.ErrorResponse {
+				driver.UnmountStub = func(env dockerdriver.Env, unmountRequest dockerdriver.UnmountRequest) dockerdriver.ErrorResponse {
 					ctx := env.Context()
 					logger := env.Logger()
 					for true {
@@ -447,10 +447,10 @@ var _ = Describe("Volman Driver Handlers", func() {
 						select {
 						case <-ctx.Done():
 							logger.Error("from-ctx", ctx.Err())
-							return voldriver.ErrorResponse{Err: ctx.Err().Error()}
+							return dockerdriver.ErrorResponse{Err: ctx.Err().Error()}
 						}
 					}
-					return voldriver.ErrorResponse{}
+					return dockerdriver.ErrorResponse{}
 				}
 				wg.Add(2)
 
@@ -481,14 +481,14 @@ var _ = Describe("Volman Driver Handlers", func() {
 			err    error
 			req    *http.Request
 			res    *RecordingCloseNotifier
-			driver *voldriverfakes.FakeDriver
+			driver *dockerdriverfakes.FakeDriver
 			wg     sync.WaitGroup
 
 			subject http.Handler
 		)
 
 		BeforeEach(func() {
-			driver = &voldriverfakes.FakeDriver{}
+			driver = &dockerdriverfakes.FakeDriver{}
 
 			subject, err = driverhttp.NewHandler(testLogger, driver)
 			Expect(err).NotTo(HaveOccurred())
@@ -498,12 +498,12 @@ var _ = Describe("Volman Driver Handlers", func() {
 				cn:               make(chan bool, 1),
 			}
 
-			getRequest := voldriver.GetRequest{}
+			getRequest := dockerdriver.GetRequest{}
 			getJSONRequest, err := json.Marshal(getRequest)
 			Expect(err).NotTo(HaveOccurred())
 
 			By("then fake serving the response using the handler")
-			route, found := voldriver.Routes.FindRouteByName(voldriver.GetRoute)
+			route, found := dockerdriver.Routes.FindRouteByName(dockerdriver.GetRoute)
 			Expect(found).To(BeTrue())
 
 			path := fmt.Sprintf("http://0.0.0.0%s", route.Path)
@@ -513,7 +513,7 @@ var _ = Describe("Volman Driver Handlers", func() {
 
 		Context("when get is successful", func() {
 			JustBeforeEach(func() {
-				driver.GetReturns(voldriver.GetResponse{Volume: voldriver.VolumeInfo{Name: "some-volume", Mountpoint: "dummy_path"}})
+				driver.GetReturns(dockerdriver.GetResponse{Volume: dockerdriver.VolumeInfo{Name: "some-volume", Mountpoint: "dummy_path"}})
 
 				wg.Add(1)
 
@@ -529,7 +529,7 @@ var _ = Describe("Volman Driver Handlers", func() {
 
 				Expect(res.Code).To(Equal(200))
 
-				getResponse := voldriver.GetResponse{}
+				getResponse := dockerdriver.GetResponse{}
 				body, err := ioutil.ReadAll(res.Body)
 				err = json.Unmarshal(body, &getResponse)
 				Expect(err).ToNot(HaveOccurred())
@@ -541,7 +541,7 @@ var _ = Describe("Volman Driver Handlers", func() {
 
 		Context("when the get hangs and the client closes the connection", func() {
 			JustBeforeEach(func() {
-				driver.GetStub = func(env voldriver.Env, getRequest voldriver.GetRequest) voldriver.GetResponse {
+				driver.GetStub = func(env dockerdriver.Env, getRequest dockerdriver.GetRequest) dockerdriver.GetResponse {
 					ctx := env.Context()
 					logger := env.Logger()
 					for true {
@@ -550,10 +550,10 @@ var _ = Describe("Volman Driver Handlers", func() {
 						select {
 						case <-ctx.Done():
 							logger.Error("from-ctx", ctx.Err())
-							return voldriver.GetResponse{Err: ctx.Err().Error()}
+							return dockerdriver.GetResponse{Err: ctx.Err().Error()}
 						}
 					}
-					return voldriver.GetResponse{}
+					return dockerdriver.GetResponse{}
 				}
 				wg.Add(2)
 
@@ -584,14 +584,14 @@ var _ = Describe("Volman Driver Handlers", func() {
 			err    error
 			req    *http.Request
 			res    *RecordingCloseNotifier
-			driver *voldriverfakes.FakeDriver
+			driver *dockerdriverfakes.FakeDriver
 			wg     sync.WaitGroup
 
 			subject http.Handler
 		)
 
 		BeforeEach(func() {
-			driver = &voldriverfakes.FakeDriver{}
+			driver = &dockerdriverfakes.FakeDriver{}
 
 			subject, err = driverhttp.NewHandler(testLogger, driver)
 			Expect(err).NotTo(HaveOccurred())
@@ -601,11 +601,11 @@ var _ = Describe("Volman Driver Handlers", func() {
 				cn:               make(chan bool, 1),
 			}
 
-			pathRequest := voldriver.PathRequest{Name: "some-volume"}
+			pathRequest := dockerdriver.PathRequest{Name: "some-volume"}
 			pathJSONRequest, err := json.Marshal(pathRequest)
 			Expect(err).NotTo(HaveOccurred())
 
-			route, found := voldriver.Routes.FindRouteByName(voldriver.PathRoute)
+			route, found := dockerdriver.Routes.FindRouteByName(dockerdriver.PathRoute)
 			Expect(found).To(BeTrue())
 
 			path := fmt.Sprintf("http://0.0.0.0%s", route.Path)
@@ -615,7 +615,7 @@ var _ = Describe("Volman Driver Handlers", func() {
 
 		Context("when path is successful", func() {
 			JustBeforeEach(func() {
-				driver.PathReturns(voldriver.PathResponse{
+				driver.PathReturns(dockerdriver.PathResponse{
 					Mountpoint: "/some/mountpoint",
 				})
 
@@ -633,7 +633,7 @@ var _ = Describe("Volman Driver Handlers", func() {
 
 				Expect(res.Code).To(Equal(200))
 
-				pathResponse := voldriver.PathResponse{}
+				pathResponse := dockerdriver.PathResponse{}
 				body, err := ioutil.ReadAll(res.Body)
 				err = json.Unmarshal(body, &pathResponse)
 				Expect(err).ToNot(HaveOccurred())
@@ -644,7 +644,7 @@ var _ = Describe("Volman Driver Handlers", func() {
 
 		Context("when the path hangs and the client closes the connection", func() {
 			JustBeforeEach(func() {
-				driver.PathStub = func(env voldriver.Env, pathRequest voldriver.PathRequest) voldriver.PathResponse {
+				driver.PathStub = func(env dockerdriver.Env, pathRequest dockerdriver.PathRequest) dockerdriver.PathResponse {
 					ctx := env.Context()
 					logger := env.Logger()
 					for true {
@@ -653,10 +653,10 @@ var _ = Describe("Volman Driver Handlers", func() {
 						select {
 						case <-ctx.Done():
 							logger.Error("from-ctx", ctx.Err())
-							return voldriver.PathResponse{Err: ctx.Err().Error()}
+							return dockerdriver.PathResponse{Err: ctx.Err().Error()}
 						}
 					}
-					return voldriver.PathResponse{}
+					return dockerdriver.PathResponse{}
 				}
 				wg.Add(2)
 
@@ -687,14 +687,14 @@ var _ = Describe("Volman Driver Handlers", func() {
 			err    error
 			req    *http.Request
 			res    *RecordingCloseNotifier
-			driver *voldriverfakes.FakeDriver
+			driver *dockerdriverfakes.FakeDriver
 			wg     sync.WaitGroup
 
 			subject http.Handler
 		)
 
 		BeforeEach(func() {
-			driver = &voldriverfakes.FakeDriver{}
+			driver = &dockerdriverfakes.FakeDriver{}
 
 			subject, err = driverhttp.NewHandler(testLogger, driver)
 			Expect(err).NotTo(HaveOccurred())
@@ -704,11 +704,11 @@ var _ = Describe("Volman Driver Handlers", func() {
 				cn:               make(chan bool, 1),
 			}
 
-			createRequest := voldriver.CreateRequest{Name: "some-volume"}
+			createRequest := dockerdriver.CreateRequest{Name: "some-volume"}
 			createJSONRequest, err := json.Marshal(createRequest)
 			Expect(err).NotTo(HaveOccurred())
 
-			route, found := voldriver.Routes.FindRouteByName(voldriver.CreateRoute)
+			route, found := dockerdriver.Routes.FindRouteByName(dockerdriver.CreateRoute)
 			Expect(found).To(BeTrue())
 
 			path := fmt.Sprintf("http://0.0.0.0%s", route.Path)
@@ -718,7 +718,7 @@ var _ = Describe("Volman Driver Handlers", func() {
 
 		Context("when create is successful", func() {
 			JustBeforeEach(func() {
-				driver.CreateReturns(voldriver.ErrorResponse{})
+				driver.CreateReturns(dockerdriver.ErrorResponse{})
 
 				wg.Add(1)
 
@@ -741,7 +741,7 @@ var _ = Describe("Volman Driver Handlers", func() {
 
 		Context("when the create hangs and the client closes the connection", func() {
 			JustBeforeEach(func() {
-				driver.CreateStub = func(env voldriver.Env, createRequest voldriver.CreateRequest) voldriver.ErrorResponse {
+				driver.CreateStub = func(env dockerdriver.Env, createRequest dockerdriver.CreateRequest) dockerdriver.ErrorResponse {
 					ctx := env.Context()
 					logger := env.Logger()
 					for true {
@@ -750,10 +750,10 @@ var _ = Describe("Volman Driver Handlers", func() {
 						select {
 						case <-ctx.Done():
 							logger.Error("from-ctx", ctx.Err())
-							return voldriver.ErrorResponse{Err: ctx.Err().Error()}
+							return dockerdriver.ErrorResponse{Err: ctx.Err().Error()}
 						}
 					}
-					return voldriver.ErrorResponse{}
+					return dockerdriver.ErrorResponse{}
 				}
 				wg.Add(2)
 
@@ -784,14 +784,14 @@ var _ = Describe("Volman Driver Handlers", func() {
 			err    error
 			req    *http.Request
 			res    *RecordingCloseNotifier
-			driver *voldriverfakes.FakeDriver
+			driver *dockerdriverfakes.FakeDriver
 			wg     sync.WaitGroup
 
 			subject http.Handler
 		)
 
 		BeforeEach(func() {
-			driver = &voldriverfakes.FakeDriver{}
+			driver = &dockerdriverfakes.FakeDriver{}
 
 			subject, err = driverhttp.NewHandler(testLogger, driver)
 			Expect(err).NotTo(HaveOccurred())
@@ -801,11 +801,11 @@ var _ = Describe("Volman Driver Handlers", func() {
 				cn:               make(chan bool, 1),
 			}
 
-			removeRequest := voldriver.RemoveRequest{Name: "some-volume"}
+			removeRequest := dockerdriver.RemoveRequest{Name: "some-volume"}
 			removeJSONRequest, err := json.Marshal(removeRequest)
 			Expect(err).NotTo(HaveOccurred())
 
-			route, found := voldriver.Routes.FindRouteByName(voldriver.RemoveRoute)
+			route, found := dockerdriver.Routes.FindRouteByName(dockerdriver.RemoveRoute)
 			Expect(found).To(BeTrue())
 
 			path := fmt.Sprintf("http://0.0.0.0%s", route.Path)
@@ -815,7 +815,7 @@ var _ = Describe("Volman Driver Handlers", func() {
 
 		Context("when remove is successful", func() {
 			JustBeforeEach(func() {
-				driver.RemoveReturns(voldriver.ErrorResponse{})
+				driver.RemoveReturns(dockerdriver.ErrorResponse{})
 
 				wg.Add(1)
 
@@ -838,7 +838,7 @@ var _ = Describe("Volman Driver Handlers", func() {
 
 		Context("when the remove hangs and the client closes the connection", func() {
 			JustBeforeEach(func() {
-				driver.RemoveStub = func(env voldriver.Env, removeRequest voldriver.RemoveRequest) voldriver.ErrorResponse {
+				driver.RemoveStub = func(env dockerdriver.Env, removeRequest dockerdriver.RemoveRequest) dockerdriver.ErrorResponse {
 					ctx := env.Context()
 					logger := env.Logger()
 					for true {
@@ -847,10 +847,10 @@ var _ = Describe("Volman Driver Handlers", func() {
 						select {
 						case <-ctx.Done():
 							logger.Error("from-ctx", ctx.Err())
-							return voldriver.ErrorResponse{Err: ctx.Err().Error()}
+							return dockerdriver.ErrorResponse{Err: ctx.Err().Error()}
 						}
 					}
-					return voldriver.ErrorResponse{}
+					return dockerdriver.ErrorResponse{}
 				}
 				wg.Add(2)
 
@@ -881,14 +881,14 @@ var _ = Describe("Volman Driver Handlers", func() {
 			err    error
 			req    *http.Request
 			res    *RecordingCloseNotifier
-			driver *voldriverfakes.FakeDriver
+			driver *dockerdriverfakes.FakeDriver
 			wg     sync.WaitGroup
 
 			subject http.Handler
 		)
 
 		BeforeEach(func() {
-			driver = &voldriverfakes.FakeDriver{}
+			driver = &dockerdriverfakes.FakeDriver{}
 
 			subject, err = driverhttp.NewHandler(testLogger, driver)
 			Expect(err).NotTo(HaveOccurred())
@@ -898,7 +898,7 @@ var _ = Describe("Volman Driver Handlers", func() {
 				cn:               make(chan bool, 1),
 			}
 
-			route, found := voldriver.Routes.FindRouteByName(voldriver.CapabilitiesRoute)
+			route, found := dockerdriver.Routes.FindRouteByName(dockerdriver.CapabilitiesRoute)
 			Expect(found).To(BeTrue())
 
 			path := fmt.Sprintf("http://0.0.0.0%s", route.Path)
@@ -908,7 +908,7 @@ var _ = Describe("Volman Driver Handlers", func() {
 
 		Context("when capabilities is successful", func() {
 			JustBeforeEach(func() {
-				driver.CapabilitiesReturns(voldriver.CapabilitiesResponse{Capabilities: voldriver.CapabilityInfo{Scope: "global"}})
+				driver.CapabilitiesReturns(dockerdriver.CapabilitiesResponse{Capabilities: dockerdriver.CapabilityInfo{Scope: "global"}})
 
 				wg.Add(1)
 
@@ -924,12 +924,12 @@ var _ = Describe("Volman Driver Handlers", func() {
 
 				Expect(res.Code).To(Equal(200))
 
-				capabilitiesResponse := voldriver.CapabilitiesResponse{}
+				capabilitiesResponse := dockerdriver.CapabilitiesResponse{}
 				body, err := ioutil.ReadAll(res.Body)
 				err = json.Unmarshal(body, &capabilitiesResponse)
 				Expect(err).ToNot(HaveOccurred())
 
-				Expect(capabilitiesResponse.Capabilities).Should(Equal(voldriver.CapabilityInfo{Scope: "global"}))
+				Expect(capabilitiesResponse.Capabilities).Should(Equal(dockerdriver.CapabilityInfo{Scope: "global"}))
 			})
 		})
 	})

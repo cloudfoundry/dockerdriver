@@ -17,11 +17,11 @@ import (
 
 	"context"
 
+	"code.cloudfoundry.org/dockerdriver"
+	"code.cloudfoundry.org/dockerdriver/driverhttp"
 	"code.cloudfoundry.org/goshims/http_wrap/http_fake"
 	"code.cloudfoundry.org/lager"
 	"code.cloudfoundry.org/lager/lagertest"
-	"code.cloudfoundry.org/voldriver"
-	"code.cloudfoundry.org/voldriver/driverhttp"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/tedsuo/ifrit"
@@ -33,9 +33,9 @@ var _ = Describe("RemoteClient", func() {
 	var (
 		testLogger                lager.Logger
 		ctx                       context.Context
-		env                       voldriver.Env
+		env                       dockerdriver.Env
 		httpClient                *http_fake.FakeClient
-		driver                    voldriver.Driver
+		driver                    dockerdriver.Driver
 		validHttpMountResponse    *http.Response
 		validHttpPathResponse     *http.Response
 		validHttpActivateResponse *http.Response
@@ -85,7 +85,7 @@ var _ = Describe("RemoteClient", func() {
 		It("should not be able to mount", func() {
 
 			volumeId := "fake-volume"
-			mountResponse := driver.Mount(env, voldriver.MountRequest{Name: volumeId})
+			mountResponse := driver.Mount(env, dockerdriver.MountRequest{Name: volumeId})
 
 			By("signaling an error")
 			Expect(mountResponse.Err).To(Equal("some error string"))
@@ -95,7 +95,7 @@ var _ = Describe("RemoteClient", func() {
 		It("should not be able to unmount", func() {
 
 			volumeId := "fake-volume"
-			unmountResponse := driver.Unmount(env, voldriver.UnmountRequest{Name: volumeId})
+			unmountResponse := driver.Unmount(env, dockerdriver.UnmountRequest{Name: volumeId})
 
 			By("signaling an error")
 			Expect(unmountResponse.Err).To(Equal("some error string"))
@@ -109,11 +109,11 @@ var _ = Describe("RemoteClient", func() {
 		Context("when match is called to check for driver reuse", func() {
 			var (
 				ret       bool
-				matchable voldriver.MatchableDriver
+				matchable dockerdriver.MatchableDriver
 			)
 
 			BeforeEach(func() {
-				matchable, ret = driver.(voldriver.MatchableDriver)
+				matchable, ret = driver.(dockerdriver.MatchableDriver)
 				Expect(ret).To(BeTrue())
 			})
 
@@ -128,7 +128,7 @@ var _ = Describe("RemoteClient", func() {
 
 			Context("when stuff doesn't match", func() {
 				BeforeEach(func() {
-					ret = matchable.Matches(testLogger, "", &voldriver.TLSConfig{InsecureSkipVerify: true, CAFile: "foo", CertFile: "foo", KeyFile: "foo"})
+					ret = matchable.Matches(testLogger, "", &dockerdriver.TLSConfig{InsecureSkipVerify: true, CAFile: "foo", CertFile: "foo", KeyFile: "foo"})
 				})
 				It("should not match", func() {
 					Expect(ret).To(BeFalse())
@@ -139,7 +139,7 @@ var _ = Describe("RemoteClient", func() {
 		It("should be able to mount", func() {
 			httpClient.DoReturns(validHttpMountResponse, nil)
 
-			mountResponse := driver.Mount(env, voldriver.MountRequest{Name: volumeId})
+			mountResponse := driver.Mount(env, dockerdriver.MountRequest{Name: volumeId})
 
 			By("giving back a path with no error")
 			Expect(mountResponse.Err).To(Equal(""))
@@ -150,7 +150,7 @@ var _ = Describe("RemoteClient", func() {
 			httpClient.DoReturns(validHttpPathResponse, nil)
 
 			volumeId := "fake-volume"
-			pathResponse := driver.Path(env, voldriver.PathRequest{Name: volumeId})
+			pathResponse := driver.Path(env, dockerdriver.PathRequest{Name: volumeId})
 
 			Expect(pathResponse.Err).To(Equal(""))
 			Expect(pathResponse.Mountpoint).To(Equal("somePath"))
@@ -166,7 +166,7 @@ var _ = Describe("RemoteClient", func() {
 			httpClient.DoReturns(validHttpUnmountResponse, nil)
 
 			volumeId := "fake-volume"
-			unmountResponse := driver.Unmount(env, voldriver.UnmountRequest{Name: volumeId})
+			unmountResponse := driver.Unmount(env, dockerdriver.UnmountRequest{Name: volumeId})
 
 			Expect(unmountResponse.Err).To(Equal(""))
 		})
@@ -197,7 +197,7 @@ var _ = Describe("RemoteClient", func() {
 
 		It("should not be able to mount", func() {
 			volumeId := "fake-volume"
-			mountResponse := driver.Mount(env, voldriver.MountRequest{Name: volumeId})
+			mountResponse := driver.Mount(env, dockerdriver.MountRequest{Name: volumeId})
 
 			By("signaling an error")
 			Expect(mountResponse.Err).NotTo(Equal(""))
@@ -214,7 +214,7 @@ var _ = Describe("RemoteClient", func() {
 			httpClient.DoReturns(invalidHttpResponse, nil)
 
 			volumeId := "fake-volume"
-			mountResponse := driver.Mount(env, voldriver.MountRequest{Name: volumeId})
+			mountResponse := driver.Mount(env, dockerdriver.MountRequest{Name: volumeId})
 
 			By("signaling an error")
 			Expect(mountResponse.Err).NotTo(Equal(""))
@@ -224,7 +224,7 @@ var _ = Describe("RemoteClient", func() {
 		It("should not be able to unmount", func() {
 
 			volumeId := "fake-volume"
-			unmountResponse := driver.Unmount(env, voldriver.UnmountRequest{Name: volumeId})
+			unmountResponse := driver.Unmount(env, dockerdriver.UnmountRequest{Name: volumeId})
 
 			Expect(unmountResponse.Err).NotTo(Equal(""))
 		})
@@ -244,7 +244,7 @@ var _ = Describe("RemoteClient", func() {
 			httpClient.DoReturns(nil, fmt.Errorf("connection failed"))
 
 			volumeId := "fake-volume"
-			mountResponse := driver.Mount(env, voldriver.MountRequest{Name: volumeId})
+			mountResponse := driver.Mount(env, dockerdriver.MountRequest{Name: volumeId})
 
 			By("signaling an error")
 			Expect(mountResponse.Err).To(Equal("connection failed"))
@@ -255,7 +255,7 @@ var _ = Describe("RemoteClient", func() {
 			httpClient.DoReturns(nil, fmt.Errorf("connection failed"))
 
 			volumeId := "fake-volume"
-			unmountResponse := driver.Unmount(env, voldriver.UnmountRequest{Name: volumeId})
+			unmountResponse := driver.Unmount(env, dockerdriver.UnmountRequest{Name: volumeId})
 
 			By("signaling an error")
 			Expect(unmountResponse.Err).NotTo(Equal(""))
@@ -271,7 +271,7 @@ var _ = Describe("RemoteClient", func() {
 			httpClient.DoReturns(invalidHttpResponse, nil)
 
 			volumeId := "fake-volume"
-			unmountResponse := driver.Unmount(env, voldriver.UnmountRequest{Name: volumeId})
+			unmountResponse := driver.Unmount(env, dockerdriver.UnmountRequest{Name: volumeId})
 
 			Expect(unmountResponse.Err).NotTo(Equal(""))
 		})
@@ -308,7 +308,7 @@ var _ = Describe("RemoteClient", func() {
 					"-listenAddr", socketPath,
 					"-transport", "unix",
 				),
-				StartCheck: "local-driver-server.started",
+				StartCheck: "localdriver-server.started",
 			})
 
 			httpClient = new(http_fake.FakeClient)
@@ -331,7 +331,7 @@ var _ = Describe("RemoteClient", func() {
 
 		It("should be able to mount", func() {
 			httpClient.DoReturns(validHttpMountResponse, nil)
-			mountResponse := driver.Mount(env, voldriver.MountRequest{Name: volumeId})
+			mountResponse := driver.Mount(env, dockerdriver.MountRequest{Name: volumeId})
 
 			By("returning a mountpoint without errors")
 			Expect(mountResponse.Err).To(Equal(""))
@@ -348,7 +348,7 @@ var _ = Describe("RemoteClient", func() {
 			httpClient.DoReturns(validHttpUnmountResponse, nil)
 
 			volumeId := "fake-volume"
-			unmountResponse := driver.Unmount(env, voldriver.UnmountRequest{Name: volumeId})
+			unmountResponse := driver.Unmount(env, dockerdriver.UnmountRequest{Name: volumeId})
 
 			Expect(unmountResponse.Err).To(Equal(""))
 		})

@@ -22,7 +22,7 @@ var tcpRunner *ginkgomon.Runner
 
 func TestDriver(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Driver Remote Client and Handlers Suite")
+	RunSpecs(t, "Docker Driver Remote Client and Handlers Suite")
 }
 
 var _ = SynchronizedBeforeSuite(func() []byte {

@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 
+	"code.cloudfoundry.org/dockerdriver"
+	"code.cloudfoundry.org/dockerdriver/driverhttp"
 	"code.cloudfoundry.org/goshims/execshim/exec_fake"
 	"code.cloudfoundry.org/lager"
 	"code.cloudfoundry.org/lager/lagertest"
-	"code.cloudfoundry.org/voldriver"
-	"code.cloudfoundry.org/voldriver/driverhttp"
 
-	"code.cloudfoundry.org/voldriver/invoker"
+	"code.cloudfoundry.org/dockerdriver/invoker"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -22,7 +22,7 @@ var _ = Describe("RealInvoker", func() {
 		fakeExec   *exec_fake.FakeExec
 		testLogger lager.Logger
 		testCtx    context.Context
-		testEnv    voldriver.Env
+		testEnv    dockerdriver.Env
 		cmd        = "some-fake-command"
 		args       = []string{"fake-args-1"}
 	)

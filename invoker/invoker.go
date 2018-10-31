@@ -3,15 +3,15 @@ package invoker
 import (
 	"fmt"
 
+	"code.cloudfoundry.org/dockerdriver"
 	"code.cloudfoundry.org/goshims/execshim"
 	"code.cloudfoundry.org/lager"
-	"code.cloudfoundry.org/voldriver"
 )
 
-//go:generate counterfeiter -o ../voldriverfakes/fake_invoker.go . Invoker
+//go:generate counterfeiter -o ../dockerdriverfakes/fake_invoker.go . Invoker
 
 type Invoker interface {
-	Invoke(env voldriver.Env, executable string, args []string) ([]byte, error)
+	Invoke(env dockerdriver.Env, executable string, args []string) ([]byte, error)
 }
 
 type realInvoker struct {
@@ -26,7 +26,7 @@ func NewRealInvokerWithExec(useExec execshim.Exec) Invoker {
 	return &realInvoker{useExec}
 }
 
-func (r *realInvoker) Invoke(env voldriver.Env, executable string, cmdArgs []string) ([]byte, error) {
+func (r *realInvoker) Invoke(env dockerdriver.Env, executable string, cmdArgs []string) ([]byte, error) {
 	logger := env.Logger().Session("invoking-command", lager.Data{"executable": executable, "args": cmdArgs})
 	logger.Info("start")
 	defer logger.Info("end")

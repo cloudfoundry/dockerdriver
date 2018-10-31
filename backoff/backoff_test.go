@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"code.cloudfoundry.org/clock/fakeclock"
-	"code.cloudfoundry.org/voldriver/backoff"
+	"code.cloudfoundry.org/dockerdriver/backoff"
 
 	"sync"
 

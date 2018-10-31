@@ -8,13 +8,13 @@ import (
 	"net/http"
 
 	cf_http_handlers "code.cloudfoundry.org/cfhttp/handlers"
+	"code.cloudfoundry.org/dockerdriver"
 	"code.cloudfoundry.org/lager"
-	"code.cloudfoundry.org/voldriver"
 	"context"
 	"github.com/tedsuo/rata"
 )
 
-func NewHttpDriverEnv(logger lager.Logger, ctx context.Context) voldriver.Env {
+func NewHttpDriverEnv(logger lager.Logger, ctx context.Context) dockerdriver.Env {
 	return &voldriverEnv{logger, ctx}
 }
 
@@ -31,15 +31,15 @@ func (v *voldriverEnv) Context() context.Context {
 	return v.aContext
 }
 
-func EnvWithLogger(logger lager.Logger, env voldriver.Env) voldriver.Env {
+func EnvWithLogger(logger lager.Logger, env dockerdriver.Env) dockerdriver.Env {
 	return &voldriverEnv{logger, env.Context()}
 }
 
-func EnvWithContext(ctx context.Context, env voldriver.Env) voldriver.Env {
+func EnvWithContext(ctx context.Context, env dockerdriver.Env) dockerdriver.Env {
 	return &voldriverEnv{env.Logger(), ctx}
 }
 
-func EnvWithMonitor(logger lager.Logger, ctx context.Context, res http.ResponseWriter) voldriver.Env {
+func EnvWithMonitor(logger lager.Logger, ctx context.Context, res http.ResponseWriter) dockerdriver.Env {
 	logger = logger.Session("with-cancel")
 	logger.Debug("start")
 	defer logger.Debug("end")
@@ -72,27 +72,27 @@ const (
 	StatusOK                  = http.StatusOK
 )
 
-func NewHandler(logger lager.Logger, client voldriver.Driver) (http.Handler, error) {
+func NewHandler(logger lager.Logger, client dockerdriver.Driver) (http.Handler, error) {
 	logger = logger.Session("server")
 	logger.Info("start")
 	defer logger.Info("end")
 
 	var handlers = rata.Handlers{
-		voldriver.ActivateRoute:     newActivateHandler(logger, client),
-		voldriver.GetRoute:          newGetHandler(logger, client),
-		voldriver.ListRoute:         newListHandler(logger, client),
-		voldriver.PathRoute:         newPathHandler(logger, client),
-		voldriver.CreateRoute:       newCreateHandler(logger, client),
-		voldriver.MountRoute:        newMountHandler(logger, client),
-		voldriver.UnmountRoute:      newUnmountHandler(logger, client),
-		voldriver.RemoveRoute:       newRemoveHandler(logger, client),
-		voldriver.CapabilitiesRoute: newCapabilitiesHandler(logger, client),
+		dockerdriver.ActivateRoute:     newActivateHandler(logger, client),
+		dockerdriver.GetRoute:          newGetHandler(logger, client),
+		dockerdriver.ListRoute:         newListHandler(logger, client),
+		dockerdriver.PathRoute:         newPathHandler(logger, client),
+		dockerdriver.CreateRoute:       newCreateHandler(logger, client),
+		dockerdriver.MountRoute:        newMountHandler(logger, client),
+		dockerdriver.UnmountRoute:      newUnmountHandler(logger, client),
+		dockerdriver.RemoveRoute:       newRemoveHandler(logger, client),
+		dockerdriver.CapabilitiesRoute: newCapabilitiesHandler(logger, client),
 	}
 
-	return rata.NewRouter(voldriver.Routes, handlers)
+	return rata.NewRouter(dockerdriver.Routes, handlers)
 }
 
-func newActivateHandler(logger lager.Logger, client voldriver.Driver) http.HandlerFunc {
+func newActivateHandler(logger lager.Logger, client dockerdriver.Driver) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		logger := logger.Session("handle-activate")
 		logger.Debug("start")
@@ -110,7 +110,7 @@ func newActivateHandler(logger lager.Logger, client voldriver.Driver) http.Handl
 	}
 }
 
-func newGetHandler(logger lager.Logger, client voldriver.Driver) http.HandlerFunc {
+func newGetHandler(logger lager.Logger, client dockerdriver.Driver) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		logger := logger.Session("handle-get")
 		logger.Info("start")
@@ -119,14 +119,14 @@ func newGetHandler(logger lager.Logger, client voldriver.Driver) http.HandlerFun
 		body, err := ioutil.ReadAll(req.Body)
 		if err != nil {
 			logger.Error("failed-reading-get-request-body", err)
-			cf_http_handlers.WriteJSONResponse(w, StatusInternalServerError, voldriver.MountResponse{Err: err.Error()})
+			cf_http_handlers.WriteJSONResponse(w, StatusInternalServerError, dockerdriver.MountResponse{Err: err.Error()})
 			return
 		}
 
-		var getRequest voldriver.GetRequest
+		var getRequest dockerdriver.GetRequest
 		if err = json.Unmarshal(body, &getRequest); err != nil {
 			logger.Error("failed-unmarshalling-get-request-body", err)
-			cf_http_handlers.WriteJSONResponse(w, StatusInternalServerError, voldriver.GetResponse{Err: err.Error()})
+			cf_http_handlers.WriteJSONResponse(w, StatusInternalServerError, dockerdriver.GetResponse{Err: err.Error()})
 			return
 		}
 
@@ -141,7 +141,7 @@ func newGetHandler(logger lager.Logger, client voldriver.Driver) http.HandlerFun
 	}
 }
 
-func newListHandler(logger lager.Logger, client voldriver.Driver) http.HandlerFunc {
+func newListHandler(logger lager.Logger, client dockerdriver.Driver) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		logger := logger.Session("handle-list")
 		logger.Info("start")
@@ -158,7 +158,7 @@ func newListHandler(logger lager.Logger, client voldriver.Driver) http.HandlerFu
 	}
 }
 
-func newPathHandler(logger lager.Logger, client voldriver.Driver) http.HandlerFunc {
+func newPathHandler(logger lager.Logger, client dockerdriver.Driver) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		logger := logger.Session("handle-path")
 		logger.Info("start")
@@ -167,14 +167,14 @@ func newPathHandler(logger lager.Logger, client voldriver.Driver) http.HandlerFu
 		body, err := ioutil.ReadAll(req.Body)
 		if err != nil {
 			logger.Error("failed-reading-path-request-body", err)
-			cf_http_handlers.WriteJSONResponse(w, StatusInternalServerError, voldriver.MountResponse{Err: err.Error()})
+			cf_http_handlers.WriteJSONResponse(w, StatusInternalServerError, dockerdriver.MountResponse{Err: err.Error()})
 			return
 		}
 
-		var pathRequest voldriver.PathRequest
+		var pathRequest dockerdriver.PathRequest
 		if err = json.Unmarshal(body, &pathRequest); err != nil {
 			logger.Error("failed-unmarshalling-path-request-body", err)
-			cf_http_handlers.WriteJSONResponse(w, StatusInternalServerError, voldriver.GetResponse{Err: err.Error()})
+			cf_http_handlers.WriteJSONResponse(w, StatusInternalServerError, dockerdriver.GetResponse{Err: err.Error()})
 			return
 		}
 
@@ -189,7 +189,7 @@ func newPathHandler(logger lager.Logger, client voldriver.Driver) http.HandlerFu
 	}
 }
 
-func newCapabilitiesHandler(logger lager.Logger, client voldriver.Driver) http.HandlerFunc {
+func newCapabilitiesHandler(logger lager.Logger, client dockerdriver.Driver) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		logger := logger.Session("handle-capabilities")
 		logger.Info("start")
@@ -201,7 +201,7 @@ func newCapabilitiesHandler(logger lager.Logger, client voldriver.Driver) http.H
 	}
 }
 
-func newCreateHandler(logger lager.Logger, client voldriver.Driver) http.HandlerFunc {
+func newCreateHandler(logger lager.Logger, client dockerdriver.Driver) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		logger := logger.Session("handle-create")
 		logger.Info("start")
@@ -210,14 +210,14 @@ func newCreateHandler(logger lager.Logger, client voldriver.Driver) http.Handler
 		body, err := ioutil.ReadAll(req.Body)
 		if err != nil {
 			logger.Error("failed-reading-create-request-body", err)
-			cf_http_handlers.WriteJSONResponse(w, StatusInternalServerError, voldriver.ErrorResponse{Err: err.Error()})
+			cf_http_handlers.WriteJSONResponse(w, StatusInternalServerError, dockerdriver.ErrorResponse{Err: err.Error()})
 			return
 		}
 
-		var createRequest voldriver.CreateRequest
+		var createRequest dockerdriver.CreateRequest
 		if err = json.Unmarshal(body, &createRequest); err != nil {
 			logger.Error("failed-unmarshalling-create-request-body", err)
-			cf_http_handlers.WriteJSONResponse(w, StatusInternalServerError, voldriver.ErrorResponse{Err: err.Error()})
+			cf_http_handlers.WriteJSONResponse(w, StatusInternalServerError, dockerdriver.ErrorResponse{Err: err.Error()})
 			return
 		}
 
@@ -232,7 +232,7 @@ func newCreateHandler(logger lager.Logger, client voldriver.Driver) http.Handler
 	}
 }
 
-func newMountHandler(logger lager.Logger, client voldriver.Driver) http.HandlerFunc {
+func newMountHandler(logger lager.Logger, client dockerdriver.Driver) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		logger := logger.Session("handle-mount")
 		logger.Info("start")
@@ -241,14 +241,14 @@ func newMountHandler(logger lager.Logger, client voldriver.Driver) http.HandlerF
 		body, err := ioutil.ReadAll(req.Body)
 		if err != nil {
 			logger.Error("failed-reading-mount-request-body", err)
-			cf_http_handlers.WriteJSONResponse(w, StatusInternalServerError, voldriver.MountResponse{Err: err.Error()})
+			cf_http_handlers.WriteJSONResponse(w, StatusInternalServerError, dockerdriver.MountResponse{Err: err.Error()})
 			return
 		}
 
-		var mountRequest voldriver.MountRequest
+		var mountRequest dockerdriver.MountRequest
 		if err = json.Unmarshal(body, &mountRequest); err != nil {
 			logger.Error("failed-unmarshalling-mount-request-body", err)
-			cf_http_handlers.WriteJSONResponse(w, StatusInternalServerError, voldriver.MountResponse{Err: err.Error()})
+			cf_http_handlers.WriteJSONResponse(w, StatusInternalServerError, dockerdriver.MountResponse{Err: err.Error()})
 			return
 		}
 
@@ -263,7 +263,7 @@ func newMountHandler(logger lager.Logger, client voldriver.Driver) http.HandlerF
 	}
 }
 
-func newUnmountHandler(logger lager.Logger, client voldriver.Driver) http.HandlerFunc {
+func newUnmountHandler(logger lager.Logger, client dockerdriver.Driver) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		logger := logger.Session("handle-unmount")
 		logger.Info("start")
@@ -272,14 +272,14 @@ func newUnmountHandler(logger lager.Logger, client voldriver.Driver) http.Handle
 		body, err := ioutil.ReadAll(req.Body)
 		if err != nil {
 			logger.Error("failed-reading-unmount-request-body", err)
-			cf_http_handlers.WriteJSONResponse(w, StatusInternalServerError, voldriver.ErrorResponse{Err: err.Error()})
+			cf_http_handlers.WriteJSONResponse(w, StatusInternalServerError, dockerdriver.ErrorResponse{Err: err.Error()})
 			return
 		}
 
-		var unmountRequest voldriver.UnmountRequest
+		var unmountRequest dockerdriver.UnmountRequest
 		if err = json.Unmarshal(body, &unmountRequest); err != nil {
 			logger.Error("failed-unmarshalling-unmount-request-body", err)
-			cf_http_handlers.WriteJSONResponse(w, StatusInternalServerError, voldriver.ErrorResponse{Err: err.Error()})
+			cf_http_handlers.WriteJSONResponse(w, StatusInternalServerError, dockerdriver.ErrorResponse{Err: err.Error()})
 			return
 		}
 
@@ -294,7 +294,7 @@ func newUnmountHandler(logger lager.Logger, client voldriver.Driver) http.Handle
 	}
 }
 
-func newRemoveHandler(logger lager.Logger, client voldriver.Driver) http.HandlerFunc {
+func newRemoveHandler(logger lager.Logger, client dockerdriver.Driver) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		logger := logger.Session("handle-remove")
 		logger.Info("start")
@@ -303,14 +303,14 @@ func newRemoveHandler(logger lager.Logger, client voldriver.Driver) http.Handler
 		body, err := ioutil.ReadAll(req.Body)
 		if err != nil {
 			logger.Error("failed-reading-remove-request-body", err)
-			cf_http_handlers.WriteJSONResponse(w, StatusInternalServerError, voldriver.ErrorResponse{Err: err.Error()})
+			cf_http_handlers.WriteJSONResponse(w, StatusInternalServerError, dockerdriver.ErrorResponse{Err: err.Error()})
 			return
 		}
 
-		var removeRequest voldriver.RemoveRequest
+		var removeRequest dockerdriver.RemoveRequest
 		if err = json.Unmarshal(body, &removeRequest); err != nil {
 			logger.Error("failed-unmarshalling-unmount-request-body", err)
-			cf_http_handlers.WriteJSONResponse(w, StatusInternalServerError, voldriver.ErrorResponse{Err: err.Error()})
+			cf_http_handlers.WriteJSONResponse(w, StatusInternalServerError, dockerdriver.ErrorResponse{Err: err.Error()})
 			return
 		}
 
@@ -324,4 +324,3 @@ func newRemoveHandler(logger lager.Logger, client voldriver.Driver) http.Handler
 		cf_http_handlers.WriteJSONResponse(w, StatusOK, removeResponse)
 	}
 }
-

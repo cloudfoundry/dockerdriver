@@ -12,9 +12,9 @@ import (
 
 	"code.cloudfoundry.org/cfhttp"
 	"code.cloudfoundry.org/clock"
+	"code.cloudfoundry.org/dockerdriver"
 	"code.cloudfoundry.org/goshims/http_wrap"
 	"code.cloudfoundry.org/lager"
-	"code.cloudfoundry.org/voldriver"
 	"github.com/tedsuo/rata"
 
 	os_http "net/http"
@@ -46,10 +46,10 @@ type remoteClient struct {
 	reqGen     *rata.RequestGenerator
 	clock      clock.Clock
 	url        string
-	tls        *voldriver.TLSConfig
+	tls        *dockerdriver.TLSConfig
 }
 
-func NewRemoteClient(url string, tls *voldriver.TLSConfig) (*remoteClient, error) {
+func NewRemoteClient(url string, tls *dockerdriver.TLSConfig) (*remoteClient, error) {
 	client := cfhttp.NewClient()
 	input_url := url
 
@@ -83,12 +83,12 @@ func NewRemoteClient(url string, tls *voldriver.TLSConfig) (*remoteClient, error
 func NewRemoteClientWithClient(socketPath string, client http_wrap.Client, clock clock.Clock) *remoteClient {
 	return &remoteClient{
 		HttpClient: client,
-		reqGen:     rata.NewRequestGenerator(socketPath, voldriver.Routes),
+		reqGen:     rata.NewRequestGenerator(socketPath, dockerdriver.Routes),
 		clock:      clock,
 	}
 }
 
-func (r *remoteClient) Matches(loggerIn lager.Logger, url string, tls *voldriver.TLSConfig) bool {
+func (r *remoteClient) Matches(loggerIn lager.Logger, url string, tls *dockerdriver.TLSConfig) bool {
 	logger := loggerIn.Session("matches")
 	logger.Info("start")
 	defer logger.Info("end")
@@ -111,33 +111,33 @@ func (r *remoteClient) Matches(loggerIn lager.Logger, url string, tls *voldriver
 	return string(tls1) == string(tls2)
 }
 
-func (r *remoteClient) Activate(env voldriver.Env) voldriver.ActivateResponse {
+func (r *remoteClient) Activate(env dockerdriver.Env) dockerdriver.ActivateResponse {
 	logger := env.Logger().Session("activate")
 	logger.Info("start")
 	defer logger.Info("end")
 
-	request := newReqFactory(r.reqGen, voldriver.ActivateRoute, nil)
+	request := newReqFactory(r.reqGen, dockerdriver.ActivateRoute, nil)
 
 	response, err := r.do(env.Context(), logger, request)
 	if err != nil {
 		logger.Error("failed-activate", err)
-		return voldriver.ActivateResponse{Err: err.Error()}
+		return dockerdriver.ActivateResponse{Err: err.Error()}
 	}
 
 	if response == nil {
-		return voldriver.ActivateResponse{Err: "Invalid response from driver."}
+		return dockerdriver.ActivateResponse{Err: "Invalid response from driver."}
 	}
 
-	var activate voldriver.ActivateResponse
+	var activate dockerdriver.ActivateResponse
 	if err := json.Unmarshal(response, &activate); err != nil {
 		logger.Error("failed-parsing-activate-response", err)
-		return voldriver.ActivateResponse{Err: err.Error()}
+		return dockerdriver.ActivateResponse{Err: err.Error()}
 	}
 
 	return activate
 }
 
-func (r *remoteClient) Create(env voldriver.Env, createRequest voldriver.CreateRequest) voldriver.ErrorResponse {
+func (r *remoteClient) Create(env dockerdriver.Env, createRequest dockerdriver.CreateRequest) dockerdriver.ErrorResponse {
 	logger := env.Logger().Session("create", lager.Data{"create_request.Name": createRequest.Name})
 	logger.Info("start")
 	defer logger.Info("end")
@@ -145,57 +145,57 @@ func (r *remoteClient) Create(env voldriver.Env, createRequest voldriver.CreateR
 	payload, err := json.Marshal(createRequest)
 	if err != nil {
 		logger.Error("failed-marshalling-request", err)
-		return voldriver.ErrorResponse{Err: err.Error()}
+		return dockerdriver.ErrorResponse{Err: err.Error()}
 	}
 
-	request := newReqFactory(r.reqGen, voldriver.CreateRoute, payload)
+	request := newReqFactory(r.reqGen, dockerdriver.CreateRoute, payload)
 
 	response, err := r.do(env.Context(), logger, request)
 	if err != nil {
 		logger.Error("failed-creating-volume", err)
-		return voldriver.ErrorResponse{Err: err.Error()}
+		return dockerdriver.ErrorResponse{Err: err.Error()}
 	}
 
-	var remoteError voldriver.ErrorResponse
+	var remoteError dockerdriver.ErrorResponse
 	if response == nil {
-		return voldriver.ErrorResponse{Err: "Invalid response from driver."}
+		return dockerdriver.ErrorResponse{Err: "Invalid response from driver."}
 	}
 
 	if err := json.Unmarshal(response, &remoteError); err != nil {
 		logger.Error("failed-parsing-error-response", err)
-		return voldriver.ErrorResponse{Err: err.Error()}
+		return dockerdriver.ErrorResponse{Err: err.Error()}
 	}
 
-	return voldriver.ErrorResponse{}
+	return dockerdriver.ErrorResponse{}
 }
 
-func (r *remoteClient) List(env voldriver.Env) voldriver.ListResponse {
+func (r *remoteClient) List(env dockerdriver.Env) dockerdriver.ListResponse {
 	logger := env.Logger().Session("remoteclient-list")
 	logger.Info("start")
 	defer logger.Info("end")
 
-	request := newReqFactory(r.reqGen, voldriver.ListRoute, nil)
+	request := newReqFactory(r.reqGen, dockerdriver.ListRoute, nil)
 
 	response, err := r.do(env.Context(), logger, request)
 	if err != nil {
 		logger.Error("failed-list", err)
-		return voldriver.ListResponse{Err: err.Error()}
+		return dockerdriver.ListResponse{Err: err.Error()}
 	}
 
 	if response == nil {
-		return voldriver.ListResponse{Err: "Invalid response from driver."}
+		return dockerdriver.ListResponse{Err: "Invalid response from driver."}
 	}
 
-	var list voldriver.ListResponse
+	var list dockerdriver.ListResponse
 	if err := json.Unmarshal(response, &list); err != nil {
 		logger.Error("failed-parsing-list-response", err)
-		return voldriver.ListResponse{Err: err.Error()}
+		return dockerdriver.ListResponse{Err: err.Error()}
 	}
 
 	return list
 }
 
-func (r *remoteClient) Mount(env voldriver.Env, mountRequest voldriver.MountRequest) voldriver.MountResponse {
+func (r *remoteClient) Mount(env dockerdriver.Env, mountRequest dockerdriver.MountRequest) dockerdriver.MountResponse {
 	logger := env.Logger().Session("remoteclient-mount", lager.Data{"mount_request": mountRequest})
 	logger.Info("start")
 	defer logger.Info("end")
@@ -203,31 +203,31 @@ func (r *remoteClient) Mount(env voldriver.Env, mountRequest voldriver.MountRequ
 	sendingJson, err := json.Marshal(mountRequest)
 	if err != nil {
 		logger.Error("failed-marshalling-request", err)
-		return voldriver.MountResponse{Err: err.Error()}
+		return dockerdriver.MountResponse{Err: err.Error()}
 	}
 
-	request := newReqFactory(r.reqGen, voldriver.MountRoute, sendingJson)
+	request := newReqFactory(r.reqGen, dockerdriver.MountRoute, sendingJson)
 
 	response, err := r.do(env.Context(), logger, request)
 	if err != nil {
 		logger.Error("failed-mounting-volume", err)
-		return voldriver.MountResponse{Err: err.Error()}
+		return dockerdriver.MountResponse{Err: err.Error()}
 	}
 
 	if response == nil {
-		return voldriver.MountResponse{Err: "Invalid response from driver."}
+		return dockerdriver.MountResponse{Err: "Invalid response from driver."}
 	}
 
-	var mountPoint voldriver.MountResponse
+	var mountPoint dockerdriver.MountResponse
 	if err := json.Unmarshal(response, &mountPoint); err != nil {
 		logger.Error("failed-parsing-mount-response", err)
-		return voldriver.MountResponse{Err: err.Error()}
+		return dockerdriver.MountResponse{Err: err.Error()}
 	}
 
 	return mountPoint
 }
 
-func (r *remoteClient) Path(env voldriver.Env, pathRequest voldriver.PathRequest) voldriver.PathResponse {
+func (r *remoteClient) Path(env dockerdriver.Env, pathRequest dockerdriver.PathRequest) dockerdriver.PathResponse {
 	logger := env.Logger().Session("path")
 	logger.Info("start")
 	defer logger.Info("end")
@@ -235,31 +235,31 @@ func (r *remoteClient) Path(env voldriver.Env, pathRequest voldriver.PathRequest
 	payload, err := json.Marshal(pathRequest)
 	if err != nil {
 		logger.Error("failed-marshalling-request", err)
-		return voldriver.PathResponse{Err: err.Error()}
+		return dockerdriver.PathResponse{Err: err.Error()}
 	}
 
-	request := newReqFactory(r.reqGen, voldriver.PathRoute, payload)
+	request := newReqFactory(r.reqGen, dockerdriver.PathRoute, payload)
 
 	response, err := r.do(env.Context(), logger, request)
 	if err != nil {
 		logger.Error("failed-volume-path", err)
-		return voldriver.PathResponse{Err: err.Error()}
+		return dockerdriver.PathResponse{Err: err.Error()}
 	}
 
 	if response == nil {
-		return voldriver.PathResponse{Err: "Invalid response from driver."}
+		return dockerdriver.PathResponse{Err: "Invalid response from driver."}
 	}
 
-	var mountPoint voldriver.PathResponse
+	var mountPoint dockerdriver.PathResponse
 	if err := json.Unmarshal(response, &mountPoint); err != nil {
 		logger.Error("failed-parsing-path-response", err)
-		return voldriver.PathResponse{Err: err.Error()}
+		return dockerdriver.PathResponse{Err: err.Error()}
 	}
 
 	return mountPoint
 }
 
-func (r *remoteClient) Unmount(env voldriver.Env, unmountRequest voldriver.UnmountRequest) voldriver.ErrorResponse {
+func (r *remoteClient) Unmount(env dockerdriver.Env, unmountRequest dockerdriver.UnmountRequest) dockerdriver.ErrorResponse {
 	logger := env.Logger().Session("mount")
 	logger.Info("start")
 	defer logger.Info("end")
@@ -267,30 +267,30 @@ func (r *remoteClient) Unmount(env voldriver.Env, unmountRequest voldriver.Unmou
 	payload, err := json.Marshal(unmountRequest)
 	if err != nil {
 		logger.Error("failed-marshalling-request", err)
-		return voldriver.ErrorResponse{Err: err.Error()}
+		return dockerdriver.ErrorResponse{Err: err.Error()}
 	}
 
-	request := newReqFactory(r.reqGen, voldriver.UnmountRoute, payload)
+	request := newReqFactory(r.reqGen, dockerdriver.UnmountRoute, payload)
 
 	response, err := r.do(env.Context(), logger, request)
 	if err != nil {
 		logger.Error("failed-unmounting-volume", err)
-		return voldriver.ErrorResponse{Err: err.Error()}
+		return dockerdriver.ErrorResponse{Err: err.Error()}
 	}
 
 	if response == nil {
-		return voldriver.ErrorResponse{Err: "Invalid response from driver."}
+		return dockerdriver.ErrorResponse{Err: "Invalid response from driver."}
 	}
 
-	var remoteErrorResponse voldriver.ErrorResponse
+	var remoteErrorResponse dockerdriver.ErrorResponse
 	if err := json.Unmarshal(response, &remoteErrorResponse); err != nil {
 		logger.Error("failed-parsing-error-response", err)
-		return voldriver.ErrorResponse{Err: err.Error()}
+		return dockerdriver.ErrorResponse{Err: err.Error()}
 	}
 	return remoteErrorResponse
 }
 
-func (r *remoteClient) Remove(env voldriver.Env, removeRequest voldriver.RemoveRequest) voldriver.ErrorResponse {
+func (r *remoteClient) Remove(env dockerdriver.Env, removeRequest dockerdriver.RemoveRequest) dockerdriver.ErrorResponse {
 	logger := env.Logger().Session("remove")
 	logger.Info("start")
 	defer logger.Info("end")
@@ -298,31 +298,31 @@ func (r *remoteClient) Remove(env voldriver.Env, removeRequest voldriver.RemoveR
 	payload, err := json.Marshal(removeRequest)
 	if err != nil {
 		logger.Error("failed-marshalling-request", err)
-		return voldriver.ErrorResponse{Err: err.Error()}
+		return dockerdriver.ErrorResponse{Err: err.Error()}
 	}
 
-	request := newReqFactory(r.reqGen, voldriver.RemoveRoute, payload)
+	request := newReqFactory(r.reqGen, dockerdriver.RemoveRoute, payload)
 
 	response, err := r.do(env.Context(), logger, request)
 	if err != nil {
 		logger.Error("failed-removing-volume", err)
-		return voldriver.ErrorResponse{Err: err.Error()}
+		return dockerdriver.ErrorResponse{Err: err.Error()}
 	}
 
 	if response == nil {
-		return voldriver.ErrorResponse{Err: "Invalid response from driver."}
+		return dockerdriver.ErrorResponse{Err: "Invalid response from driver."}
 	}
 
-	var remoteErrorResponse voldriver.ErrorResponse
+	var remoteErrorResponse dockerdriver.ErrorResponse
 	if err := json.Unmarshal(response, &remoteErrorResponse); err != nil {
 		logger.Error("failed-parsing-error-response", err)
-		return voldriver.ErrorResponse{Err: err.Error()}
+		return dockerdriver.ErrorResponse{Err: err.Error()}
 	}
 
 	return remoteErrorResponse
 }
 
-func (r *remoteClient) Get(env voldriver.Env, getRequest voldriver.GetRequest) voldriver.GetResponse {
+func (r *remoteClient) Get(env dockerdriver.Env, getRequest dockerdriver.GetRequest) dockerdriver.GetResponse {
 	logger := env.Logger().Session("get")
 	logger.Info("start")
 	defer logger.Info("end")
@@ -330,58 +330,58 @@ func (r *remoteClient) Get(env voldriver.Env, getRequest voldriver.GetRequest) v
 	payload, err := json.Marshal(getRequest)
 	if err != nil {
 		logger.Error("failed-marshalling-request", err)
-		return voldriver.GetResponse{Err: err.Error()}
+		return dockerdriver.GetResponse{Err: err.Error()}
 	}
 
-	request := newReqFactory(r.reqGen, voldriver.GetRoute, payload)
+	request := newReqFactory(r.reqGen, dockerdriver.GetRoute, payload)
 
 	response, err := r.do(env.Context(), logger, request)
 	if err != nil {
 		logger.Error("failed-getting-volume", err)
-		return voldriver.GetResponse{Err: err.Error()}
+		return dockerdriver.GetResponse{Err: err.Error()}
 	}
 
 	if response == nil {
-		return voldriver.GetResponse{Err: "Invalid response from driver."}
+		return dockerdriver.GetResponse{Err: "Invalid response from driver."}
 	}
 
-	var remoteResponse voldriver.GetResponse
+	var remoteResponse dockerdriver.GetResponse
 	if err := json.Unmarshal(response, &remoteResponse); err != nil {
 		logger.Error("failed-parsing-error-response", err)
-		return voldriver.GetResponse{Err: err.Error()}
+		return dockerdriver.GetResponse{Err: err.Error()}
 	}
 
 	return remoteResponse
 }
 
-func (r *remoteClient) Capabilities(env voldriver.Env) voldriver.CapabilitiesResponse {
+func (r *remoteClient) Capabilities(env dockerdriver.Env) dockerdriver.CapabilitiesResponse {
 	logger := env.Logger().Session("capabilities")
 	logger.Info("start")
 	defer logger.Info("end")
 
-	request := newReqFactory(r.reqGen, voldriver.CapabilitiesRoute, nil)
+	request := newReqFactory(r.reqGen, dockerdriver.CapabilitiesRoute, nil)
 
 	response, err := r.do(env.Context(), logger, request)
 	if err != nil {
 		logger.Error("failed-capabilities", err)
-		return voldriver.CapabilitiesResponse{}
+		return dockerdriver.CapabilitiesResponse{}
 	}
 
-	var remoteError voldriver.CapabilitiesResponse
+	var remoteError dockerdriver.CapabilitiesResponse
 	if response == nil {
 		return remoteError
 	}
 
-	var capabilities voldriver.CapabilitiesResponse
+	var capabilities dockerdriver.CapabilitiesResponse
 	if err := json.Unmarshal(response, &capabilities); err != nil {
 		logger.Error("failed-parsing-capabilities-response", err)
-		return voldriver.CapabilitiesResponse{}
+		return dockerdriver.CapabilitiesResponse{}
 	}
 
 	return capabilities
 }
 
-func (r *remoteClient) GetVoldriver() voldriver.Driver {
+func (r *remoteClient) GetVoldriver() dockerdriver.Driver {
 	return r
 }
 
@@ -408,7 +408,7 @@ func (r *remoteClient) do(ctx context.Context, logger lager.Logger, requestFacto
 		return data, err
 	}
 
-	var remoteErrorResponse voldriver.ErrorResponse
+	var remoteErrorResponse dockerdriver.ErrorResponse
 	if err := json.Unmarshal(data, &remoteErrorResponse); err != nil {
 		logger.Error("failed-parsing-http-response-body", err)
 		return data, err

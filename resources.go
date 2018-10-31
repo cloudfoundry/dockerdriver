@@ -1,4 +1,4 @@
-package voldriver
+package dockerdriver
 
 import (
 	"context"
@@ -31,20 +31,20 @@ var Routes = rata.Routes{
 	{Path: "/VolumeDriver.Capabilities", Method: "POST", Name: CapabilitiesRoute},
 }
 
-//go:generate counterfeiter -o voldriverfakes/fake_env.go . Env
+//go:generate counterfeiter -o dockerdriverfakes/fake_env.go . Env
 type Env interface {
 	Logger() lager.Logger
 	Context() context.Context
 }
 
-//go:generate counterfeiter -o voldriverfakes/fake_matchable_driver_client.go . MatchableDriver
+//go:generate counterfeiter -o dockerdriverfakes/fake_matchable_driver_client.go . MatchableDriver
 type MatchableDriver interface {
 	Matches(lager.Logger, string, *TLSConfig) bool
 
 	Driver
 }
 
-//go:generate counterfeiter -o voldriverfakes/fake_driver_client.go . Driver
+//go:generate counterfeiter -o dockerdriverfakes/fake_driver_client.go . Driver
 type Driver interface {
 	Activate(env Env) ActivateResponse
 	Get(env Env, getRequest GetRequest) GetResponse
@@ -57,7 +57,7 @@ type Driver interface {
 	Provisioner
 }
 
-//go:generate counterfeiter -o voldriverfakes/fake_provisioner.go . Provisioner
+//go:generate counterfeiter -o dockerdriverfakes/fake_provisioner.go . Provisioner
 type Provisioner interface {
 	Create(env Env, createRequest CreateRequest) ErrorResponse
 	Remove(env Env, removeRequest RemoveRequest) ErrorResponse
