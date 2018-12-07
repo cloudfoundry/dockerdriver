@@ -74,18 +74,21 @@ func NewRemoteClient(url string, tls *dockerdriver.TLSConfig) (*remoteClient, er
 
 	}
 
-	driver := NewRemoteClientWithClient(url, client, clock.NewClock())
-	driver.tls = tls
+	driver := NewRemoteClientWithClient(url, tls, client, clock.NewClock())
 	driver.url = input_url
 	return driver, nil
 }
 
-func NewRemoteClientWithClient(socketPath string, client http_wrap.Client, clock clock.Clock) *remoteClient {
-	return &remoteClient{
+func NewRemoteClientWithClient(url string, tls *dockerdriver.TLSConfig, client http_wrap.Client, clock clock.Clock) *remoteClient {
+	driver := remoteClient{
 		HttpClient: client,
-		reqGen:     rata.NewRequestGenerator(socketPath, dockerdriver.Routes),
+		reqGen:     rata.NewRequestGenerator(url, dockerdriver.Routes),
 		clock:      clock,
 	}
+
+	driver.tls = tls
+
+	return &driver
 }
 
 func (r *remoteClient) Matches(loggerIn lager.Logger, url string, tls *dockerdriver.TLSConfig) bool {
@@ -100,13 +103,17 @@ func (r *remoteClient) Matches(loggerIn lager.Logger, url string, tls *dockerdri
 	var err error
 	if tls != nil {
 		tls1, err = json.Marshal(tls)
-		logger.Error("failed-json-marshall", err)
-		return false
+		if err != nil {
+			logger.Error("failed-json-marshall", err)
+			return false
+		}
 	}
 	if r.tls != nil {
 		tls2, err = json.Marshal(r.tls)
-		logger.Error("failed-json-marshall", err)
-		return false
+		if err != nil {
+			logger.Error("failed-json-marshall", err)
+			return false
+		}
 	}
 	return string(tls1) == string(tls2)
 }

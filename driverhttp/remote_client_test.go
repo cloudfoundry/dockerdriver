@@ -45,7 +45,7 @@ var _ = Describe("RemoteClient", func() {
 	BeforeEach(func() {
 		httpClient = new(http_fake.FakeClient)
 		fakeClock = fakeclock.NewFakeClock(time.Now())
-		driver = driverhttp.NewRemoteClientWithClient("http://127.0.0.1:8080", httpClient, fakeClock)
+		driver = driverhttp.NewRemoteClientWithClient("http://127.0.0.1:8080", nil, httpClient, fakeClock)
 
 		validHttpMountResponse = &http.Response{
 			StatusCode: driverhttp.StatusOK,
@@ -71,7 +71,7 @@ var _ = Describe("RemoteClient", func() {
 		BeforeEach(func() {
 			fakeClock = fakeclock.NewFakeClock(time.Now())
 			httpClient = new(http_fake.FakeClient)
-			driver = driverhttp.NewRemoteClientWithClient("http://127.0.0.1:8080", httpClient, fakeClock)
+			driver = driverhttp.NewRemoteClientWithClient("http://127.0.0.1:8080", nil, httpClient, fakeClock)
 			httpClient.DoStub = func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: driverhttp.StatusInternalServerError,
@@ -120,6 +120,18 @@ var _ = Describe("RemoteClient", func() {
 			Context("when stuff matches", func() {
 				BeforeEach(func() {
 					ret = matchable.Matches(testLogger, "", nil)
+				})
+				It("should match", func() {
+					Expect(ret).To(BeTrue())
+				})
+			})
+
+			Context("when stuff matches and tls is configured", func() {
+				BeforeEach(func() {
+					tls := dockerdriver.TLSConfig{InsecureSkipVerify: true, CAFile: "foo", CertFile: "foo", KeyFile: "foo"}
+					driver = driverhttp.NewRemoteClientWithClient("http://127.0.0.1:8080", &tls, httpClient, fakeClock)
+					matchable, ret = driver.(dockerdriver.MatchableDriver)
+					ret = matchable.Matches(testLogger, "", &tls)
 				})
 				It("should match", func() {
 					Expect(ret).To(BeTrue())
@@ -318,7 +330,7 @@ var _ = Describe("RemoteClient", func() {
 			time.Sleep(time.Millisecond * 1000)
 
 			fakeClock = fakeclock.NewFakeClock(time.Now())
-			driver = driverhttp.NewRemoteClientWithClient(socketPath, httpClient, fakeClock)
+			driver = driverhttp.NewRemoteClientWithClient(socketPath, nil, httpClient, fakeClock)
 			validHttpMountResponse = &http.Response{
 				StatusCode: driverhttp.StatusOK,
 				Body:       stringCloser{bytes.NewBufferString("{\"Mountpoint\":\"somePath\"}")},
