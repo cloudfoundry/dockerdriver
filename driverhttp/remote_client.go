@@ -15,6 +15,7 @@ import (
 	"code.cloudfoundry.org/dockerdriver"
 	"code.cloudfoundry.org/goshims/http_wrap"
 	"code.cloudfoundry.org/lager"
+	"code.cloudfoundry.org/tlsconfig"
 	"github.com/tedsuo/rata"
 
 	os_http "net/http"
@@ -58,7 +59,10 @@ func NewRemoteClient(url string, tls *dockerdriver.TLSConfig) (*remoteClient, er
 		url = fmt.Sprintf("unix://%s", url)
 	} else {
 		if tls != nil {
-			tlsConfig, err := cfhttp.NewTLSConfig(tls.CertFile, tls.KeyFile, tls.CAFile)
+			tlsConfig, err := tlsconfig.Build(
+				tlsconfig.WithInternalServiceDefaults(),
+				tlsconfig.WithIdentityFromFile(tls.CertFile, tls.KeyFile),
+			).Client(tlsconfig.WithAuthorityFromFile(tls.CAFile))
 			if err != nil {
 				return nil, err
 			}
