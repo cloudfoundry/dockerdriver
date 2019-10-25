@@ -20,17 +20,17 @@ import (
 
 var _ = Describe("ProcessGroupInvoker", func() {
 	var (
-		subject    invoker.Invoker
-		fakeCmd    *exec_fake.FakeCmd
-		fakeExec   *exec_fake.FakeExec
-		fakeSyscall	*syscall_fake.FakeSyscall
-		testLogger lager.Logger
-		testCtx    context.Context
-		cancel		context.CancelFunc
-		testEnv    dockerdriver.Env
-		cmd        = "some-fake-command"
-		args       = []string{"fake-args-1", "fake-args-2"}
-		attrs 		*syscall.SysProcAttr
+		subject     invoker.Invoker
+		fakeCmd     *exec_fake.FakeCmd
+		fakeExec    *exec_fake.FakeExec
+		fakeSyscall *syscall_fake.FakeSyscall
+		testLogger  lager.Logger
+		testCtx     context.Context
+		cancel      context.CancelFunc
+		testEnv     dockerdriver.Env
+		cmd         = "some-fake-command"
+		args        = []string{"fake-args-1", "fake-args-2"}
+		attrs       *syscall.SysProcAttr
 	)
 
 	Context("when invoking an executable", func() {
@@ -140,7 +140,7 @@ var _ = Describe("ProcessGroupInvoker", func() {
 
 				Expect(fakeSyscall.KillCallCount()).To(Equal(1))
 				pid, signal := fakeSyscall.KillArgsForCall(0)
-				Expect(pid).To(Equal(-9999))							// process group
+				Expect(pid).To(Equal(-9999)) // process group
 				Expect(signal).To(Equal(syscall.SIGKILL))
 			})
 		})
