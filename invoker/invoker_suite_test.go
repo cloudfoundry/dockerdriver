@@ -4,9 +4,9 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"testing"
-	"io"
 	"fmt"
+	"io"
+	"testing"
 )
 
 func TestInvoker(t *testing.T) {
@@ -24,7 +24,6 @@ var _ = SynchronizedAfterSuite(func() {
 
 }, func() {
 })
-
 
 // testing support types:
 
