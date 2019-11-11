@@ -1,17 +1,18 @@
 package invoker_test
 
 import (
+	"context"
+	"errors"
+	"fmt"
+	"syscall"
+	"time"
+
 	"code.cloudfoundry.org/dockerdriver"
 	"code.cloudfoundry.org/dockerdriver/driverhttp"
 	"code.cloudfoundry.org/goshims/execshim/exec_fake"
 	"code.cloudfoundry.org/goshims/syscallshim/syscall_fake"
 	"code.cloudfoundry.org/lager"
 	"code.cloudfoundry.org/lager/lagertest"
-	"context"
-	"errors"
-	"fmt"
-	"syscall"
-	"time"
 
 	"code.cloudfoundry.org/dockerdriver/invoker"
 	. "github.com/onsi/ginkgo"
@@ -123,13 +124,12 @@ var _ = Describe("ProcessGroupInvoker", func() {
 		})
 
 		Context("when the context is cancelled", func() {
-
 			BeforeEach(func() {
 				fakeCmd.PidReturns(9999)
 
 				fakeCmd.WaitStub = func() error {
 					cancel()
-					time.Sleep(100)
+					time.Sleep(time.Second)
 					return context.Canceled
 				}
 			})
