@@ -12,7 +12,7 @@ import (
 	"code.cloudfoundry.org/dockerdriver"
 	"code.cloudfoundry.org/dockerdriver/dockerdriverfakes"
 	"code.cloudfoundry.org/dockerdriver/driverhttp"
-	"code.cloudfoundry.org/lager/lagertest"
+	"code.cloudfoundry.org/lager/v3/lagertest"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"sync"

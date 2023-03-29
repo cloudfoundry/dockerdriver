@@ -8,7 +8,7 @@ import (
 	"path"
 	"strings"
 
-	"code.cloudfoundry.org/lager"
+	"code.cloudfoundry.org/lager/v3"
 )
 
 func WriteDriverSpec(logger lager.Logger, pluginsDirectory string, driver string, extension string, contents []byte) error {
