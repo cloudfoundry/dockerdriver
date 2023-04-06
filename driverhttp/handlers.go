@@ -7,10 +7,11 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"context"
+
 	cf_http_handlers "code.cloudfoundry.org/cfhttp/handlers"
 	"code.cloudfoundry.org/dockerdriver"
-	"code.cloudfoundry.org/lager"
-	"context"
+	"code.cloudfoundry.org/lager/v3"
 	"github.com/tedsuo/rata"
 )
 
@@ -61,7 +62,7 @@ func EnvWithMonitor(logger lager.Logger, ctx context.Context, res http.ResponseW
 			}
 		}()
 	}
-
+	_ = cancel
 	return env
 }
 
