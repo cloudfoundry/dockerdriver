@@ -1,10 +1,9 @@
 package utils_test
 
 import (
+	"code.cloudfoundry.org/dockerdriver/utils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
-	"code.cloudfoundry.org/dockerdriver/utils"
 )
 
 var _ = Describe("Utils/VolumeId", func() {

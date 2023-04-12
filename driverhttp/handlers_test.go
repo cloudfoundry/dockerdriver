@@ -3,11 +3,12 @@ package driverhttp_test
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
-
-	"fmt"
+	"sync"
+	"time"
 
 	"code.cloudfoundry.org/dockerdriver"
 	"code.cloudfoundry.org/dockerdriver/dockerdriverfakes"
@@ -15,8 +16,6 @@ import (
 	"code.cloudfoundry.org/lager/v3/lagertest"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"sync"
-	"time"
 )
 
 type RecordingCloseNotifier struct {
@@ -39,7 +38,7 @@ var _ = Describe("Docker Driver Handlers", func() {
 	var ErrorResponse = func(res *RecordingCloseNotifier) dockerdriver.ErrorResponse {
 		response := dockerdriver.ErrorResponse{}
 
-		body, err := ioutil.ReadAll(res.Body)
+		body, err := io.ReadAll(res.Body)
 		Expect(err).ToNot(HaveOccurred())
 
 		err = json.Unmarshal(body, &response)
@@ -98,7 +97,7 @@ var _ = Describe("Docker Driver Handlers", func() {
 
 				activateResponse := dockerdriver.ActivateResponse{}
 
-				body, err := ioutil.ReadAll(res.Body)
+				body, err := io.ReadAll(res.Body)
 				Expect(err).ToNot(HaveOccurred())
 
 				err = json.Unmarshal(body, &activateResponse)
@@ -144,7 +143,7 @@ var _ = Describe("Docker Driver Handlers", func() {
 
 				activateResponse := dockerdriver.ActivateResponse{}
 
-				body, err := ioutil.ReadAll(res.Body)
+				body, err := io.ReadAll(res.Body)
 				Expect(err).ToNot(HaveOccurred())
 
 				err = json.Unmarshal(body, &activateResponse)
@@ -214,7 +213,7 @@ var _ = Describe("Docker Driver Handlers", func() {
 
 				listResponse := dockerdriver.ListResponse{}
 
-				body, err := ioutil.ReadAll(res.Body)
+				body, err := io.ReadAll(res.Body)
 				Expect(err).ToNot(HaveOccurred())
 
 				err = json.Unmarshal(body, &listResponse)
@@ -261,7 +260,7 @@ var _ = Describe("Docker Driver Handlers", func() {
 
 				listResponse := dockerdriver.ListResponse{}
 
-				body, err := ioutil.ReadAll(res.Body)
+				body, err := io.ReadAll(res.Body)
 				Expect(err).ToNot(HaveOccurred())
 
 				err = json.Unmarshal(body, &listResponse)
@@ -285,7 +284,7 @@ var _ = Describe("Docker Driver Handlers", func() {
 
 		var ExpectMountPointToEqual = func(value string) dockerdriver.MountResponse {
 			mountResponse := dockerdriver.MountResponse{}
-			body, err := ioutil.ReadAll(res.Body)
+			body, err := io.ReadAll(res.Body)
 
 			err = json.Unmarshal(body, &mountResponse)
 			Expect(err).ToNot(HaveOccurred())
@@ -530,7 +529,7 @@ var _ = Describe("Docker Driver Handlers", func() {
 				Expect(res.Code).To(Equal(200))
 
 				getResponse := dockerdriver.GetResponse{}
-				body, err := ioutil.ReadAll(res.Body)
+				body, err := io.ReadAll(res.Body)
 				err = json.Unmarshal(body, &getResponse)
 				Expect(err).ToNot(HaveOccurred())
 
@@ -634,7 +633,7 @@ var _ = Describe("Docker Driver Handlers", func() {
 				Expect(res.Code).To(Equal(200))
 
 				pathResponse := dockerdriver.PathResponse{}
-				body, err := ioutil.ReadAll(res.Body)
+				body, err := io.ReadAll(res.Body)
 				err = json.Unmarshal(body, &pathResponse)
 				Expect(err).ToNot(HaveOccurred())
 
@@ -925,7 +924,7 @@ var _ = Describe("Docker Driver Handlers", func() {
 				Expect(res.Code).To(Equal(200))
 
 				capabilitiesResponse := dockerdriver.CapabilitiesResponse{}
-				body, err := ioutil.ReadAll(res.Body)
+				body, err := io.ReadAll(res.Body)
 				err = json.Unmarshal(body, &capabilitiesResponse)
 				Expect(err).ToNot(HaveOccurred())
 

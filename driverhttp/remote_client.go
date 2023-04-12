@@ -2,13 +2,13 @@ package driverhttp
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
-	"io/ioutil"
-	"net/http"
-
-	"strings"
-
+	"errors"
 	"fmt"
+	"io"
+	"net/http"
+	"strings"
 
 	"code.cloudfoundry.org/cfhttp"
 	"code.cloudfoundry.org/clock"
@@ -17,11 +17,6 @@ import (
 	"code.cloudfoundry.org/lager/v3"
 	"code.cloudfoundry.org/tlsconfig"
 	"github.com/tedsuo/rata"
-
-	os_http "net/http"
-
-	"context"
-	"errors"
 )
 
 type reqFactory struct {
@@ -38,7 +33,7 @@ func newReqFactory(reqGen *rata.RequestGenerator, route string, payload []byte) 
 	}
 }
 
-func (r *reqFactory) Request() (*os_http.Request, error) {
+func (r *reqFactory) Request() (*http.Request, error) {
 	return r.reqGen.CreateRequest(r.route, nil, bytes.NewBuffer(r.payload))
 }
 
@@ -414,7 +409,7 @@ func (r *remoteClient) do(ctx context.Context, logger lager.Logger, requestFacto
 	}
 	logger.Debug("response", lager.Data{"response": response.Status})
 
-	data, err = ioutil.ReadAll(response.Body)
+	data, err = io.ReadAll(response.Body)
 	if err != nil {
 		return data, err
 	}
