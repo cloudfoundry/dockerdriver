@@ -4,7 +4,6 @@
 package tools
 
 import (
-	_ "code.cloudfoundry.org/localdriver/cmd/localdriver"
 	_ "github.com/maxbrunsfeld/counterfeiter/v6"
 	_ "github.com/onsi/ginkgo/v2/ginkgo"
 )
