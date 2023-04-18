@@ -1,13 +1,12 @@
 package driverhttp
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
-
-	"context"
 
 	cf_http_handlers "code.cloudfoundry.org/cfhttp/handlers"
 	"code.cloudfoundry.org/dockerdriver"
@@ -117,7 +116,7 @@ func newGetHandler(logger lager.Logger, client dockerdriver.Driver) http.Handler
 		logger.Info("start")
 		defer logger.Info("end")
 
-		body, err := ioutil.ReadAll(req.Body)
+		body, err := io.ReadAll(req.Body)
 		if err != nil {
 			logger.Error("failed-reading-get-request-body", err)
 			cf_http_handlers.WriteJSONResponse(w, StatusInternalServerError, dockerdriver.MountResponse{Err: err.Error()})
@@ -165,7 +164,7 @@ func newPathHandler(logger lager.Logger, client dockerdriver.Driver) http.Handle
 		logger.Info("start")
 		defer logger.Info("end")
 
-		body, err := ioutil.ReadAll(req.Body)
+		body, err := io.ReadAll(req.Body)
 		if err != nil {
 			logger.Error("failed-reading-path-request-body", err)
 			cf_http_handlers.WriteJSONResponse(w, StatusInternalServerError, dockerdriver.MountResponse{Err: err.Error()})
@@ -208,7 +207,7 @@ func newCreateHandler(logger lager.Logger, client dockerdriver.Driver) http.Hand
 		logger.Info("start")
 		defer logger.Info("end")
 
-		body, err := ioutil.ReadAll(req.Body)
+		body, err := io.ReadAll(req.Body)
 		if err != nil {
 			logger.Error("failed-reading-create-request-body", err)
 			cf_http_handlers.WriteJSONResponse(w, StatusInternalServerError, dockerdriver.ErrorResponse{Err: err.Error()})
@@ -239,7 +238,7 @@ func newMountHandler(logger lager.Logger, client dockerdriver.Driver) http.Handl
 		logger.Info("start")
 		defer logger.Info("end")
 
-		body, err := ioutil.ReadAll(req.Body)
+		body, err := io.ReadAll(req.Body)
 		if err != nil {
 			logger.Error("failed-reading-mount-request-body", err)
 			cf_http_handlers.WriteJSONResponse(w, StatusInternalServerError, dockerdriver.MountResponse{Err: err.Error()})
@@ -270,7 +269,7 @@ func newUnmountHandler(logger lager.Logger, client dockerdriver.Driver) http.Han
 		logger.Info("start")
 		defer logger.Info("end")
 
-		body, err := ioutil.ReadAll(req.Body)
+		body, err := io.ReadAll(req.Body)
 		if err != nil {
 			logger.Error("failed-reading-unmount-request-body", err)
 			cf_http_handlers.WriteJSONResponse(w, StatusInternalServerError, dockerdriver.ErrorResponse{Err: err.Error()})
@@ -301,7 +300,7 @@ func newRemoveHandler(logger lager.Logger, client dockerdriver.Driver) http.Hand
 		logger.Info("start")
 		defer logger.Info("end")
 
-		body, err := ioutil.ReadAll(req.Body)
+		body, err := io.ReadAll(req.Body)
 		if err != nil {
 			logger.Error("failed-reading-remove-request-body", err)
 			cf_http_handlers.WriteJSONResponse(w, StatusInternalServerError, dockerdriver.ErrorResponse{Err: err.Error()})

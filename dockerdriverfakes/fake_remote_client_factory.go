@@ -9,11 +9,11 @@ import (
 )
 
 type FakeRemoteClientFactory struct {
-	NewRemoteClientStub        func(url string, tls *dockerdriver.TLSConfig) (dockerdriver.Driver, error)
+	NewRemoteClientStub        func(string, *dockerdriver.TLSConfig) (dockerdriver.Driver, error)
 	newRemoteClientMutex       sync.RWMutex
 	newRemoteClientArgsForCall []struct {
-		url string
-		tls *dockerdriver.TLSConfig
+		arg1 string
+		arg2 *dockerdriver.TLSConfig
 	}
 	newRemoteClientReturns struct {
 		result1 dockerdriver.Driver
@@ -27,22 +27,24 @@ type FakeRemoteClientFactory struct {
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeRemoteClientFactory) NewRemoteClient(url string, tls *dockerdriver.TLSConfig) (dockerdriver.Driver, error) {
+func (fake *FakeRemoteClientFactory) NewRemoteClient(arg1 string, arg2 *dockerdriver.TLSConfig) (dockerdriver.Driver, error) {
 	fake.newRemoteClientMutex.Lock()
 	ret, specificReturn := fake.newRemoteClientReturnsOnCall[len(fake.newRemoteClientArgsForCall)]
 	fake.newRemoteClientArgsForCall = append(fake.newRemoteClientArgsForCall, struct {
-		url string
-		tls *dockerdriver.TLSConfig
-	}{url, tls})
-	fake.recordInvocation("NewRemoteClient", []interface{}{url, tls})
+		arg1 string
+		arg2 *dockerdriver.TLSConfig
+	}{arg1, arg2})
+	stub := fake.NewRemoteClientStub
+	fakeReturns := fake.newRemoteClientReturns
+	fake.recordInvocation("NewRemoteClient", []interface{}{arg1, arg2})
 	fake.newRemoteClientMutex.Unlock()
-	if fake.NewRemoteClientStub != nil {
-		return fake.NewRemoteClientStub(url, tls)
+	if stub != nil {
+		return stub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	return fake.newRemoteClientReturns.result1, fake.newRemoteClientReturns.result2
+	return fakeReturns.result1, fakeReturns.result2
 }
 
 func (fake *FakeRemoteClientFactory) NewRemoteClientCallCount() int {
@@ -51,13 +53,22 @@ func (fake *FakeRemoteClientFactory) NewRemoteClientCallCount() int {
 	return len(fake.newRemoteClientArgsForCall)
 }
 
+func (fake *FakeRemoteClientFactory) NewRemoteClientCalls(stub func(string, *dockerdriver.TLSConfig) (dockerdriver.Driver, error)) {
+	fake.newRemoteClientMutex.Lock()
+	defer fake.newRemoteClientMutex.Unlock()
+	fake.NewRemoteClientStub = stub
+}
+
 func (fake *FakeRemoteClientFactory) NewRemoteClientArgsForCall(i int) (string, *dockerdriver.TLSConfig) {
 	fake.newRemoteClientMutex.RLock()
 	defer fake.newRemoteClientMutex.RUnlock()
-	return fake.newRemoteClientArgsForCall[i].url, fake.newRemoteClientArgsForCall[i].tls
+	argsForCall := fake.newRemoteClientArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2
 }
 
 func (fake *FakeRemoteClientFactory) NewRemoteClientReturns(result1 dockerdriver.Driver, result2 error) {
+	fake.newRemoteClientMutex.Lock()
+	defer fake.newRemoteClientMutex.Unlock()
 	fake.NewRemoteClientStub = nil
 	fake.newRemoteClientReturns = struct {
 		result1 dockerdriver.Driver
@@ -66,6 +77,8 @@ func (fake *FakeRemoteClientFactory) NewRemoteClientReturns(result1 dockerdriver
 }
 
 func (fake *FakeRemoteClientFactory) NewRemoteClientReturnsOnCall(i int, result1 dockerdriver.Driver, result2 error) {
+	fake.newRemoteClientMutex.Lock()
+	defer fake.newRemoteClientMutex.Unlock()
 	fake.NewRemoteClientStub = nil
 	if fake.newRemoteClientReturnsOnCall == nil {
 		fake.newRemoteClientReturnsOnCall = make(map[int]struct {

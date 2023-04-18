@@ -5,10 +5,67 @@ import (
 	"sync"
 
 	"code.cloudfoundry.org/dockerdriver"
-	"code.cloudfoundry.org/lager/v3"
+	lager "code.cloudfoundry.org/lager/v3"
 )
 
 type FakeMatchableDriver struct {
+	ActivateStub        func(dockerdriver.Env) dockerdriver.ActivateResponse
+	activateMutex       sync.RWMutex
+	activateArgsForCall []struct {
+		arg1 dockerdriver.Env
+	}
+	activateReturns struct {
+		result1 dockerdriver.ActivateResponse
+	}
+	activateReturnsOnCall map[int]struct {
+		result1 dockerdriver.ActivateResponse
+	}
+	CapabilitiesStub        func(dockerdriver.Env) dockerdriver.CapabilitiesResponse
+	capabilitiesMutex       sync.RWMutex
+	capabilitiesArgsForCall []struct {
+		arg1 dockerdriver.Env
+	}
+	capabilitiesReturns struct {
+		result1 dockerdriver.CapabilitiesResponse
+	}
+	capabilitiesReturnsOnCall map[int]struct {
+		result1 dockerdriver.CapabilitiesResponse
+	}
+	CreateStub        func(dockerdriver.Env, dockerdriver.CreateRequest) dockerdriver.ErrorResponse
+	createMutex       sync.RWMutex
+	createArgsForCall []struct {
+		arg1 dockerdriver.Env
+		arg2 dockerdriver.CreateRequest
+	}
+	createReturns struct {
+		result1 dockerdriver.ErrorResponse
+	}
+	createReturnsOnCall map[int]struct {
+		result1 dockerdriver.ErrorResponse
+	}
+	GetStub        func(dockerdriver.Env, dockerdriver.GetRequest) dockerdriver.GetResponse
+	getMutex       sync.RWMutex
+	getArgsForCall []struct {
+		arg1 dockerdriver.Env
+		arg2 dockerdriver.GetRequest
+	}
+	getReturns struct {
+		result1 dockerdriver.GetResponse
+	}
+	getReturnsOnCall map[int]struct {
+		result1 dockerdriver.GetResponse
+	}
+	ListStub        func(dockerdriver.Env) dockerdriver.ListResponse
+	listMutex       sync.RWMutex
+	listArgsForCall []struct {
+		arg1 dockerdriver.Env
+	}
+	listReturns struct {
+		result1 dockerdriver.ListResponse
+	}
+	listReturnsOnCall map[int]struct {
+		result1 dockerdriver.ListResponse
+	}
 	MatchesStub        func(lager.Logger, string, *dockerdriver.TLSConfig) bool
 	matchesMutex       sync.RWMutex
 	matchesArgsForCall []struct {
@@ -22,45 +79,11 @@ type FakeMatchableDriver struct {
 	matchesReturnsOnCall map[int]struct {
 		result1 bool
 	}
-	ActivateStub        func(env dockerdriver.Env) dockerdriver.ActivateResponse
-	activateMutex       sync.RWMutex
-	activateArgsForCall []struct {
-		env dockerdriver.Env
-	}
-	activateReturns struct {
-		result1 dockerdriver.ActivateResponse
-	}
-	activateReturnsOnCall map[int]struct {
-		result1 dockerdriver.ActivateResponse
-	}
-	GetStub        func(env dockerdriver.Env, getRequest dockerdriver.GetRequest) dockerdriver.GetResponse
-	getMutex       sync.RWMutex
-	getArgsForCall []struct {
-		env        dockerdriver.Env
-		getRequest dockerdriver.GetRequest
-	}
-	getReturns struct {
-		result1 dockerdriver.GetResponse
-	}
-	getReturnsOnCall map[int]struct {
-		result1 dockerdriver.GetResponse
-	}
-	ListStub        func(env dockerdriver.Env) dockerdriver.ListResponse
-	listMutex       sync.RWMutex
-	listArgsForCall []struct {
-		env dockerdriver.Env
-	}
-	listReturns struct {
-		result1 dockerdriver.ListResponse
-	}
-	listReturnsOnCall map[int]struct {
-		result1 dockerdriver.ListResponse
-	}
-	MountStub        func(env dockerdriver.Env, mountRequest dockerdriver.MountRequest) dockerdriver.MountResponse
+	MountStub        func(dockerdriver.Env, dockerdriver.MountRequest) dockerdriver.MountResponse
 	mountMutex       sync.RWMutex
 	mountArgsForCall []struct {
-		env          dockerdriver.Env
-		mountRequest dockerdriver.MountRequest
+		arg1 dockerdriver.Env
+		arg2 dockerdriver.MountRequest
 	}
 	mountReturns struct {
 		result1 dockerdriver.MountResponse
@@ -68,11 +91,11 @@ type FakeMatchableDriver struct {
 	mountReturnsOnCall map[int]struct {
 		result1 dockerdriver.MountResponse
 	}
-	PathStub        func(env dockerdriver.Env, pathRequest dockerdriver.PathRequest) dockerdriver.PathResponse
+	PathStub        func(dockerdriver.Env, dockerdriver.PathRequest) dockerdriver.PathResponse
 	pathMutex       sync.RWMutex
 	pathArgsForCall []struct {
-		env         dockerdriver.Env
-		pathRequest dockerdriver.PathRequest
+		arg1 dockerdriver.Env
+		arg2 dockerdriver.PathRequest
 	}
 	pathReturns struct {
 		result1 dockerdriver.PathResponse
@@ -80,46 +103,11 @@ type FakeMatchableDriver struct {
 	pathReturnsOnCall map[int]struct {
 		result1 dockerdriver.PathResponse
 	}
-	UnmountStub        func(env dockerdriver.Env, unmountRequest dockerdriver.UnmountRequest) dockerdriver.ErrorResponse
-	unmountMutex       sync.RWMutex
-	unmountArgsForCall []struct {
-		env            dockerdriver.Env
-		unmountRequest dockerdriver.UnmountRequest
-	}
-	unmountReturns struct {
-		result1 dockerdriver.ErrorResponse
-	}
-	unmountReturnsOnCall map[int]struct {
-		result1 dockerdriver.ErrorResponse
-	}
-	CapabilitiesStub        func(env dockerdriver.Env) dockerdriver.CapabilitiesResponse
-	capabilitiesMutex       sync.RWMutex
-	capabilitiesArgsForCall []struct {
-		env dockerdriver.Env
-	}
-	capabilitiesReturns struct {
-		result1 dockerdriver.CapabilitiesResponse
-	}
-	capabilitiesReturnsOnCall map[int]struct {
-		result1 dockerdriver.CapabilitiesResponse
-	}
-	CreateStub        func(env dockerdriver.Env, createRequest dockerdriver.CreateRequest) dockerdriver.ErrorResponse
-	createMutex       sync.RWMutex
-	createArgsForCall []struct {
-		env           dockerdriver.Env
-		createRequest dockerdriver.CreateRequest
-	}
-	createReturns struct {
-		result1 dockerdriver.ErrorResponse
-	}
-	createReturnsOnCall map[int]struct {
-		result1 dockerdriver.ErrorResponse
-	}
-	RemoveStub        func(env dockerdriver.Env, removeRequest dockerdriver.RemoveRequest) dockerdriver.ErrorResponse
+	RemoveStub        func(dockerdriver.Env, dockerdriver.RemoveRequest) dockerdriver.ErrorResponse
 	removeMutex       sync.RWMutex
 	removeArgsForCall []struct {
-		env           dockerdriver.Env
-		removeRequest dockerdriver.RemoveRequest
+		arg1 dockerdriver.Env
+		arg2 dockerdriver.RemoveRequest
 	}
 	removeReturns struct {
 		result1 dockerdriver.ErrorResponse
@@ -127,75 +115,39 @@ type FakeMatchableDriver struct {
 	removeReturnsOnCall map[int]struct {
 		result1 dockerdriver.ErrorResponse
 	}
+	UnmountStub        func(dockerdriver.Env, dockerdriver.UnmountRequest) dockerdriver.ErrorResponse
+	unmountMutex       sync.RWMutex
+	unmountArgsForCall []struct {
+		arg1 dockerdriver.Env
+		arg2 dockerdriver.UnmountRequest
+	}
+	unmountReturns struct {
+		result1 dockerdriver.ErrorResponse
+	}
+	unmountReturnsOnCall map[int]struct {
+		result1 dockerdriver.ErrorResponse
+	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeMatchableDriver) Matches(arg1 lager.Logger, arg2 string, arg3 *dockerdriver.TLSConfig) bool {
-	fake.matchesMutex.Lock()
-	ret, specificReturn := fake.matchesReturnsOnCall[len(fake.matchesArgsForCall)]
-	fake.matchesArgsForCall = append(fake.matchesArgsForCall, struct {
-		arg1 lager.Logger
-		arg2 string
-		arg3 *dockerdriver.TLSConfig
-	}{arg1, arg2, arg3})
-	fake.recordInvocation("Matches", []interface{}{arg1, arg2, arg3})
-	fake.matchesMutex.Unlock()
-	if fake.MatchesStub != nil {
-		return fake.MatchesStub(arg1, arg2, arg3)
-	}
-	if specificReturn {
-		return ret.result1
-	}
-	return fake.matchesReturns.result1
-}
-
-func (fake *FakeMatchableDriver) MatchesCallCount() int {
-	fake.matchesMutex.RLock()
-	defer fake.matchesMutex.RUnlock()
-	return len(fake.matchesArgsForCall)
-}
-
-func (fake *FakeMatchableDriver) MatchesArgsForCall(i int) (lager.Logger, string, *dockerdriver.TLSConfig) {
-	fake.matchesMutex.RLock()
-	defer fake.matchesMutex.RUnlock()
-	return fake.matchesArgsForCall[i].arg1, fake.matchesArgsForCall[i].arg2, fake.matchesArgsForCall[i].arg3
-}
-
-func (fake *FakeMatchableDriver) MatchesReturns(result1 bool) {
-	fake.MatchesStub = nil
-	fake.matchesReturns = struct {
-		result1 bool
-	}{result1}
-}
-
-func (fake *FakeMatchableDriver) MatchesReturnsOnCall(i int, result1 bool) {
-	fake.MatchesStub = nil
-	if fake.matchesReturnsOnCall == nil {
-		fake.matchesReturnsOnCall = make(map[int]struct {
-			result1 bool
-		})
-	}
-	fake.matchesReturnsOnCall[i] = struct {
-		result1 bool
-	}{result1}
-}
-
-func (fake *FakeMatchableDriver) Activate(env dockerdriver.Env) dockerdriver.ActivateResponse {
+func (fake *FakeMatchableDriver) Activate(arg1 dockerdriver.Env) dockerdriver.ActivateResponse {
 	fake.activateMutex.Lock()
 	ret, specificReturn := fake.activateReturnsOnCall[len(fake.activateArgsForCall)]
 	fake.activateArgsForCall = append(fake.activateArgsForCall, struct {
-		env dockerdriver.Env
-	}{env})
-	fake.recordInvocation("Activate", []interface{}{env})
+		arg1 dockerdriver.Env
+	}{arg1})
+	stub := fake.ActivateStub
+	fakeReturns := fake.activateReturns
+	fake.recordInvocation("Activate", []interface{}{arg1})
 	fake.activateMutex.Unlock()
-	if fake.ActivateStub != nil {
-		return fake.ActivateStub(env)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	return fake.activateReturns.result1
+	return fakeReturns.result1
 }
 
 func (fake *FakeMatchableDriver) ActivateCallCount() int {
@@ -204,13 +156,22 @@ func (fake *FakeMatchableDriver) ActivateCallCount() int {
 	return len(fake.activateArgsForCall)
 }
 
+func (fake *FakeMatchableDriver) ActivateCalls(stub func(dockerdriver.Env) dockerdriver.ActivateResponse) {
+	fake.activateMutex.Lock()
+	defer fake.activateMutex.Unlock()
+	fake.ActivateStub = stub
+}
+
 func (fake *FakeMatchableDriver) ActivateArgsForCall(i int) dockerdriver.Env {
 	fake.activateMutex.RLock()
 	defer fake.activateMutex.RUnlock()
-	return fake.activateArgsForCall[i].env
+	argsForCall := fake.activateArgsForCall[i]
+	return argsForCall.arg1
 }
 
 func (fake *FakeMatchableDriver) ActivateReturns(result1 dockerdriver.ActivateResponse) {
+	fake.activateMutex.Lock()
+	defer fake.activateMutex.Unlock()
 	fake.ActivateStub = nil
 	fake.activateReturns = struct {
 		result1 dockerdriver.ActivateResponse
@@ -218,6 +179,8 @@ func (fake *FakeMatchableDriver) ActivateReturns(result1 dockerdriver.ActivateRe
 }
 
 func (fake *FakeMatchableDriver) ActivateReturnsOnCall(i int, result1 dockerdriver.ActivateResponse) {
+	fake.activateMutex.Lock()
+	defer fake.activateMutex.Unlock()
 	fake.ActivateStub = nil
 	if fake.activateReturnsOnCall == nil {
 		fake.activateReturnsOnCall = make(map[int]struct {
@@ -229,265 +192,23 @@ func (fake *FakeMatchableDriver) ActivateReturnsOnCall(i int, result1 dockerdriv
 	}{result1}
 }
 
-func (fake *FakeMatchableDriver) Get(env dockerdriver.Env, getRequest dockerdriver.GetRequest) dockerdriver.GetResponse {
-	fake.getMutex.Lock()
-	ret, specificReturn := fake.getReturnsOnCall[len(fake.getArgsForCall)]
-	fake.getArgsForCall = append(fake.getArgsForCall, struct {
-		env        dockerdriver.Env
-		getRequest dockerdriver.GetRequest
-	}{env, getRequest})
-	fake.recordInvocation("Get", []interface{}{env, getRequest})
-	fake.getMutex.Unlock()
-	if fake.GetStub != nil {
-		return fake.GetStub(env, getRequest)
-	}
-	if specificReturn {
-		return ret.result1
-	}
-	return fake.getReturns.result1
-}
-
-func (fake *FakeMatchableDriver) GetCallCount() int {
-	fake.getMutex.RLock()
-	defer fake.getMutex.RUnlock()
-	return len(fake.getArgsForCall)
-}
-
-func (fake *FakeMatchableDriver) GetArgsForCall(i int) (dockerdriver.Env, dockerdriver.GetRequest) {
-	fake.getMutex.RLock()
-	defer fake.getMutex.RUnlock()
-	return fake.getArgsForCall[i].env, fake.getArgsForCall[i].getRequest
-}
-
-func (fake *FakeMatchableDriver) GetReturns(result1 dockerdriver.GetResponse) {
-	fake.GetStub = nil
-	fake.getReturns = struct {
-		result1 dockerdriver.GetResponse
-	}{result1}
-}
-
-func (fake *FakeMatchableDriver) GetReturnsOnCall(i int, result1 dockerdriver.GetResponse) {
-	fake.GetStub = nil
-	if fake.getReturnsOnCall == nil {
-		fake.getReturnsOnCall = make(map[int]struct {
-			result1 dockerdriver.GetResponse
-		})
-	}
-	fake.getReturnsOnCall[i] = struct {
-		result1 dockerdriver.GetResponse
-	}{result1}
-}
-
-func (fake *FakeMatchableDriver) List(env dockerdriver.Env) dockerdriver.ListResponse {
-	fake.listMutex.Lock()
-	ret, specificReturn := fake.listReturnsOnCall[len(fake.listArgsForCall)]
-	fake.listArgsForCall = append(fake.listArgsForCall, struct {
-		env dockerdriver.Env
-	}{env})
-	fake.recordInvocation("List", []interface{}{env})
-	fake.listMutex.Unlock()
-	if fake.ListStub != nil {
-		return fake.ListStub(env)
-	}
-	if specificReturn {
-		return ret.result1
-	}
-	return fake.listReturns.result1
-}
-
-func (fake *FakeMatchableDriver) ListCallCount() int {
-	fake.listMutex.RLock()
-	defer fake.listMutex.RUnlock()
-	return len(fake.listArgsForCall)
-}
-
-func (fake *FakeMatchableDriver) ListArgsForCall(i int) dockerdriver.Env {
-	fake.listMutex.RLock()
-	defer fake.listMutex.RUnlock()
-	return fake.listArgsForCall[i].env
-}
-
-func (fake *FakeMatchableDriver) ListReturns(result1 dockerdriver.ListResponse) {
-	fake.ListStub = nil
-	fake.listReturns = struct {
-		result1 dockerdriver.ListResponse
-	}{result1}
-}
-
-func (fake *FakeMatchableDriver) ListReturnsOnCall(i int, result1 dockerdriver.ListResponse) {
-	fake.ListStub = nil
-	if fake.listReturnsOnCall == nil {
-		fake.listReturnsOnCall = make(map[int]struct {
-			result1 dockerdriver.ListResponse
-		})
-	}
-	fake.listReturnsOnCall[i] = struct {
-		result1 dockerdriver.ListResponse
-	}{result1}
-}
-
-func (fake *FakeMatchableDriver) Mount(env dockerdriver.Env, mountRequest dockerdriver.MountRequest) dockerdriver.MountResponse {
-	fake.mountMutex.Lock()
-	ret, specificReturn := fake.mountReturnsOnCall[len(fake.mountArgsForCall)]
-	fake.mountArgsForCall = append(fake.mountArgsForCall, struct {
-		env          dockerdriver.Env
-		mountRequest dockerdriver.MountRequest
-	}{env, mountRequest})
-	fake.recordInvocation("Mount", []interface{}{env, mountRequest})
-	fake.mountMutex.Unlock()
-	if fake.MountStub != nil {
-		return fake.MountStub(env, mountRequest)
-	}
-	if specificReturn {
-		return ret.result1
-	}
-	return fake.mountReturns.result1
-}
-
-func (fake *FakeMatchableDriver) MountCallCount() int {
-	fake.mountMutex.RLock()
-	defer fake.mountMutex.RUnlock()
-	return len(fake.mountArgsForCall)
-}
-
-func (fake *FakeMatchableDriver) MountArgsForCall(i int) (dockerdriver.Env, dockerdriver.MountRequest) {
-	fake.mountMutex.RLock()
-	defer fake.mountMutex.RUnlock()
-	return fake.mountArgsForCall[i].env, fake.mountArgsForCall[i].mountRequest
-}
-
-func (fake *FakeMatchableDriver) MountReturns(result1 dockerdriver.MountResponse) {
-	fake.MountStub = nil
-	fake.mountReturns = struct {
-		result1 dockerdriver.MountResponse
-	}{result1}
-}
-
-func (fake *FakeMatchableDriver) MountReturnsOnCall(i int, result1 dockerdriver.MountResponse) {
-	fake.MountStub = nil
-	if fake.mountReturnsOnCall == nil {
-		fake.mountReturnsOnCall = make(map[int]struct {
-			result1 dockerdriver.MountResponse
-		})
-	}
-	fake.mountReturnsOnCall[i] = struct {
-		result1 dockerdriver.MountResponse
-	}{result1}
-}
-
-func (fake *FakeMatchableDriver) Path(env dockerdriver.Env, pathRequest dockerdriver.PathRequest) dockerdriver.PathResponse {
-	fake.pathMutex.Lock()
-	ret, specificReturn := fake.pathReturnsOnCall[len(fake.pathArgsForCall)]
-	fake.pathArgsForCall = append(fake.pathArgsForCall, struct {
-		env         dockerdriver.Env
-		pathRequest dockerdriver.PathRequest
-	}{env, pathRequest})
-	fake.recordInvocation("Path", []interface{}{env, pathRequest})
-	fake.pathMutex.Unlock()
-	if fake.PathStub != nil {
-		return fake.PathStub(env, pathRequest)
-	}
-	if specificReturn {
-		return ret.result1
-	}
-	return fake.pathReturns.result1
-}
-
-func (fake *FakeMatchableDriver) PathCallCount() int {
-	fake.pathMutex.RLock()
-	defer fake.pathMutex.RUnlock()
-	return len(fake.pathArgsForCall)
-}
-
-func (fake *FakeMatchableDriver) PathArgsForCall(i int) (dockerdriver.Env, dockerdriver.PathRequest) {
-	fake.pathMutex.RLock()
-	defer fake.pathMutex.RUnlock()
-	return fake.pathArgsForCall[i].env, fake.pathArgsForCall[i].pathRequest
-}
-
-func (fake *FakeMatchableDriver) PathReturns(result1 dockerdriver.PathResponse) {
-	fake.PathStub = nil
-	fake.pathReturns = struct {
-		result1 dockerdriver.PathResponse
-	}{result1}
-}
-
-func (fake *FakeMatchableDriver) PathReturnsOnCall(i int, result1 dockerdriver.PathResponse) {
-	fake.PathStub = nil
-	if fake.pathReturnsOnCall == nil {
-		fake.pathReturnsOnCall = make(map[int]struct {
-			result1 dockerdriver.PathResponse
-		})
-	}
-	fake.pathReturnsOnCall[i] = struct {
-		result1 dockerdriver.PathResponse
-	}{result1}
-}
-
-func (fake *FakeMatchableDriver) Unmount(env dockerdriver.Env, unmountRequest dockerdriver.UnmountRequest) dockerdriver.ErrorResponse {
-	fake.unmountMutex.Lock()
-	ret, specificReturn := fake.unmountReturnsOnCall[len(fake.unmountArgsForCall)]
-	fake.unmountArgsForCall = append(fake.unmountArgsForCall, struct {
-		env            dockerdriver.Env
-		unmountRequest dockerdriver.UnmountRequest
-	}{env, unmountRequest})
-	fake.recordInvocation("Unmount", []interface{}{env, unmountRequest})
-	fake.unmountMutex.Unlock()
-	if fake.UnmountStub != nil {
-		return fake.UnmountStub(env, unmountRequest)
-	}
-	if specificReturn {
-		return ret.result1
-	}
-	return fake.unmountReturns.result1
-}
-
-func (fake *FakeMatchableDriver) UnmountCallCount() int {
-	fake.unmountMutex.RLock()
-	defer fake.unmountMutex.RUnlock()
-	return len(fake.unmountArgsForCall)
-}
-
-func (fake *FakeMatchableDriver) UnmountArgsForCall(i int) (dockerdriver.Env, dockerdriver.UnmountRequest) {
-	fake.unmountMutex.RLock()
-	defer fake.unmountMutex.RUnlock()
-	return fake.unmountArgsForCall[i].env, fake.unmountArgsForCall[i].unmountRequest
-}
-
-func (fake *FakeMatchableDriver) UnmountReturns(result1 dockerdriver.ErrorResponse) {
-	fake.UnmountStub = nil
-	fake.unmountReturns = struct {
-		result1 dockerdriver.ErrorResponse
-	}{result1}
-}
-
-func (fake *FakeMatchableDriver) UnmountReturnsOnCall(i int, result1 dockerdriver.ErrorResponse) {
-	fake.UnmountStub = nil
-	if fake.unmountReturnsOnCall == nil {
-		fake.unmountReturnsOnCall = make(map[int]struct {
-			result1 dockerdriver.ErrorResponse
-		})
-	}
-	fake.unmountReturnsOnCall[i] = struct {
-		result1 dockerdriver.ErrorResponse
-	}{result1}
-}
-
-func (fake *FakeMatchableDriver) Capabilities(env dockerdriver.Env) dockerdriver.CapabilitiesResponse {
+func (fake *FakeMatchableDriver) Capabilities(arg1 dockerdriver.Env) dockerdriver.CapabilitiesResponse {
 	fake.capabilitiesMutex.Lock()
 	ret, specificReturn := fake.capabilitiesReturnsOnCall[len(fake.capabilitiesArgsForCall)]
 	fake.capabilitiesArgsForCall = append(fake.capabilitiesArgsForCall, struct {
-		env dockerdriver.Env
-	}{env})
-	fake.recordInvocation("Capabilities", []interface{}{env})
+		arg1 dockerdriver.Env
+	}{arg1})
+	stub := fake.CapabilitiesStub
+	fakeReturns := fake.capabilitiesReturns
+	fake.recordInvocation("Capabilities", []interface{}{arg1})
 	fake.capabilitiesMutex.Unlock()
-	if fake.CapabilitiesStub != nil {
-		return fake.CapabilitiesStub(env)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	return fake.capabilitiesReturns.result1
+	return fakeReturns.result1
 }
 
 func (fake *FakeMatchableDriver) CapabilitiesCallCount() int {
@@ -496,13 +217,22 @@ func (fake *FakeMatchableDriver) CapabilitiesCallCount() int {
 	return len(fake.capabilitiesArgsForCall)
 }
 
+func (fake *FakeMatchableDriver) CapabilitiesCalls(stub func(dockerdriver.Env) dockerdriver.CapabilitiesResponse) {
+	fake.capabilitiesMutex.Lock()
+	defer fake.capabilitiesMutex.Unlock()
+	fake.CapabilitiesStub = stub
+}
+
 func (fake *FakeMatchableDriver) CapabilitiesArgsForCall(i int) dockerdriver.Env {
 	fake.capabilitiesMutex.RLock()
 	defer fake.capabilitiesMutex.RUnlock()
-	return fake.capabilitiesArgsForCall[i].env
+	argsForCall := fake.capabilitiesArgsForCall[i]
+	return argsForCall.arg1
 }
 
 func (fake *FakeMatchableDriver) CapabilitiesReturns(result1 dockerdriver.CapabilitiesResponse) {
+	fake.capabilitiesMutex.Lock()
+	defer fake.capabilitiesMutex.Unlock()
 	fake.CapabilitiesStub = nil
 	fake.capabilitiesReturns = struct {
 		result1 dockerdriver.CapabilitiesResponse
@@ -510,6 +240,8 @@ func (fake *FakeMatchableDriver) CapabilitiesReturns(result1 dockerdriver.Capabi
 }
 
 func (fake *FakeMatchableDriver) CapabilitiesReturnsOnCall(i int, result1 dockerdriver.CapabilitiesResponse) {
+	fake.capabilitiesMutex.Lock()
+	defer fake.capabilitiesMutex.Unlock()
 	fake.CapabilitiesStub = nil
 	if fake.capabilitiesReturnsOnCall == nil {
 		fake.capabilitiesReturnsOnCall = make(map[int]struct {
@@ -521,22 +253,24 @@ func (fake *FakeMatchableDriver) CapabilitiesReturnsOnCall(i int, result1 docker
 	}{result1}
 }
 
-func (fake *FakeMatchableDriver) Create(env dockerdriver.Env, createRequest dockerdriver.CreateRequest) dockerdriver.ErrorResponse {
+func (fake *FakeMatchableDriver) Create(arg1 dockerdriver.Env, arg2 dockerdriver.CreateRequest) dockerdriver.ErrorResponse {
 	fake.createMutex.Lock()
 	ret, specificReturn := fake.createReturnsOnCall[len(fake.createArgsForCall)]
 	fake.createArgsForCall = append(fake.createArgsForCall, struct {
-		env           dockerdriver.Env
-		createRequest dockerdriver.CreateRequest
-	}{env, createRequest})
-	fake.recordInvocation("Create", []interface{}{env, createRequest})
+		arg1 dockerdriver.Env
+		arg2 dockerdriver.CreateRequest
+	}{arg1, arg2})
+	stub := fake.CreateStub
+	fakeReturns := fake.createReturns
+	fake.recordInvocation("Create", []interface{}{arg1, arg2})
 	fake.createMutex.Unlock()
-	if fake.CreateStub != nil {
-		return fake.CreateStub(env, createRequest)
+	if stub != nil {
+		return stub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	return fake.createReturns.result1
+	return fakeReturns.result1
 }
 
 func (fake *FakeMatchableDriver) CreateCallCount() int {
@@ -545,13 +279,22 @@ func (fake *FakeMatchableDriver) CreateCallCount() int {
 	return len(fake.createArgsForCall)
 }
 
+func (fake *FakeMatchableDriver) CreateCalls(stub func(dockerdriver.Env, dockerdriver.CreateRequest) dockerdriver.ErrorResponse) {
+	fake.createMutex.Lock()
+	defer fake.createMutex.Unlock()
+	fake.CreateStub = stub
+}
+
 func (fake *FakeMatchableDriver) CreateArgsForCall(i int) (dockerdriver.Env, dockerdriver.CreateRequest) {
 	fake.createMutex.RLock()
 	defer fake.createMutex.RUnlock()
-	return fake.createArgsForCall[i].env, fake.createArgsForCall[i].createRequest
+	argsForCall := fake.createArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2
 }
 
 func (fake *FakeMatchableDriver) CreateReturns(result1 dockerdriver.ErrorResponse) {
+	fake.createMutex.Lock()
+	defer fake.createMutex.Unlock()
 	fake.CreateStub = nil
 	fake.createReturns = struct {
 		result1 dockerdriver.ErrorResponse
@@ -559,6 +302,8 @@ func (fake *FakeMatchableDriver) CreateReturns(result1 dockerdriver.ErrorRespons
 }
 
 func (fake *FakeMatchableDriver) CreateReturnsOnCall(i int, result1 dockerdriver.ErrorResponse) {
+	fake.createMutex.Lock()
+	defer fake.createMutex.Unlock()
 	fake.CreateStub = nil
 	if fake.createReturnsOnCall == nil {
 		fake.createReturnsOnCall = make(map[int]struct {
@@ -570,22 +315,334 @@ func (fake *FakeMatchableDriver) CreateReturnsOnCall(i int, result1 dockerdriver
 	}{result1}
 }
 
-func (fake *FakeMatchableDriver) Remove(env dockerdriver.Env, removeRequest dockerdriver.RemoveRequest) dockerdriver.ErrorResponse {
-	fake.removeMutex.Lock()
-	ret, specificReturn := fake.removeReturnsOnCall[len(fake.removeArgsForCall)]
-	fake.removeArgsForCall = append(fake.removeArgsForCall, struct {
-		env           dockerdriver.Env
-		removeRequest dockerdriver.RemoveRequest
-	}{env, removeRequest})
-	fake.recordInvocation("Remove", []interface{}{env, removeRequest})
-	fake.removeMutex.Unlock()
-	if fake.RemoveStub != nil {
-		return fake.RemoveStub(env, removeRequest)
+func (fake *FakeMatchableDriver) Get(arg1 dockerdriver.Env, arg2 dockerdriver.GetRequest) dockerdriver.GetResponse {
+	fake.getMutex.Lock()
+	ret, specificReturn := fake.getReturnsOnCall[len(fake.getArgsForCall)]
+	fake.getArgsForCall = append(fake.getArgsForCall, struct {
+		arg1 dockerdriver.Env
+		arg2 dockerdriver.GetRequest
+	}{arg1, arg2})
+	stub := fake.GetStub
+	fakeReturns := fake.getReturns
+	fake.recordInvocation("Get", []interface{}{arg1, arg2})
+	fake.getMutex.Unlock()
+	if stub != nil {
+		return stub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	return fake.removeReturns.result1
+	return fakeReturns.result1
+}
+
+func (fake *FakeMatchableDriver) GetCallCount() int {
+	fake.getMutex.RLock()
+	defer fake.getMutex.RUnlock()
+	return len(fake.getArgsForCall)
+}
+
+func (fake *FakeMatchableDriver) GetCalls(stub func(dockerdriver.Env, dockerdriver.GetRequest) dockerdriver.GetResponse) {
+	fake.getMutex.Lock()
+	defer fake.getMutex.Unlock()
+	fake.GetStub = stub
+}
+
+func (fake *FakeMatchableDriver) GetArgsForCall(i int) (dockerdriver.Env, dockerdriver.GetRequest) {
+	fake.getMutex.RLock()
+	defer fake.getMutex.RUnlock()
+	argsForCall := fake.getArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2
+}
+
+func (fake *FakeMatchableDriver) GetReturns(result1 dockerdriver.GetResponse) {
+	fake.getMutex.Lock()
+	defer fake.getMutex.Unlock()
+	fake.GetStub = nil
+	fake.getReturns = struct {
+		result1 dockerdriver.GetResponse
+	}{result1}
+}
+
+func (fake *FakeMatchableDriver) GetReturnsOnCall(i int, result1 dockerdriver.GetResponse) {
+	fake.getMutex.Lock()
+	defer fake.getMutex.Unlock()
+	fake.GetStub = nil
+	if fake.getReturnsOnCall == nil {
+		fake.getReturnsOnCall = make(map[int]struct {
+			result1 dockerdriver.GetResponse
+		})
+	}
+	fake.getReturnsOnCall[i] = struct {
+		result1 dockerdriver.GetResponse
+	}{result1}
+}
+
+func (fake *FakeMatchableDriver) List(arg1 dockerdriver.Env) dockerdriver.ListResponse {
+	fake.listMutex.Lock()
+	ret, specificReturn := fake.listReturnsOnCall[len(fake.listArgsForCall)]
+	fake.listArgsForCall = append(fake.listArgsForCall, struct {
+		arg1 dockerdriver.Env
+	}{arg1})
+	stub := fake.ListStub
+	fakeReturns := fake.listReturns
+	fake.recordInvocation("List", []interface{}{arg1})
+	fake.listMutex.Unlock()
+	if stub != nil {
+		return stub(arg1)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fakeReturns.result1
+}
+
+func (fake *FakeMatchableDriver) ListCallCount() int {
+	fake.listMutex.RLock()
+	defer fake.listMutex.RUnlock()
+	return len(fake.listArgsForCall)
+}
+
+func (fake *FakeMatchableDriver) ListCalls(stub func(dockerdriver.Env) dockerdriver.ListResponse) {
+	fake.listMutex.Lock()
+	defer fake.listMutex.Unlock()
+	fake.ListStub = stub
+}
+
+func (fake *FakeMatchableDriver) ListArgsForCall(i int) dockerdriver.Env {
+	fake.listMutex.RLock()
+	defer fake.listMutex.RUnlock()
+	argsForCall := fake.listArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeMatchableDriver) ListReturns(result1 dockerdriver.ListResponse) {
+	fake.listMutex.Lock()
+	defer fake.listMutex.Unlock()
+	fake.ListStub = nil
+	fake.listReturns = struct {
+		result1 dockerdriver.ListResponse
+	}{result1}
+}
+
+func (fake *FakeMatchableDriver) ListReturnsOnCall(i int, result1 dockerdriver.ListResponse) {
+	fake.listMutex.Lock()
+	defer fake.listMutex.Unlock()
+	fake.ListStub = nil
+	if fake.listReturnsOnCall == nil {
+		fake.listReturnsOnCall = make(map[int]struct {
+			result1 dockerdriver.ListResponse
+		})
+	}
+	fake.listReturnsOnCall[i] = struct {
+		result1 dockerdriver.ListResponse
+	}{result1}
+}
+
+func (fake *FakeMatchableDriver) Matches(arg1 lager.Logger, arg2 string, arg3 *dockerdriver.TLSConfig) bool {
+	fake.matchesMutex.Lock()
+	ret, specificReturn := fake.matchesReturnsOnCall[len(fake.matchesArgsForCall)]
+	fake.matchesArgsForCall = append(fake.matchesArgsForCall, struct {
+		arg1 lager.Logger
+		arg2 string
+		arg3 *dockerdriver.TLSConfig
+	}{arg1, arg2, arg3})
+	stub := fake.MatchesStub
+	fakeReturns := fake.matchesReturns
+	fake.recordInvocation("Matches", []interface{}{arg1, arg2, arg3})
+	fake.matchesMutex.Unlock()
+	if stub != nil {
+		return stub(arg1, arg2, arg3)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fakeReturns.result1
+}
+
+func (fake *FakeMatchableDriver) MatchesCallCount() int {
+	fake.matchesMutex.RLock()
+	defer fake.matchesMutex.RUnlock()
+	return len(fake.matchesArgsForCall)
+}
+
+func (fake *FakeMatchableDriver) MatchesCalls(stub func(lager.Logger, string, *dockerdriver.TLSConfig) bool) {
+	fake.matchesMutex.Lock()
+	defer fake.matchesMutex.Unlock()
+	fake.MatchesStub = stub
+}
+
+func (fake *FakeMatchableDriver) MatchesArgsForCall(i int) (lager.Logger, string, *dockerdriver.TLSConfig) {
+	fake.matchesMutex.RLock()
+	defer fake.matchesMutex.RUnlock()
+	argsForCall := fake.matchesArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
+}
+
+func (fake *FakeMatchableDriver) MatchesReturns(result1 bool) {
+	fake.matchesMutex.Lock()
+	defer fake.matchesMutex.Unlock()
+	fake.MatchesStub = nil
+	fake.matchesReturns = struct {
+		result1 bool
+	}{result1}
+}
+
+func (fake *FakeMatchableDriver) MatchesReturnsOnCall(i int, result1 bool) {
+	fake.matchesMutex.Lock()
+	defer fake.matchesMutex.Unlock()
+	fake.MatchesStub = nil
+	if fake.matchesReturnsOnCall == nil {
+		fake.matchesReturnsOnCall = make(map[int]struct {
+			result1 bool
+		})
+	}
+	fake.matchesReturnsOnCall[i] = struct {
+		result1 bool
+	}{result1}
+}
+
+func (fake *FakeMatchableDriver) Mount(arg1 dockerdriver.Env, arg2 dockerdriver.MountRequest) dockerdriver.MountResponse {
+	fake.mountMutex.Lock()
+	ret, specificReturn := fake.mountReturnsOnCall[len(fake.mountArgsForCall)]
+	fake.mountArgsForCall = append(fake.mountArgsForCall, struct {
+		arg1 dockerdriver.Env
+		arg2 dockerdriver.MountRequest
+	}{arg1, arg2})
+	stub := fake.MountStub
+	fakeReturns := fake.mountReturns
+	fake.recordInvocation("Mount", []interface{}{arg1, arg2})
+	fake.mountMutex.Unlock()
+	if stub != nil {
+		return stub(arg1, arg2)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fakeReturns.result1
+}
+
+func (fake *FakeMatchableDriver) MountCallCount() int {
+	fake.mountMutex.RLock()
+	defer fake.mountMutex.RUnlock()
+	return len(fake.mountArgsForCall)
+}
+
+func (fake *FakeMatchableDriver) MountCalls(stub func(dockerdriver.Env, dockerdriver.MountRequest) dockerdriver.MountResponse) {
+	fake.mountMutex.Lock()
+	defer fake.mountMutex.Unlock()
+	fake.MountStub = stub
+}
+
+func (fake *FakeMatchableDriver) MountArgsForCall(i int) (dockerdriver.Env, dockerdriver.MountRequest) {
+	fake.mountMutex.RLock()
+	defer fake.mountMutex.RUnlock()
+	argsForCall := fake.mountArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2
+}
+
+func (fake *FakeMatchableDriver) MountReturns(result1 dockerdriver.MountResponse) {
+	fake.mountMutex.Lock()
+	defer fake.mountMutex.Unlock()
+	fake.MountStub = nil
+	fake.mountReturns = struct {
+		result1 dockerdriver.MountResponse
+	}{result1}
+}
+
+func (fake *FakeMatchableDriver) MountReturnsOnCall(i int, result1 dockerdriver.MountResponse) {
+	fake.mountMutex.Lock()
+	defer fake.mountMutex.Unlock()
+	fake.MountStub = nil
+	if fake.mountReturnsOnCall == nil {
+		fake.mountReturnsOnCall = make(map[int]struct {
+			result1 dockerdriver.MountResponse
+		})
+	}
+	fake.mountReturnsOnCall[i] = struct {
+		result1 dockerdriver.MountResponse
+	}{result1}
+}
+
+func (fake *FakeMatchableDriver) Path(arg1 dockerdriver.Env, arg2 dockerdriver.PathRequest) dockerdriver.PathResponse {
+	fake.pathMutex.Lock()
+	ret, specificReturn := fake.pathReturnsOnCall[len(fake.pathArgsForCall)]
+	fake.pathArgsForCall = append(fake.pathArgsForCall, struct {
+		arg1 dockerdriver.Env
+		arg2 dockerdriver.PathRequest
+	}{arg1, arg2})
+	stub := fake.PathStub
+	fakeReturns := fake.pathReturns
+	fake.recordInvocation("Path", []interface{}{arg1, arg2})
+	fake.pathMutex.Unlock()
+	if stub != nil {
+		return stub(arg1, arg2)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fakeReturns.result1
+}
+
+func (fake *FakeMatchableDriver) PathCallCount() int {
+	fake.pathMutex.RLock()
+	defer fake.pathMutex.RUnlock()
+	return len(fake.pathArgsForCall)
+}
+
+func (fake *FakeMatchableDriver) PathCalls(stub func(dockerdriver.Env, dockerdriver.PathRequest) dockerdriver.PathResponse) {
+	fake.pathMutex.Lock()
+	defer fake.pathMutex.Unlock()
+	fake.PathStub = stub
+}
+
+func (fake *FakeMatchableDriver) PathArgsForCall(i int) (dockerdriver.Env, dockerdriver.PathRequest) {
+	fake.pathMutex.RLock()
+	defer fake.pathMutex.RUnlock()
+	argsForCall := fake.pathArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2
+}
+
+func (fake *FakeMatchableDriver) PathReturns(result1 dockerdriver.PathResponse) {
+	fake.pathMutex.Lock()
+	defer fake.pathMutex.Unlock()
+	fake.PathStub = nil
+	fake.pathReturns = struct {
+		result1 dockerdriver.PathResponse
+	}{result1}
+}
+
+func (fake *FakeMatchableDriver) PathReturnsOnCall(i int, result1 dockerdriver.PathResponse) {
+	fake.pathMutex.Lock()
+	defer fake.pathMutex.Unlock()
+	fake.PathStub = nil
+	if fake.pathReturnsOnCall == nil {
+		fake.pathReturnsOnCall = make(map[int]struct {
+			result1 dockerdriver.PathResponse
+		})
+	}
+	fake.pathReturnsOnCall[i] = struct {
+		result1 dockerdriver.PathResponse
+	}{result1}
+}
+
+func (fake *FakeMatchableDriver) Remove(arg1 dockerdriver.Env, arg2 dockerdriver.RemoveRequest) dockerdriver.ErrorResponse {
+	fake.removeMutex.Lock()
+	ret, specificReturn := fake.removeReturnsOnCall[len(fake.removeArgsForCall)]
+	fake.removeArgsForCall = append(fake.removeArgsForCall, struct {
+		arg1 dockerdriver.Env
+		arg2 dockerdriver.RemoveRequest
+	}{arg1, arg2})
+	stub := fake.RemoveStub
+	fakeReturns := fake.removeReturns
+	fake.recordInvocation("Remove", []interface{}{arg1, arg2})
+	fake.removeMutex.Unlock()
+	if stub != nil {
+		return stub(arg1, arg2)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fakeReturns.result1
 }
 
 func (fake *FakeMatchableDriver) RemoveCallCount() int {
@@ -594,13 +651,22 @@ func (fake *FakeMatchableDriver) RemoveCallCount() int {
 	return len(fake.removeArgsForCall)
 }
 
+func (fake *FakeMatchableDriver) RemoveCalls(stub func(dockerdriver.Env, dockerdriver.RemoveRequest) dockerdriver.ErrorResponse) {
+	fake.removeMutex.Lock()
+	defer fake.removeMutex.Unlock()
+	fake.RemoveStub = stub
+}
+
 func (fake *FakeMatchableDriver) RemoveArgsForCall(i int) (dockerdriver.Env, dockerdriver.RemoveRequest) {
 	fake.removeMutex.RLock()
 	defer fake.removeMutex.RUnlock()
-	return fake.removeArgsForCall[i].env, fake.removeArgsForCall[i].removeRequest
+	argsForCall := fake.removeArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2
 }
 
 func (fake *FakeMatchableDriver) RemoveReturns(result1 dockerdriver.ErrorResponse) {
+	fake.removeMutex.Lock()
+	defer fake.removeMutex.Unlock()
 	fake.RemoveStub = nil
 	fake.removeReturns = struct {
 		result1 dockerdriver.ErrorResponse
@@ -608,6 +674,8 @@ func (fake *FakeMatchableDriver) RemoveReturns(result1 dockerdriver.ErrorRespons
 }
 
 func (fake *FakeMatchableDriver) RemoveReturnsOnCall(i int, result1 dockerdriver.ErrorResponse) {
+	fake.removeMutex.Lock()
+	defer fake.removeMutex.Unlock()
 	fake.RemoveStub = nil
 	if fake.removeReturnsOnCall == nil {
 		fake.removeReturnsOnCall = make(map[int]struct {
@@ -619,29 +687,91 @@ func (fake *FakeMatchableDriver) RemoveReturnsOnCall(i int, result1 dockerdriver
 	}{result1}
 }
 
+func (fake *FakeMatchableDriver) Unmount(arg1 dockerdriver.Env, arg2 dockerdriver.UnmountRequest) dockerdriver.ErrorResponse {
+	fake.unmountMutex.Lock()
+	ret, specificReturn := fake.unmountReturnsOnCall[len(fake.unmountArgsForCall)]
+	fake.unmountArgsForCall = append(fake.unmountArgsForCall, struct {
+		arg1 dockerdriver.Env
+		arg2 dockerdriver.UnmountRequest
+	}{arg1, arg2})
+	stub := fake.UnmountStub
+	fakeReturns := fake.unmountReturns
+	fake.recordInvocation("Unmount", []interface{}{arg1, arg2})
+	fake.unmountMutex.Unlock()
+	if stub != nil {
+		return stub(arg1, arg2)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fakeReturns.result1
+}
+
+func (fake *FakeMatchableDriver) UnmountCallCount() int {
+	fake.unmountMutex.RLock()
+	defer fake.unmountMutex.RUnlock()
+	return len(fake.unmountArgsForCall)
+}
+
+func (fake *FakeMatchableDriver) UnmountCalls(stub func(dockerdriver.Env, dockerdriver.UnmountRequest) dockerdriver.ErrorResponse) {
+	fake.unmountMutex.Lock()
+	defer fake.unmountMutex.Unlock()
+	fake.UnmountStub = stub
+}
+
+func (fake *FakeMatchableDriver) UnmountArgsForCall(i int) (dockerdriver.Env, dockerdriver.UnmountRequest) {
+	fake.unmountMutex.RLock()
+	defer fake.unmountMutex.RUnlock()
+	argsForCall := fake.unmountArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2
+}
+
+func (fake *FakeMatchableDriver) UnmountReturns(result1 dockerdriver.ErrorResponse) {
+	fake.unmountMutex.Lock()
+	defer fake.unmountMutex.Unlock()
+	fake.UnmountStub = nil
+	fake.unmountReturns = struct {
+		result1 dockerdriver.ErrorResponse
+	}{result1}
+}
+
+func (fake *FakeMatchableDriver) UnmountReturnsOnCall(i int, result1 dockerdriver.ErrorResponse) {
+	fake.unmountMutex.Lock()
+	defer fake.unmountMutex.Unlock()
+	fake.UnmountStub = nil
+	if fake.unmountReturnsOnCall == nil {
+		fake.unmountReturnsOnCall = make(map[int]struct {
+			result1 dockerdriver.ErrorResponse
+		})
+	}
+	fake.unmountReturnsOnCall[i] = struct {
+		result1 dockerdriver.ErrorResponse
+	}{result1}
+}
+
 func (fake *FakeMatchableDriver) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
-	fake.matchesMutex.RLock()
-	defer fake.matchesMutex.RUnlock()
 	fake.activateMutex.RLock()
 	defer fake.activateMutex.RUnlock()
-	fake.getMutex.RLock()
-	defer fake.getMutex.RUnlock()
-	fake.listMutex.RLock()
-	defer fake.listMutex.RUnlock()
-	fake.mountMutex.RLock()
-	defer fake.mountMutex.RUnlock()
-	fake.pathMutex.RLock()
-	defer fake.pathMutex.RUnlock()
-	fake.unmountMutex.RLock()
-	defer fake.unmountMutex.RUnlock()
 	fake.capabilitiesMutex.RLock()
 	defer fake.capabilitiesMutex.RUnlock()
 	fake.createMutex.RLock()
 	defer fake.createMutex.RUnlock()
+	fake.getMutex.RLock()
+	defer fake.getMutex.RUnlock()
+	fake.listMutex.RLock()
+	defer fake.listMutex.RUnlock()
+	fake.matchesMutex.RLock()
+	defer fake.matchesMutex.RUnlock()
+	fake.mountMutex.RLock()
+	defer fake.mountMutex.RUnlock()
+	fake.pathMutex.RLock()
+	defer fake.pathMutex.RUnlock()
 	fake.removeMutex.RLock()
 	defer fake.removeMutex.RUnlock()
+	fake.unmountMutex.RLock()
+	defer fake.unmountMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}
 	for key, value := range fake.invocations {
 		copiedInvocations[key] = value

@@ -3,14 +3,16 @@ package driverhttp_test
 import (
 	"fmt"
 	"io"
+	"os/exec"
+	"path"
+	"testing"
+	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gexec"
 	"github.com/tedsuo/ifrit"
 	ginkgomon "github.com/tedsuo/ifrit/ginkgomon_v2"
-
-	"testing"
 )
 
 var debugServerAddress string
@@ -26,19 +28,20 @@ func TestDriver(t *testing.T) {
 }
 
 var _ = SynchronizedBeforeSuite(func() []byte {
-	var err error
+	dirname := GinkgoT().TempDir()
+	cmd := exec.Command("go", "install", "-race", "code.cloudfoundry.org/localdriver/cmd/localdriver@latest")
+	cmd.Env = append(cmd.Environ(), fmt.Sprintf("GOBIN=%s", dirname))
+	cmd.Dir = dirname
 
-	localDriverPath, err = gexec.Build("code.cloudfoundry.org/localdriver/cmd/localdriver", "-race")
+	session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 	Expect(err).NotTo(HaveOccurred())
+	Eventually(session).WithTimeout(time.Hour).Should(gexec.Exit(0))
+
+	localDriverPath = path.Join(dirname, "localdriver")
+	Expect(localDriverPath).To(BeAnExistingFile())
 	return []byte(localDriverPath)
 }, func(pathsByte []byte) {
 	localDriverPath = string(pathsByte)
-})
-
-var _ = SynchronizedAfterSuite(func() {
-
-}, func() {
-	gexec.CleanupBuildArtifacts()
 })
 
 // testing support types:

@@ -8,11 +8,11 @@ import (
 )
 
 type FakeProvisioner struct {
-	CreateStub        func(env dockerdriver.Env, createRequest dockerdriver.CreateRequest) dockerdriver.ErrorResponse
+	CreateStub        func(dockerdriver.Env, dockerdriver.CreateRequest) dockerdriver.ErrorResponse
 	createMutex       sync.RWMutex
 	createArgsForCall []struct {
-		env           dockerdriver.Env
-		createRequest dockerdriver.CreateRequest
+		arg1 dockerdriver.Env
+		arg2 dockerdriver.CreateRequest
 	}
 	createReturns struct {
 		result1 dockerdriver.ErrorResponse
@@ -20,11 +20,11 @@ type FakeProvisioner struct {
 	createReturnsOnCall map[int]struct {
 		result1 dockerdriver.ErrorResponse
 	}
-	RemoveStub        func(env dockerdriver.Env, removeRequest dockerdriver.RemoveRequest) dockerdriver.ErrorResponse
+	RemoveStub        func(dockerdriver.Env, dockerdriver.RemoveRequest) dockerdriver.ErrorResponse
 	removeMutex       sync.RWMutex
 	removeArgsForCall []struct {
-		env           dockerdriver.Env
-		removeRequest dockerdriver.RemoveRequest
+		arg1 dockerdriver.Env
+		arg2 dockerdriver.RemoveRequest
 	}
 	removeReturns struct {
 		result1 dockerdriver.ErrorResponse
@@ -36,22 +36,24 @@ type FakeProvisioner struct {
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeProvisioner) Create(env dockerdriver.Env, createRequest dockerdriver.CreateRequest) dockerdriver.ErrorResponse {
+func (fake *FakeProvisioner) Create(arg1 dockerdriver.Env, arg2 dockerdriver.CreateRequest) dockerdriver.ErrorResponse {
 	fake.createMutex.Lock()
 	ret, specificReturn := fake.createReturnsOnCall[len(fake.createArgsForCall)]
 	fake.createArgsForCall = append(fake.createArgsForCall, struct {
-		env           dockerdriver.Env
-		createRequest dockerdriver.CreateRequest
-	}{env, createRequest})
-	fake.recordInvocation("Create", []interface{}{env, createRequest})
+		arg1 dockerdriver.Env
+		arg2 dockerdriver.CreateRequest
+	}{arg1, arg2})
+	stub := fake.CreateStub
+	fakeReturns := fake.createReturns
+	fake.recordInvocation("Create", []interface{}{arg1, arg2})
 	fake.createMutex.Unlock()
-	if fake.CreateStub != nil {
-		return fake.CreateStub(env, createRequest)
+	if stub != nil {
+		return stub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	return fake.createReturns.result1
+	return fakeReturns.result1
 }
 
 func (fake *FakeProvisioner) CreateCallCount() int {
@@ -60,13 +62,22 @@ func (fake *FakeProvisioner) CreateCallCount() int {
 	return len(fake.createArgsForCall)
 }
 
+func (fake *FakeProvisioner) CreateCalls(stub func(dockerdriver.Env, dockerdriver.CreateRequest) dockerdriver.ErrorResponse) {
+	fake.createMutex.Lock()
+	defer fake.createMutex.Unlock()
+	fake.CreateStub = stub
+}
+
 func (fake *FakeProvisioner) CreateArgsForCall(i int) (dockerdriver.Env, dockerdriver.CreateRequest) {
 	fake.createMutex.RLock()
 	defer fake.createMutex.RUnlock()
-	return fake.createArgsForCall[i].env, fake.createArgsForCall[i].createRequest
+	argsForCall := fake.createArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2
 }
 
 func (fake *FakeProvisioner) CreateReturns(result1 dockerdriver.ErrorResponse) {
+	fake.createMutex.Lock()
+	defer fake.createMutex.Unlock()
 	fake.CreateStub = nil
 	fake.createReturns = struct {
 		result1 dockerdriver.ErrorResponse
@@ -74,6 +85,8 @@ func (fake *FakeProvisioner) CreateReturns(result1 dockerdriver.ErrorResponse) {
 }
 
 func (fake *FakeProvisioner) CreateReturnsOnCall(i int, result1 dockerdriver.ErrorResponse) {
+	fake.createMutex.Lock()
+	defer fake.createMutex.Unlock()
 	fake.CreateStub = nil
 	if fake.createReturnsOnCall == nil {
 		fake.createReturnsOnCall = make(map[int]struct {
@@ -85,22 +98,24 @@ func (fake *FakeProvisioner) CreateReturnsOnCall(i int, result1 dockerdriver.Err
 	}{result1}
 }
 
-func (fake *FakeProvisioner) Remove(env dockerdriver.Env, removeRequest dockerdriver.RemoveRequest) dockerdriver.ErrorResponse {
+func (fake *FakeProvisioner) Remove(arg1 dockerdriver.Env, arg2 dockerdriver.RemoveRequest) dockerdriver.ErrorResponse {
 	fake.removeMutex.Lock()
 	ret, specificReturn := fake.removeReturnsOnCall[len(fake.removeArgsForCall)]
 	fake.removeArgsForCall = append(fake.removeArgsForCall, struct {
-		env           dockerdriver.Env
-		removeRequest dockerdriver.RemoveRequest
-	}{env, removeRequest})
-	fake.recordInvocation("Remove", []interface{}{env, removeRequest})
+		arg1 dockerdriver.Env
+		arg2 dockerdriver.RemoveRequest
+	}{arg1, arg2})
+	stub := fake.RemoveStub
+	fakeReturns := fake.removeReturns
+	fake.recordInvocation("Remove", []interface{}{arg1, arg2})
 	fake.removeMutex.Unlock()
-	if fake.RemoveStub != nil {
-		return fake.RemoveStub(env, removeRequest)
+	if stub != nil {
+		return stub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	return fake.removeReturns.result1
+	return fakeReturns.result1
 }
 
 func (fake *FakeProvisioner) RemoveCallCount() int {
@@ -109,13 +124,22 @@ func (fake *FakeProvisioner) RemoveCallCount() int {
 	return len(fake.removeArgsForCall)
 }
 
+func (fake *FakeProvisioner) RemoveCalls(stub func(dockerdriver.Env, dockerdriver.RemoveRequest) dockerdriver.ErrorResponse) {
+	fake.removeMutex.Lock()
+	defer fake.removeMutex.Unlock()
+	fake.RemoveStub = stub
+}
+
 func (fake *FakeProvisioner) RemoveArgsForCall(i int) (dockerdriver.Env, dockerdriver.RemoveRequest) {
 	fake.removeMutex.RLock()
 	defer fake.removeMutex.RUnlock()
-	return fake.removeArgsForCall[i].env, fake.removeArgsForCall[i].removeRequest
+	argsForCall := fake.removeArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2
 }
 
 func (fake *FakeProvisioner) RemoveReturns(result1 dockerdriver.ErrorResponse) {
+	fake.removeMutex.Lock()
+	defer fake.removeMutex.Unlock()
 	fake.RemoveStub = nil
 	fake.removeReturns = struct {
 		result1 dockerdriver.ErrorResponse
@@ -123,6 +147,8 @@ func (fake *FakeProvisioner) RemoveReturns(result1 dockerdriver.ErrorResponse) {
 }
 
 func (fake *FakeProvisioner) RemoveReturnsOnCall(i int, result1 dockerdriver.ErrorResponse) {
+	fake.removeMutex.Lock()
+	defer fake.removeMutex.Unlock()
 	fake.RemoveStub = nil
 	if fake.removeReturnsOnCall == nil {
 		fake.removeReturnsOnCall = make(map[int]struct {
