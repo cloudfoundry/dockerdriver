@@ -5,7 +5,7 @@ go 1.19
 require (
 	code.cloudfoundry.org/cfhttp v2.0.0+incompatible
 	code.cloudfoundry.org/clock v1.1.0
-	code.cloudfoundry.org/goshims v0.28.0
+	code.cloudfoundry.org/goshims v0.29.0
 	code.cloudfoundry.org/lager/v3 v3.0.3
 	code.cloudfoundry.org/tlsconfig v0.0.0-20230320190829-8f91c367795b
 	github.com/maxbrunsfeld/counterfeiter/v6 v6.7.0
@@ -26,8 +26,8 @@ require (
 	github.com/nxadm/tail v1.4.11 // indirect
 	github.com/openzipkin/zipkin-go v0.4.2 // indirect
 	golang.org/x/mod v0.13.0 // indirect
-	golang.org/x/net v0.19.0 // indirect
-	golang.org/x/sys v0.15.0 // indirect
+	golang.org/x/net v0.20.0 // indirect
+	golang.org/x/sys v0.16.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/tools v0.14.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
