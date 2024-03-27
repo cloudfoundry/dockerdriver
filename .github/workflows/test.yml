@@ -5,6 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        version: [ 'oldstable', 'stable' ]
     name: Test Go ${{ matrix.go }}
     steps:
       - uses: actions/setup-go@v5
