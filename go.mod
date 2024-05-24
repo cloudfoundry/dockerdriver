@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	code.cloudfoundry.org/cfhttp v2.0.0+incompatible
-	code.cloudfoundry.org/cfhttp/v2 v2.0.2
+	code.cloudfoundry.org/cfhttp/v2 v2.1.0
 	code.cloudfoundry.org/clock v1.1.0
 	code.cloudfoundry.org/goshims v0.35.0
 	code.cloudfoundry.org/lager/v3 v3.0.3
