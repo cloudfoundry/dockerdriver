@@ -11,16 +11,9 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gexec"
-	"github.com/tedsuo/ifrit"
-	ginkgomon "github.com/tedsuo/ifrit/ginkgomon_v2"
 )
 
-var debugServerAddress string
 var localDriverPath string
-
-var fakedriverServerPort int
-var fakedriverProcess ifrit.Process
-var tcpRunner *ginkgomon.Runner
 
 func TestDriver(t *testing.T) {
 	RegisterFailHandler(Fail)

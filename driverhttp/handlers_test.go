@@ -112,16 +112,11 @@ var _ = Describe("Docker Driver Handlers", func() {
 				driver.ActivateStub = func(env dockerdriver.Env) dockerdriver.ActivateResponse {
 					ctx := env.Context()
 					logger := env.Logger()
-					for true {
-						time.Sleep(time.Second * 1)
+					time.Sleep(time.Second * 1)
 
-						select {
-						case <-ctx.Done():
-							logger.Error("from-ctx", ctx.Err())
-							return dockerdriver.ActivateResponse{Err: ctx.Err().Error()}
-						}
-					}
-					return dockerdriver.ActivateResponse{}
+					<-ctx.Done()
+					logger.Error("from-ctx", ctx.Err())
+					return dockerdriver.ActivateResponse{Err: ctx.Err().Error()}
 				}
 				wg.Add(2)
 
@@ -229,16 +224,10 @@ var _ = Describe("Docker Driver Handlers", func() {
 				driver.ListStub = func(env dockerdriver.Env) dockerdriver.ListResponse {
 					ctx := env.Context()
 					logger := env.Logger()
-					for true {
-						time.Sleep(time.Second * 1)
-
-						select {
-						case <-ctx.Done():
-							logger.Error("from-ctx", ctx.Err())
-							return dockerdriver.ListResponse{Err: ctx.Err().Error()}
-						}
-					}
-					return dockerdriver.ListResponse{}
+					time.Sleep(time.Second * 1)
+					<-ctx.Done()
+					logger.Error("from-ctx", ctx.Err())
+					return dockerdriver.ListResponse{Err: ctx.Err().Error()}
 				}
 				wg.Add(2)
 
@@ -285,6 +274,7 @@ var _ = Describe("Docker Driver Handlers", func() {
 		var ExpectMountPointToEqual = func(value string) dockerdriver.MountResponse {
 			mountResponse := dockerdriver.MountResponse{}
 			body, err := io.ReadAll(res.Body)
+			Expect(err).ToNot(HaveOccurred())
 
 			err = json.Unmarshal(body, &mountResponse)
 			Expect(err).ToNot(HaveOccurred())
@@ -347,16 +337,10 @@ var _ = Describe("Docker Driver Handlers", func() {
 				driver.MountStub = func(env dockerdriver.Env, mountRequest dockerdriver.MountRequest) dockerdriver.MountResponse {
 					ctx := env.Context()
 					logger := env.Logger()
-					for true {
-						time.Sleep(time.Second * 1)
-
-						select {
-						case <-ctx.Done():
-							logger.Error("from-ctx", ctx.Err())
-							return dockerdriver.MountResponse{Err: ctx.Err().Error()}
-						}
-					}
-					return dockerdriver.MountResponse{}
+					time.Sleep(time.Second * 1)
+					<-ctx.Done()
+					logger.Error("from-ctx", ctx.Err())
+					return dockerdriver.MountResponse{Err: ctx.Err().Error()}
 				}
 				wg.Add(2)
 
@@ -440,16 +424,10 @@ var _ = Describe("Docker Driver Handlers", func() {
 				driver.UnmountStub = func(env dockerdriver.Env, unmountRequest dockerdriver.UnmountRequest) dockerdriver.ErrorResponse {
 					ctx := env.Context()
 					logger := env.Logger()
-					for true {
-						time.Sleep(time.Second * 1)
-
-						select {
-						case <-ctx.Done():
-							logger.Error("from-ctx", ctx.Err())
-							return dockerdriver.ErrorResponse{Err: ctx.Err().Error()}
-						}
-					}
-					return dockerdriver.ErrorResponse{}
+					time.Sleep(time.Second * 1)
+					<-ctx.Done()
+					logger.Error("from-ctx", ctx.Err())
+					return dockerdriver.ErrorResponse{Err: ctx.Err().Error()}
 				}
 				wg.Add(2)
 
@@ -530,6 +508,7 @@ var _ = Describe("Docker Driver Handlers", func() {
 
 				getResponse := dockerdriver.GetResponse{}
 				body, err := io.ReadAll(res.Body)
+				Expect(err).ToNot(HaveOccurred())
 				err = json.Unmarshal(body, &getResponse)
 				Expect(err).ToNot(HaveOccurred())
 
@@ -543,16 +522,10 @@ var _ = Describe("Docker Driver Handlers", func() {
 				driver.GetStub = func(env dockerdriver.Env, getRequest dockerdriver.GetRequest) dockerdriver.GetResponse {
 					ctx := env.Context()
 					logger := env.Logger()
-					for true {
-						time.Sleep(time.Second * 1)
-
-						select {
-						case <-ctx.Done():
-							logger.Error("from-ctx", ctx.Err())
-							return dockerdriver.GetResponse{Err: ctx.Err().Error()}
-						}
-					}
-					return dockerdriver.GetResponse{}
+					time.Sleep(time.Second * 1)
+					<-ctx.Done()
+					logger.Error("from-ctx", ctx.Err())
+					return dockerdriver.GetResponse{Err: ctx.Err().Error()}
 				}
 				wg.Add(2)
 
@@ -634,6 +607,7 @@ var _ = Describe("Docker Driver Handlers", func() {
 
 				pathResponse := dockerdriver.PathResponse{}
 				body, err := io.ReadAll(res.Body)
+				Expect(err).ToNot(HaveOccurred())
 				err = json.Unmarshal(body, &pathResponse)
 				Expect(err).ToNot(HaveOccurred())
 
@@ -646,16 +620,10 @@ var _ = Describe("Docker Driver Handlers", func() {
 				driver.PathStub = func(env dockerdriver.Env, pathRequest dockerdriver.PathRequest) dockerdriver.PathResponse {
 					ctx := env.Context()
 					logger := env.Logger()
-					for true {
-						time.Sleep(time.Second * 1)
-
-						select {
-						case <-ctx.Done():
-							logger.Error("from-ctx", ctx.Err())
-							return dockerdriver.PathResponse{Err: ctx.Err().Error()}
-						}
-					}
-					return dockerdriver.PathResponse{}
+					time.Sleep(time.Second * 1)
+					<-ctx.Done()
+					logger.Error("from-ctx", ctx.Err())
+					return dockerdriver.PathResponse{Err: ctx.Err().Error()}
 				}
 				wg.Add(2)
 
@@ -743,16 +711,10 @@ var _ = Describe("Docker Driver Handlers", func() {
 				driver.CreateStub = func(env dockerdriver.Env, createRequest dockerdriver.CreateRequest) dockerdriver.ErrorResponse {
 					ctx := env.Context()
 					logger := env.Logger()
-					for true {
-						time.Sleep(time.Second * 1)
-
-						select {
-						case <-ctx.Done():
-							logger.Error("from-ctx", ctx.Err())
-							return dockerdriver.ErrorResponse{Err: ctx.Err().Error()}
-						}
-					}
-					return dockerdriver.ErrorResponse{}
+					time.Sleep(time.Second * 1)
+					<-ctx.Done()
+					logger.Error("from-ctx", ctx.Err())
+					return dockerdriver.ErrorResponse{Err: ctx.Err().Error()}
 				}
 				wg.Add(2)
 
@@ -840,16 +802,10 @@ var _ = Describe("Docker Driver Handlers", func() {
 				driver.RemoveStub = func(env dockerdriver.Env, removeRequest dockerdriver.RemoveRequest) dockerdriver.ErrorResponse {
 					ctx := env.Context()
 					logger := env.Logger()
-					for true {
-						time.Sleep(time.Second * 1)
-
-						select {
-						case <-ctx.Done():
-							logger.Error("from-ctx", ctx.Err())
-							return dockerdriver.ErrorResponse{Err: ctx.Err().Error()}
-						}
-					}
-					return dockerdriver.ErrorResponse{}
+					time.Sleep(time.Second * 1)
+					<-ctx.Done()
+					logger.Error("from-ctx", ctx.Err())
+					return dockerdriver.ErrorResponse{Err: ctx.Err().Error()}
 				}
 				wg.Add(2)
 
@@ -925,6 +881,7 @@ var _ = Describe("Docker Driver Handlers", func() {
 
 				capabilitiesResponse := dockerdriver.CapabilitiesResponse{}
 				body, err := io.ReadAll(res.Body)
+				Expect(err).ToNot(HaveOccurred())
 				err = json.Unmarshal(body, &capabilitiesResponse)
 				Expect(err).ToNot(HaveOccurred())
 
