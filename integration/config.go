@@ -14,7 +14,6 @@ type Config struct {
 	DriverAddress string                     `json:"driver_address"`
 	DriverArgs    []string                   `json:"driver_args"`
 	TLSConfig     *dockerdriver.TLSConfig    `json:"tls_config,omitempty"`
-	VolmanSpecDir string                     `json:"volman_spec_dir"`
 }
 
 func LoadConfig() (Config, error) {

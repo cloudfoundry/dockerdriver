@@ -29,3 +29,7 @@ var _ = BeforeSuite(func() {
 
 	Eventually(session.Out).Should(gbytes.Say("driver-server.started"))
 })
+var _ = AfterSuite(func() {
+	session.Interrupt()
+	Eventually(session).Should(gexec.Exit())
+})

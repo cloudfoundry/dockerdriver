@@ -8,7 +8,6 @@ import (
 	"path"
 	"path/filepath"
 	"strconv"
-	"strings"
 	"time"
 
 	"code.cloudfoundry.org/dockerdriver"
@@ -46,82 +45,120 @@ var _ = Describe("Compatibility", func() {
 		Expect(err).NotTo(HaveOccurred())
 	})
 
-	for _, binding := range bindingsFixture {
+	It("verifies driver name", func() {
+		Expect([]string{"smbdriver", "nfsv3driver"}).To(ContainElement(config.DriverName))
+	})
 
-		options := []string{}
-
-		cf := config
-		cf.CreateConfig = dockerdriver.CreateRequest{}
-		cf.CreateConfig.Name = binding.VolumeMounts[0].Device.VolumeID
-		cf.CreateConfig.Opts = map[string]interface{}{}
-		cf.CreateConfig.Opts["source"] = config.CreateConfig.Opts["source"]
-
-		if userAuthenticated(config.CreateConfig.Opts) {
+	DescribeTable("nfs",
+		func(key string, value interface{}) {
+			if config.DriverName != "nfsv3driver" {
+				Skip("This is for nfsdriver only")
+			}
+			panic("need to add the fixture")
+			cf := config
+			cf.CreateConfig = dockerdriver.CreateRequest{}
+			cf.CreateConfig.Name = randomString(10)
+			cf.CreateConfig.Opts = map[string]interface{}{}
+			cf.CreateConfig.Opts["source"] = config.CreateConfig.Opts["source"]
 			cf.CreateConfig.Opts["username"] = config.CreateConfig.Opts["username"]
 			cf.CreateConfig.Opts["password"] = config.CreateConfig.Opts["password"]
-		} else {
-			cf.CreateConfig.Opts["uid"] = config.CreateConfig.Opts["uid"]
-			cf.CreateConfig.Opts["gid"] = config.CreateConfig.Opts["gid"]
-		}
+			cf.CreateConfig.Opts[key] = value
 
-		for k, v := range binding.VolumeMounts[0].Device.MountConfig {
-			options = append(options, k)
+			testLogger.Info("using fixture", lager.Data{"fixture": cf})
+			errResponse = driverClient.Create(testEnv, cf.CreateConfig)
+			Expect(errResponse.Err).To(Equal(""))
 
-			if k == "source" || k == "username" || k == "password" || k == "uid" || k == "gid" {
-				continue
+			mountResponse = driverClient.Mount(testEnv, dockerdriver.MountRequest{
+				Name: cf.CreateConfig.Name,
+			})
+			Expect(mountResponse.Err).To(Equal(""))
+			Expect(mountResponse.Mountpoint).NotTo(Equal(""))
+
+			cmd := exec.Command("bash", "-c", "cat /proc/mounts | grep -E '"+mountResponse.Mountpoint+"'")
+			Expect(cmdRunner(cmd)).To(Equal(0))
+			if isReadWrite(cf.CreateConfig.Opts) {
+				testFileWrite(testLogger, mountResponse)
+			} else {
+				testReadOnly(testLogger, mountResponse)
 			}
 
-			cf.CreateConfig.Opts[k] = v
-		}
-
-		Context("given a created volume", func() {
-
-			var certificationFixture = cf
-
-			BeforeEach(func() {
-				testLogger.Info("using fixture", lager.Data{"fixture": certificationFixture})
-				errResponse = driverClient.Create(testEnv, certificationFixture.CreateConfig)
-				Expect(errResponse.Err).To(Equal(""))
+			// Cleanup
+			errResponse = driverClient.Unmount(testEnv, dockerdriver.UnmountRequest{
+				Name: cf.CreateConfig.Name,
 			})
+			Expect(errResponse.Err).To(Equal(""))
 
-			AfterEach(func() {
-				errResponse = driverClient.Remove(testEnv, dockerdriver.RemoveRequest{
-					Name: certificationFixture.CreateConfig.Name,
-				})
-				Expect(errResponse.Err).To(Equal(""))
+			errResponse = driverClient.Remove(testEnv, dockerdriver.RemoveRequest{
+				Name: cf.CreateConfig.Name,
 			})
+			Expect(errResponse.Err).To(Equal(""))
+		},
+		Entry("with a default volume mount", "domain", ""),
+		Entry("with a readonly=true volume mount", "readonly", true),
+		Entry("with a ro=true volume mount", "ro", "true"),
+		Entry("with a mount=/foo/bar volume mount", "mount", "/foo/bar"),
+		Entry("with a version=1.0 volume mount", "version", "1.0"),
+		Entry("with a version=2.0 volume mount", "version", "2.0"),
+		Entry("with a version=2.1 volume mount", "version", "2.1"),
+		Entry("with a version=3.0 volume mount", "version", "3.0"),
+		Entry("with a version=3.1.1 volume mount", "version", "3.1.1"),
+		Entry("with a mfsymlinks=true volume mount", "mfsymlinks", "true"),
+	)
 
-			Context("given a mounted volume with options: "+strings.Join(options, ","), func() {
-				BeforeEach(func() {
-					mountResponse = driverClient.Mount(testEnv, dockerdriver.MountRequest{
-						Name: certificationFixture.CreateConfig.Name,
-					})
-					Expect(mountResponse.Err).To(Equal(""))
-					Expect(mountResponse.Mountpoint).NotTo(Equal(""))
+	DescribeTable("smb",
+		func(key string, value interface{}) {
+			if config.DriverName != "smbdriver" {
+				Skip("This is for smbdriver only")
+			}
+			cf := config
+			cf.CreateConfig = dockerdriver.CreateRequest{}
+			cf.CreateConfig.Name = randomString(10)
+			cf.CreateConfig.Opts = map[string]interface{}{}
+			cf.CreateConfig.Opts["source"] = config.CreateConfig.Opts["source"]
+			cf.CreateConfig.Opts["username"] = config.CreateConfig.Opts["username"]
+			cf.CreateConfig.Opts["password"] = config.CreateConfig.Opts["password"]
+			cf.CreateConfig.Opts[key] = value
 
-					cmd := exec.Command("bash", "-c", "cat /proc/mounts | grep -E '"+mountResponse.Mountpoint+"'")
-					Expect(cmdRunner(cmd)).To(Equal(0))
-				})
+			testLogger.Info("using fixture", lager.Data{"fixture": cf})
+			errResponse = driverClient.Create(testEnv, cf.CreateConfig)
+			Expect(errResponse.Err).To(Equal(""))
 
-				AfterEach(func() {
-					errResponse = driverClient.Unmount(testEnv, dockerdriver.UnmountRequest{
-						Name: certificationFixture.CreateConfig.Name,
-					})
-					Expect(errResponse.Err).To(Equal(""))
-				})
-
-				if isReadWrite(certificationFixture.CreateConfig.Opts) {
-					It("should be able to write a file", func() {
-						testFileWrite(testLogger, mountResponse)
-					})
-				} else {
-					It("should be a read-only filesystem", func() {
-						testReadOnly(testLogger, mountResponse)
-					})
-				}
+			mountResponse = driverClient.Mount(testEnv, dockerdriver.MountRequest{
+				Name: cf.CreateConfig.Name,
 			})
-		})
-	}
+			Expect(mountResponse.Err).To(Equal(""))
+			Expect(mountResponse.Mountpoint).NotTo(Equal(""))
+
+			cmd := exec.Command("bash", "-c", "cat /proc/mounts | grep -E '"+mountResponse.Mountpoint+"'")
+			Expect(cmdRunner(cmd)).To(Equal(0))
+			if isReadWrite(cf.CreateConfig.Opts) {
+				testFileWrite(testLogger, mountResponse)
+			} else {
+				testReadOnly(testLogger, mountResponse)
+			}
+
+			// Cleanup
+			errResponse = driverClient.Unmount(testEnv, dockerdriver.UnmountRequest{
+				Name: cf.CreateConfig.Name,
+			})
+			Expect(errResponse.Err).To(Equal(""))
+
+			errResponse = driverClient.Remove(testEnv, dockerdriver.RemoveRequest{
+				Name: cf.CreateConfig.Name,
+			})
+			Expect(errResponse.Err).To(Equal(""))
+		},
+		Entry("with a default volume mount", "domain", ""),
+		Entry("with a readonly=true volume mount", "readonly", true),
+		Entry("with a ro=true volume mount", "ro", "true"),
+		Entry("with a mount=/foo/bar volume mount", "mount", "/foo/bar"),
+		Entry("with a version=1.0 volume mount", "version", "1.0"),
+		Entry("with a version=2.0 volume mount", "version", "2.0"),
+		Entry("with a version=2.1 volume mount", "version", "2.1"),
+		Entry("with a version=3.0 volume mount", "version", "3.0"),
+		Entry("with a version=3.1.1 volume mount", "version", "3.1.1"),
+		Entry("with a mfsymlinks=true volume mount", "mfsymlinks", "true"),
+	)
 })
 
 func userAuthenticated(opts map[string]interface{}) bool {

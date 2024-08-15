@@ -28,3 +28,7 @@ var _ = BeforeSuite(func() {
 	Expect(err).NotTo(HaveOccurred())
 	Eventually(session.Out).Should(gbytes.Say("driver-server.started"))
 })
+var _ = AfterSuite(func() {
+	session.Interrupt()
+	Eventually(session).Should(gexec.Exit())
+})

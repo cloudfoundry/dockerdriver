@@ -2,6 +2,7 @@ package integration_test
 
 import (
 	"context"
+	"fmt"
 	"math/rand"
 	"os"
 	"path"
@@ -33,11 +34,12 @@ var _ = Describe("Certify with: ", func() {
 		testLogger = lagertest.NewTestLogger("MainTest")
 		testContext = context.TODO()
 		testEnv = driverhttp.NewHttpDriverEnv(testLogger, testContext)
-
 		var err error
 		config, err = integration.LoadConfig()
 		Expect(err).NotTo(HaveOccurred())
 		testLogger.Info("fixture", lager.Data{"context": config})
+
+		config.CreateConfig.Name = randomString(10)
 
 		driverClient, err = driverhttp.NewRemoteClient(config.DriverAddress, config.TLSConfig)
 		Expect(err).NotTo(HaveOccurred())
@@ -53,7 +55,6 @@ var _ = Describe("Certify with: ", func() {
 
 	Context("given a created volume missing required options", func() {
 		BeforeEach(func() {
-			config.CreateConfig.Name = "invalid-configuration"
 			if _, found := config.CreateConfig.Opts["password"]; !found {
 				Skip("No password found in create config")
 			}
@@ -70,12 +71,12 @@ var _ = Describe("Certify with: ", func() {
 			errResponse = driverClient.Unmount(testEnv, dockerdriver.UnmountRequest{
 				Name: config.CreateConfig.Name,
 			})
-			Expect(errResponse.Err).To(ContainSubstring("Volume invalid-configuration does not exist"))
+			Expect(errResponse.Err).To(ContainSubstring(fmt.Sprintf("Volume %s does not exist", config.CreateConfig.Name)))
 
 			errResponse = driverClient.Remove(testEnv, dockerdriver.RemoveRequest{
 				Name: config.CreateConfig.Name,
 			})
-			Expect(errResponse.Err).To(ContainSubstring("Volume invalid-configuration does not exist"))
+			Expect(errResponse.Err).To(ContainSubstring(fmt.Sprintf("Volume %s does not exist", config.CreateConfig.Name)))
 		})
 
 		It("should log an error message", func() {
@@ -84,6 +85,10 @@ var _ = Describe("Certify with: ", func() {
 			})
 
 			Expect(mountResponse.Err).To(ContainSubstring("Missing mandatory options: username, password"))
+
+			dir := fmt.Sprintf("/var/vcap/data/dockerdriver-integration/mount/%s", config.CreateConfig.Name)
+			dirEntries, err := os.ReadDir(dir)
+			Expect(err).To(HaveOccurred(), fmt.Sprintf("Found entries %+v\n", dirEntries))
 		})
 	})
 
