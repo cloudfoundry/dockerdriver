@@ -19,14 +19,12 @@ import (
 
 var _ = Describe("Certify with: ", func() {
 	var (
-		err error
-
-		testLogger           lager.Logger
-		testContext          context.Context
-		testEnv              dockerdriver.Env
-		certificationFixture integration.CertificationFixture
-		driverClient         dockerdriver.Driver
-		errResponse          dockerdriver.ErrorResponse
+		testLogger   lager.Logger
+		testContext  context.Context
+		testEnv      dockerdriver.Env
+		config       integration.Config
+		driverClient dockerdriver.Driver
+		errResponse  dockerdriver.ErrorResponse
 
 		mountResponse dockerdriver.MountResponse
 	)
@@ -36,14 +34,12 @@ var _ = Describe("Certify with: ", func() {
 		testContext = context.TODO()
 		testEnv = driverhttp.NewHttpDriverEnv(testLogger, testContext)
 
-		fileName := os.Getenv("FIXTURE_FILENAME")
-		Expect(fileName).NotTo(Equal(""))
-
-		certificationFixture, err = integration.LoadCertificationFixture(fileName)
+		var err error
+		config, err = integration.LoadConfig()
 		Expect(err).NotTo(HaveOccurred())
-		testLogger.Info("fixture", lager.Data{"filename": fileName, "context": certificationFixture})
+		testLogger.Info("fixture", lager.Data{"context": config})
 
-		driverClient, err = driverhttp.NewRemoteClient(certificationFixture.DriverAddress, certificationFixture.TLSConfig)
+		driverClient, err = driverhttp.NewRemoteClient(config.DriverAddress, config.TLSConfig)
 		Expect(err).NotTo(HaveOccurred())
 	})
 
@@ -57,34 +53,34 @@ var _ = Describe("Certify with: ", func() {
 
 	Context("given a created volume missing required options", func() {
 		BeforeEach(func() {
-			certificationFixture.CreateConfig.Name = "invalid-configuration"
-			if _, found := certificationFixture.CreateConfig.Opts["password"]; !found {
+			config.CreateConfig.Name = "invalid-configuration"
+			if _, found := config.CreateConfig.Opts["password"]; !found {
 				Skip("No password found in create config")
 			}
 
-			delete(certificationFixture.CreateConfig.Opts, "username")
-			delete(certificationFixture.CreateConfig.Opts, "password")
+			delete(config.CreateConfig.Opts, "username")
+			delete(config.CreateConfig.Opts, "password")
 
-			errResponse = driverClient.Create(testEnv, certificationFixture.CreateConfig)
+			errResponse = driverClient.Create(testEnv, config.CreateConfig)
 			Expect(errResponse.Err).To(Equal(""))
 
 		})
 
 		AfterEach(func() {
 			errResponse = driverClient.Unmount(testEnv, dockerdriver.UnmountRequest{
-				Name: certificationFixture.CreateConfig.Name,
+				Name: config.CreateConfig.Name,
 			})
 			Expect(errResponse.Err).To(ContainSubstring("Volume invalid-configuration does not exist"))
 
 			errResponse = driverClient.Remove(testEnv, dockerdriver.RemoveRequest{
-				Name: certificationFixture.CreateConfig.Name,
+				Name: config.CreateConfig.Name,
 			})
 			Expect(errResponse.Err).To(ContainSubstring("Volume invalid-configuration does not exist"))
 		})
 
 		It("should log an error message", func() {
 			mountResponse = driverClient.Mount(testEnv, dockerdriver.MountRequest{
-				Name: certificationFixture.CreateConfig.Name,
+				Name: config.CreateConfig.Name,
 			})
 
 			Expect(mountResponse.Err).To(ContainSubstring("Missing mandatory options: username, password"))
@@ -93,13 +89,13 @@ var _ = Describe("Certify with: ", func() {
 
 	Context("given a created volume", func() {
 		BeforeEach(func() {
-			errResponse = driverClient.Create(testEnv, certificationFixture.CreateConfig)
+			errResponse = driverClient.Create(testEnv, config.CreateConfig)
 			Expect(errResponse.Err).To(Equal(""))
 		})
 
 		AfterEach(func() {
 			errResponse = driverClient.Remove(testEnv, dockerdriver.RemoveRequest{
-				Name: certificationFixture.CreateConfig.Name,
+				Name: config.CreateConfig.Name,
 			})
 			Expect(errResponse.Err).To(Equal(""))
 		})
@@ -107,7 +103,7 @@ var _ = Describe("Certify with: ", func() {
 		Context("given a mounted volume", func() {
 			BeforeEach(func() {
 				mountResponse = driverClient.Mount(testEnv, dockerdriver.MountRequest{
-					Name: certificationFixture.CreateConfig.Name,
+					Name: config.CreateConfig.Name,
 				})
 				Expect(mountResponse.Err).To(Equal(""))
 				Expect(mountResponse.Mountpoint).NotTo(Equal(""))
@@ -115,7 +111,7 @@ var _ = Describe("Certify with: ", func() {
 
 			AfterEach(func() {
 				errResponse = driverClient.Unmount(testEnv, dockerdriver.UnmountRequest{
-					Name: certificationFixture.CreateConfig.Name,
+					Name: config.CreateConfig.Name,
 				})
 				Expect(errResponse.Err).To(Equal(""))
 			})
@@ -131,7 +127,7 @@ var _ = Describe("Certify with: ", func() {
 			})
 
 			It("should not log any sensitive data", func() {
-				createConfig := certificationFixture.CreateConfig
+				createConfig := config.CreateConfig
 				if val, found := createConfig.Opts["password"]; found {
 					driverOutput := string(session.Out.Contents())
 					Expect(driverOutput).Should(ContainSubstring("REDACTED"))
@@ -144,22 +140,22 @@ var _ = Describe("Certify with: ", func() {
 	})
 
 	It("should unmount a volume given same volume ID", func() {
-		errResponse = driverClient.Create(testEnv, certificationFixture.CreateConfig)
+		errResponse = driverClient.Create(testEnv, config.CreateConfig)
 		Expect(errResponse.Err).To(Equal(""))
 
 		mountResponse := driverClient.Mount(testEnv, dockerdriver.MountRequest{
-			Name: certificationFixture.CreateConfig.Name,
+			Name: config.CreateConfig.Name,
 		})
 		Expect(mountResponse.Err).To(Equal(""))
 
 		errResponse = driverClient.Unmount(testEnv, dockerdriver.UnmountRequest{
-			Name: certificationFixture.CreateConfig.Name,
+			Name: config.CreateConfig.Name,
 		})
 		Expect(errResponse.Err).To(Equal(""))
 		Expect(cellClean(mountResponse.Mountpoint)).To(Equal(true))
 
 		errResponse = driverClient.Remove(testEnv, dockerdriver.RemoveRequest{
-			Name: certificationFixture.CreateConfig.Name,
+			Name: config.CreateConfig.Name,
 		})
 		Expect(errResponse.Err).To(Equal(""))
 

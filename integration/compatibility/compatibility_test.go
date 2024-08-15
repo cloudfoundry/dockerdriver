@@ -13,6 +13,7 @@ import (
 
 	"code.cloudfoundry.org/dockerdriver"
 	"code.cloudfoundry.org/dockerdriver/driverhttp"
+	"code.cloudfoundry.org/dockerdriver/integration"
 	"code.cloudfoundry.org/lager/v3"
 	"code.cloudfoundry.org/lager/v3/lagertest"
 	. "github.com/onsi/ginkgo/v2"
@@ -22,13 +23,12 @@ import (
 
 var _ = Describe("Compatibility", func() {
 	var (
-		err error
-
 		testLogger   lager.Logger
 		testContext  context.Context
 		testEnv      dockerdriver.Env
 		driverClient dockerdriver.Driver
 		errResponse  dockerdriver.ErrorResponse
+		config       integration.Config
 
 		mountResponse dockerdriver.MountResponse
 	)
@@ -38,7 +38,11 @@ var _ = Describe("Compatibility", func() {
 		testContext = context.TODO()
 		testEnv = driverhttp.NewHttpDriverEnv(testLogger, testContext)
 
-		driverClient, err = driverhttp.NewRemoteClient(integrationFixtureTemplate.DriverAddress, integrationFixtureTemplate.TLSConfig)
+		var err error
+		config, err = integration.LoadConfig()
+		Expect(err).NotTo(HaveOccurred())
+
+		driverClient, err = driverhttp.NewRemoteClient(config.DriverAddress, config.TLSConfig)
 		Expect(err).NotTo(HaveOccurred())
 	})
 
@@ -46,18 +50,18 @@ var _ = Describe("Compatibility", func() {
 
 		options := []string{}
 
-		cf := integrationFixtureTemplate
+		cf := config
 		cf.CreateConfig = dockerdriver.CreateRequest{}
 		cf.CreateConfig.Name = binding.VolumeMounts[0].Device.VolumeID
 		cf.CreateConfig.Opts = map[string]interface{}{}
-		cf.CreateConfig.Opts["source"] = integrationFixtureTemplate.CreateConfig.Opts["source"]
+		cf.CreateConfig.Opts["source"] = config.CreateConfig.Opts["source"]
 
-		if userAuthenticated(integrationFixtureTemplate.CreateConfig.Opts) {
-			cf.CreateConfig.Opts["username"] = integrationFixtureTemplate.CreateConfig.Opts["username"]
-			cf.CreateConfig.Opts["password"] = integrationFixtureTemplate.CreateConfig.Opts["password"]
+		if userAuthenticated(config.CreateConfig.Opts) {
+			cf.CreateConfig.Opts["username"] = config.CreateConfig.Opts["username"]
+			cf.CreateConfig.Opts["password"] = config.CreateConfig.Opts["password"]
 		} else {
-			cf.CreateConfig.Opts["uid"] = integrationFixtureTemplate.CreateConfig.Opts["uid"]
-			cf.CreateConfig.Opts["gid"] = integrationFixtureTemplate.CreateConfig.Opts["gid"]
+			cf.CreateConfig.Opts["uid"] = config.CreateConfig.Opts["uid"]
+			cf.CreateConfig.Opts["gid"] = config.CreateConfig.Opts["gid"]
 		}
 
 		for k, v := range binding.VolumeMounts[0].Device.MountConfig {

@@ -19,14 +19,12 @@ import (
 
 var _ = Describe("LazyUnmount", func() {
 	var (
-		err error
-
-		testLogger           lager.Logger
-		testContext          context.Context
-		testEnv              dockerdriver.Env
-		certificationFixture integration.CertificationFixture
-		driverClient         dockerdriver.Driver
-		errResponse          dockerdriver.ErrorResponse
+		testLogger   lager.Logger
+		testContext  context.Context
+		testEnv      dockerdriver.Env
+		config       integration.Config
+		driverClient dockerdriver.Driver
+		errResponse  dockerdriver.ErrorResponse
 
 		mountResponse dockerdriver.MountResponse
 	)
@@ -36,26 +34,24 @@ var _ = Describe("LazyUnmount", func() {
 		testContext = context.TODO()
 		testEnv = driverhttp.NewHttpDriverEnv(testLogger, testContext)
 
-		fileName := os.Getenv("FIXTURE_FILENAME")
-		Expect(fileName).NotTo(Equal(""))
-
-		certificationFixture, err = integration.LoadCertificationFixture(fileName)
+		var err error
+		config, err = integration.LoadConfig()
 		Expect(err).NotTo(HaveOccurred())
-		testLogger.Info("fixture", lager.Data{"filename": fileName, "context": certificationFixture})
+		testLogger.Info("fixture", lager.Data{"context": config})
 
-		driverClient, err = driverhttp.NewRemoteClient(certificationFixture.DriverAddress, certificationFixture.TLSConfig)
+		driverClient, err = driverhttp.NewRemoteClient(config.DriverAddress, config.TLSConfig)
 		Expect(err).NotTo(HaveOccurred())
 	})
 
 	Context("given a created volume", func() {
 		BeforeEach(func() {
-			errResponse = driverClient.Create(testEnv, certificationFixture.CreateConfig)
+			errResponse = driverClient.Create(testEnv, config.CreateConfig)
 			Expect(errResponse.Err).To(Equal(""))
 		})
 
 		AfterEach(func() {
 			errResponse = driverClient.Remove(testEnv, dockerdriver.RemoveRequest{
-				Name: certificationFixture.CreateConfig.Name,
+				Name: config.CreateConfig.Name,
 			})
 			Expect(errResponse.Err).To(Equal(""))
 		})
@@ -63,7 +59,7 @@ var _ = Describe("LazyUnmount", func() {
 		Context("given a mounted volume", func() {
 			BeforeEach(func() {
 				mountResponse = driverClient.Mount(testEnv, dockerdriver.MountRequest{
-					Name: certificationFixture.CreateConfig.Name,
+					Name: config.CreateConfig.Name,
 				})
 				Expect(mountResponse.Err).To(Equal(""))
 				Expect(mountResponse.Mountpoint).NotTo(Equal(""))
@@ -78,6 +74,7 @@ var _ = Describe("LazyUnmount", func() {
 				BeforeEach(func() {
 					testFilePath := filepath.Join(mountResponse.Mountpoint, "file-used-to-keep-open")
 
+					var err error
 					file, err = os.OpenFile(testFilePath, os.O_CREATE, os.FileMode(0777))
 					Expect(err).NotTo(HaveOccurred())
 				})
@@ -88,7 +85,7 @@ var _ = Describe("LazyUnmount", func() {
 
 				It("should unmount lazily", func() {
 					errResponse := driverClient.Unmount(testEnv, dockerdriver.UnmountRequest{
-						Name: certificationFixture.CreateConfig.Name,
+						Name: config.CreateConfig.Name,
 					})
 					Expect(errResponse.Err).To(Equal(""))
 
