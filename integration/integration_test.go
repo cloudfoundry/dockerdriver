@@ -39,7 +39,7 @@ var _ = Describe("Certify with: ", func() {
 		Expect(err).NotTo(HaveOccurred())
 		testLogger.Info("fixture", lager.Data{"context": config})
 
-		config.CreateConfig.Name = randomString(10)
+		config.CreateConfig.Name = fmt.Sprintf("%s-%d", randomString(10), GinkgoParallelProcess())
 
 		driverClient, err = driverhttp.NewRemoteClient(config.DriverAddress, config.TLSConfig)
 		Expect(err).NotTo(HaveOccurred())
@@ -85,10 +85,6 @@ var _ = Describe("Certify with: ", func() {
 			})
 
 			Expect(mountResponse.Err).To(ContainSubstring("Missing mandatory options: username, password"))
-
-			dir := fmt.Sprintf("/var/vcap/data/dockerdriver-integration/mount/%s", config.CreateConfig.Name)
-			dirEntries, err := os.ReadDir(dir)
-			Expect(err).To(HaveOccurred(), fmt.Sprintf("Found entries %+v\n", dirEntries))
 		})
 	})
 

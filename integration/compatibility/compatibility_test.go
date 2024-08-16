@@ -52,63 +52,16 @@ var _ = Describe("Compatibility", func() {
 	DescribeTable("nfs",
 		func(key string, value interface{}) {
 			if config.DriverName != "nfsv3driver" {
-				Skip("This is for nfsdriver only")
+				Skip("This is for nfsv3driver only")
+				return
 			}
 			panic("need to add the fixture")
-			cf := config
-			cf.CreateConfig = dockerdriver.CreateRequest{}
-			cf.CreateConfig.Name = randomString(10)
-			cf.CreateConfig.Opts = map[string]interface{}{}
-			cf.CreateConfig.Opts["source"] = config.CreateConfig.Opts["source"]
-			cf.CreateConfig.Opts["username"] = config.CreateConfig.Opts["username"]
-			cf.CreateConfig.Opts["password"] = config.CreateConfig.Opts["password"]
-			cf.CreateConfig.Opts[key] = value
-
-			testLogger.Info("using fixture", lager.Data{"fixture": cf})
-			errResponse = driverClient.Create(testEnv, cf.CreateConfig)
-			Expect(errResponse.Err).To(Equal(""))
-
-			mountResponse = driverClient.Mount(testEnv, dockerdriver.MountRequest{
-				Name: cf.CreateConfig.Name,
-			})
-			Expect(mountResponse.Err).To(Equal(""))
-			Expect(mountResponse.Mountpoint).NotTo(Equal(""))
-
-			cmd := exec.Command("bash", "-c", "cat /proc/mounts | grep -E '"+mountResponse.Mountpoint+"'")
-			Expect(cmdRunner(cmd)).To(Equal(0))
-			if isReadWrite(cf.CreateConfig.Opts) {
-				testFileWrite(testLogger, mountResponse)
-			} else {
-				testReadOnly(testLogger, mountResponse)
-			}
-
-			// Cleanup
-			errResponse = driverClient.Unmount(testEnv, dockerdriver.UnmountRequest{
-				Name: cf.CreateConfig.Name,
-			})
-			Expect(errResponse.Err).To(Equal(""))
-
-			errResponse = driverClient.Remove(testEnv, dockerdriver.RemoveRequest{
-				Name: cf.CreateConfig.Name,
-			})
-			Expect(errResponse.Err).To(Equal(""))
-		},
-		Entry("with a default volume mount", "domain", ""),
-		Entry("with a readonly=true volume mount", "readonly", true),
-		Entry("with a ro=true volume mount", "ro", "true"),
-		Entry("with a mount=/foo/bar volume mount", "mount", "/foo/bar"),
-		Entry("with a version=1.0 volume mount", "version", "1.0"),
-		Entry("with a version=2.0 volume mount", "version", "2.0"),
-		Entry("with a version=2.1 volume mount", "version", "2.1"),
-		Entry("with a version=3.0 volume mount", "version", "3.0"),
-		Entry("with a version=3.1.1 volume mount", "version", "3.1.1"),
-		Entry("with a mfsymlinks=true volume mount", "mfsymlinks", "true"),
-	)
-
+		}, Entry("hello", "config", "value"))
 	DescribeTable("smb",
 		func(key string, value interface{}) {
 			if config.DriverName != "smbdriver" {
 				Skip("This is for smbdriver only")
+				return
 			}
 			cf := config
 			cf.CreateConfig = dockerdriver.CreateRequest{}
