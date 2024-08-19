@@ -114,15 +114,6 @@ var _ = Describe("Compatibility", func() {
 	)
 })
 
-func userAuthenticated(opts map[string]interface{}) bool {
-	if _, ok := opts["username"]; ok {
-		return true
-	} else {
-		return false
-	}
-
-}
-
 func testFileWrite(logger lager.Logger, mountResponse dockerdriver.MountResponse) {
 	logger = logger.Session("test-file-write")
 	logger.Info("start")
