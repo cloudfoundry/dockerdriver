@@ -1,0 +1,12 @@
+[
+    {"volume_mounts":[{"device":{"volume_id":"1","mount_config":{"domain":null,"password":"b","source":"foo/bar","username":"a"}}}]},
+    {"volume_mounts":[{"device":{"volume_id":"2","mount_config":{"domain":null,"password":"b","readonly":true,"source":"foo/bar","username":"a"}}}]},
+    {"volume_mounts":[{"device":{"volume_id":"3","mount_config":{"password":"b","ro":"true","source":"foo/bar","username":"a"}}}]},
+    {"volume_mounts":[{"device":{"volume_id":"4","mount_config":{"mount":"/foo/bar","password":"b","source":"foo/bar","username":"a"}}}]},
+    {"volume_mounts":[{"device":{"volume_id":"5","mount_config":{"password":"b","source":"foo/bar","username":"a"}}}]},
+    {"volume_mounts":[{"device":{"volume_id":"6","mount_config":{"password":"b","source":"foo/bar","username":"a","version": "1.0"}}}]},
+    {"volume_mounts":[{"device":{"volume_id":"7","mount_config":{"password":"b","source":"foo/bar","username":"a","version": "2.0"}}}]},
+    {"volume_mounts":[{"device":{"volume_id":"8","mount_config":{"password":"b","source":"foo/bar","username":"a","version": "2.1"}}}]},
+    {"volume_mounts":[{"device":{"volume_id":"9","mount_config":{"password":"b","source":"foo/bar","username":"a","version": "3.0"}}}]},
+    {"volume_mounts":[{"device":{"volume_id":"10","mount_config":{"password":"b","source":"foo/bar","username":"a","mfsymlinks": "true"}}}]}
+]
