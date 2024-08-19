@@ -3,17 +3,16 @@ package integration_test
 import (
 	"context"
 	"fmt"
-	"math/rand"
 	"os"
 	"path"
 	"path/filepath"
-	"time"
 
 	"code.cloudfoundry.org/dockerdriver"
 	"code.cloudfoundry.org/dockerdriver/driverhttp"
 	"code.cloudfoundry.org/dockerdriver/integration"
 	"code.cloudfoundry.org/lager/v3"
 	"code.cloudfoundry.org/lager/v3/lagertest"
+	"github.com/google/uuid"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -39,7 +38,7 @@ var _ = Describe("Certify with: ", func() {
 		Expect(err).NotTo(HaveOccurred())
 		testLogger.Info("fixture", lager.Data{"context": config})
 
-		config.CreateConfig.Name = fmt.Sprintf("%s-%d", randomString(10), GinkgoParallelProcess())
+		config.CreateConfig.Name = fmt.Sprintf("%s-%d", uuid.NewString(), GinkgoParallelProcess())
 
 		driverClient, err = driverhttp.NewRemoteClient(config.DriverAddress, config.TLSConfig)
 		Expect(err).NotTo(HaveOccurred())
@@ -169,7 +168,7 @@ func testFileWrite(logger lager.Logger, mountResponse dockerdriver.MountResponse
 	logger.Info("start")
 	defer logger.Info("end")
 
-	fileName := "certtest-" + randomString(10)
+	fileName := "certtest-" + uuid.NewString()
 
 	logger.Info("writing-test-file", lager.Data{"mountpoint": mountResponse.Mountpoint})
 	testFile := path.Join(mountResponse.Mountpoint, fileName)
@@ -197,20 +196,4 @@ func cellClean(mountpoint string) bool {
 	matches, err := filepath.Glob(mountpoint)
 	Expect(err).NotTo(HaveOccurred())
 	return len(matches) == 0
-}
-
-var isSeeded = false
-
-func randomString(n int) string {
-	if !isSeeded {
-		rand.Seed(time.Now().UnixNano())
-		isSeeded = true
-	}
-	runes := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-
-	b := make([]rune, n)
-	for i := range b {
-		b[i] = runes[rand.Intn(len(runes))]
-	}
-	return string(b)
 }

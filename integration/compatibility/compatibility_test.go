@@ -2,19 +2,18 @@ package compatibility_test
 
 import (
 	"context"
-	"math/rand"
 	"os"
 	"os/exec"
 	"path"
 	"path/filepath"
 	"strconv"
-	"time"
 
 	"code.cloudfoundry.org/dockerdriver"
 	"code.cloudfoundry.org/dockerdriver/driverhttp"
 	"code.cloudfoundry.org/dockerdriver/integration"
 	"code.cloudfoundry.org/lager/v3"
 	"code.cloudfoundry.org/lager/v3/lagertest"
+	"github.com/google/uuid"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gexec"
@@ -65,7 +64,7 @@ var _ = Describe("Compatibility", func() {
 			}
 			cf := config
 			cf.CreateConfig = dockerdriver.CreateRequest{}
-			cf.CreateConfig.Name = randomString(10)
+			cf.CreateConfig.Name = uuid.NewString()
 			cf.CreateConfig.Opts = map[string]interface{}{}
 			cf.CreateConfig.Opts["source"] = config.CreateConfig.Opts["source"]
 			cf.CreateConfig.Opts["username"] = config.CreateConfig.Opts["username"]
@@ -119,7 +118,7 @@ func testFileWrite(logger lager.Logger, mountResponse dockerdriver.MountResponse
 	logger.Info("start")
 	defer logger.Info("end")
 
-	fileName := "certtest-" + randomString(10)
+	fileName := "certtest-" + uuid.NewString()
 
 	logger.Info("writing-test-file", lager.Data{"mountpoint": mountResponse.Mountpoint})
 	testFile := path.Join(mountResponse.Mountpoint, fileName)
@@ -158,7 +157,7 @@ func testReadOnly(logger lager.Logger, mountResponse dockerdriver.MountResponse)
 	logger.Info("start")
 	defer logger.Info("end")
 
-	fileName := "certtest-" + randomString(10)
+	fileName := "certtest-" + uuid.NewString()
 
 	logger.Info("writing-test-file", lager.Data{"mountpoint": mountResponse.Mountpoint})
 	testFile := path.Join(mountResponse.Mountpoint, fileName)
@@ -179,22 +178,6 @@ func errorCheckReadOnlyMounts() bool {
 	} else {
 		return true
 	}
-}
-
-var isSeeded = false
-
-func randomString(n int) string {
-	if !isSeeded {
-		rand.Seed(time.Now().UnixNano())
-		isSeeded = true
-	}
-	runes := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-
-	b := make([]rune, n)
-	for i := range b {
-		b[i] = runes[rand.Intn(len(runes))]
-	}
-	return string(b)
 }
 
 func cmdRunner(cmd *exec.Cmd) int {
