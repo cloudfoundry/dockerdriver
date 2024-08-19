@@ -10,7 +10,7 @@ require (
 	code.cloudfoundry.org/goshims v0.39.0
 	code.cloudfoundry.org/lager/v3 v3.1.0
 	code.cloudfoundry.org/tlsconfig v0.1.0
-	github.com/google/uuid v1.3.0
+	github.com/google/uuid v1.6.0
 	github.com/maxbrunsfeld/counterfeiter/v6 v6.8.1
 	github.com/onsi/ginkgo/v2 v2.20.0
 	github.com/onsi/gomega v1.34.1
