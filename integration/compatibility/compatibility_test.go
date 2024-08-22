@@ -6,7 +6,6 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
-	"strconv"
 
 	"code.cloudfoundry.org/dockerdriver"
 	"code.cloudfoundry.org/dockerdriver/driverhttp"
@@ -49,13 +48,58 @@ var _ = Describe("Compatibility", func() {
 	})
 
 	DescribeTable("nfs",
-		func(key string, value interface{}) {
+		func(values map[string]interface{}) {
 			if config.DriverName != "nfsv3driver" {
 				Skip("This is for nfsv3driver only")
 				return
 			}
-			panic("need to add the fixture")
-		}, Entry("hello", "config", "value"))
+			cf := config
+			cf.CreateConfig = dockerdriver.CreateRequest{}
+			cf.CreateConfig.Name = uuid.NewString()
+			cf.CreateConfig.Opts = map[string]interface{}{}
+			cf.CreateConfig.Opts["source"] = config.CreateConfig.Opts["source"]
+			cf.CreateConfig.Opts["uid"] = config.CreateConfig.Opts["uid"]
+			cf.CreateConfig.Opts["gid"] = config.CreateConfig.Opts["gid"]
+			cf.CreateConfig.Opts["auto_cache"] = "true"
+			for index, value := range values {
+				cf.CreateConfig.Opts[index] = value
+			}
+			testLogger.Info("using fixture", lager.Data{"fixture": cf})
+			errResponse = driverClient.Create(testEnv, cf.CreateConfig)
+			Expect(errResponse.Err).To(Equal(""))
+
+			mountResponse = driverClient.Mount(testEnv, dockerdriver.MountRequest{
+				Name: cf.CreateConfig.Name,
+			})
+			Expect(mountResponse.Err).To(Equal(""))
+			Expect(mountResponse.Mountpoint).NotTo(Equal(""))
+
+			cmd := exec.Command("bash", "-c", "cat /proc/mounts | grep -E '"+mountResponse.Mountpoint+"'")
+			Expect(cmdRunner(cmd)).To(Equal(0))
+			if isReadWrite(cf.CreateConfig.Opts) {
+				testFileWrite(testLogger, mountResponse)
+			} else {
+				testReadOnly(testLogger, mountResponse)
+			}
+
+			// Cleanup
+			errResponse = driverClient.Unmount(testEnv, dockerdriver.UnmountRequest{
+				Name: cf.CreateConfig.Name,
+			})
+			Expect(errResponse.Err).To(Equal(""))
+
+			errResponse = driverClient.Remove(testEnv, dockerdriver.RemoveRequest{
+				Name: cf.CreateConfig.Name,
+			})
+			Expect(errResponse.Err).To(Equal(""))
+		},
+		Entry("default", map[string]interface{}{}),
+		Entry("when experimental=true", map[string]interface{}{"experimental": "true"}),
+		Entry("when mount=/foo/bar", map[string]interface{}{"mount": "/foo/bar"}),
+		Entry("when experimental=true and version=4", map[string]interface{}{"experimental": "true", "version": "4"}),
+		Entry("when version=4.1", map[string]interface{}{"version": "4.1"}),
+		Entry("when mount=/foo/bar and cache=true", map[string]interface{}{"mount": "/foo/bar", "cache": "true"}),
+	)
 	DescribeTable("smb",
 		func(key string, value interface{}) {
 			if config.DriverName != "smbdriver" {
@@ -163,21 +207,8 @@ func testReadOnly(logger lager.Logger, mountResponse dockerdriver.MountResponse)
 	testFile := path.Join(mountResponse.Mountpoint, fileName)
 	logger.Info("writing-test-file", lager.Data{"filepath": testFile})
 	err := os.WriteFile(testFile, []byte("hello persi"), 0644)
-	if errorCheckReadOnlyMounts() {
-		Expect(err.Error()).To(ContainSubstring("read-only file system"))
-	}
-}
-
-func errorCheckReadOnlyMounts() bool {
-	if val, ok := os.LookupEnv("ERROR_CHECK_READONLY_MOUNTS"); ok {
-		errorCheckReadOnlyMounts, err := strconv.ParseBool(val)
-		if err != nil {
-			return false
-		}
-		return errorCheckReadOnlyMounts
-	} else {
-		return true
-	}
+	Expect(err).To(HaveOccurred())
+	Expect(err.Error()).To(ContainSubstring("read-only file system"))
 }
 
 func cmdRunner(cmd *exec.Cmd) int {
