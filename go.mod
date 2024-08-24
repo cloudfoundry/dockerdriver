@@ -5,10 +5,10 @@ go 1.21
 toolchain go1.22.3
 
 require (
-	code.cloudfoundry.org/cfhttp/v2 v2.3.0
-	code.cloudfoundry.org/clock v1.4.0
+	code.cloudfoundry.org/cfhttp/v2 v2.4.0
+	code.cloudfoundry.org/clock v1.5.0
 	code.cloudfoundry.org/goshims v0.39.0
-	code.cloudfoundry.org/lager/v3 v3.2.0
+	code.cloudfoundry.org/lager/v3 v3.3.0
 	code.cloudfoundry.org/tlsconfig v0.1.0
 	github.com/google/uuid v1.6.0
 	github.com/maxbrunsfeld/counterfeiter/v6 v6.8.1
