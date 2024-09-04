@@ -5,8 +5,8 @@ go 1.22
 toolchain go1.22.3
 
 require (
-	code.cloudfoundry.org/cfhttp/v2 v2.7.0
-	code.cloudfoundry.org/clock v1.8.0
+	code.cloudfoundry.org/cfhttp/v2 v2.8.0
+	code.cloudfoundry.org/clock v1.9.0
 	code.cloudfoundry.org/goshims v0.39.0
 	code.cloudfoundry.org/lager/v3 v3.3.0
 	code.cloudfoundry.org/tlsconfig v0.2.0
@@ -31,8 +31,8 @@ require (
 	golang.org/x/mod v0.20.0 // indirect
 	golang.org/x/net v0.28.0 // indirect
 	golang.org/x/sync v0.8.0 // indirect
-	golang.org/x/sys v0.24.0 // indirect
-	golang.org/x/text v0.17.0 // indirect
+	golang.org/x/sys v0.25.0 // indirect
+	golang.org/x/text v0.18.0 // indirect
 	golang.org/x/tools v0.24.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
