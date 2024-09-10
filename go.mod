@@ -5,10 +5,10 @@ go 1.22.0
 toolchain go1.22.3
 
 require (
-	code.cloudfoundry.org/cfhttp/v2 v2.10.0
-	code.cloudfoundry.org/clock v1.11.0
+	code.cloudfoundry.org/cfhttp/v2 v2.11.0
+	code.cloudfoundry.org/clock v1.12.0
 	code.cloudfoundry.org/goshims v0.39.0
-	code.cloudfoundry.org/lager/v3 v3.4.0
+	code.cloudfoundry.org/lager/v3 v3.5.0
 	code.cloudfoundry.org/tlsconfig v0.4.0
 	github.com/google/uuid v1.6.0
 	github.com/maxbrunsfeld/counterfeiter/v6 v6.8.1
@@ -24,7 +24,7 @@ require (
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
-	github.com/google/pprof v0.0.0-20240903155634-a8630aee4ab9 // indirect
+	github.com/google/pprof v0.0.0-20240910150728-a0b0bb1d4134 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/nxadm/tail v1.4.11 // indirect
 	github.com/openzipkin/zipkin-go v0.4.3 // indirect
