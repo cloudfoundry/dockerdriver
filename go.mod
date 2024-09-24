@@ -5,7 +5,7 @@ go 1.22.0
 toolchain go1.22.3
 
 require (
-	code.cloudfoundry.org/cfhttp/v2 v2.12.0
+	code.cloudfoundry.org/cfhttp/v2 v2.13.0
 	code.cloudfoundry.org/clock v1.13.0
 	code.cloudfoundry.org/goshims v0.39.0
 	code.cloudfoundry.org/lager/v3 v3.6.0
