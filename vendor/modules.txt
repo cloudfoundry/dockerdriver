@@ -1,22 +1,22 @@
-# code.cloudfoundry.org/cfhttp/v2 v2.24.0
+# code.cloudfoundry.org/cfhttp/v2 v2.25.0
 ## explicit; go 1.22.0
 code.cloudfoundry.org/cfhttp/v2
 code.cloudfoundry.org/cfhttp/v2/handlers
-# code.cloudfoundry.org/clock v1.23.0
+# code.cloudfoundry.org/clock v1.24.0
 ## explicit; go 1.22.0
 code.cloudfoundry.org/clock
 code.cloudfoundry.org/clock/fakeclock
-# code.cloudfoundry.org/goshims v0.52.0
+# code.cloudfoundry.org/goshims v0.53.0
 ## explicit; go 1.23
 code.cloudfoundry.org/goshims/http_wrap
 code.cloudfoundry.org/goshims/http_wrap/http_fake
-# code.cloudfoundry.org/lager/v3 v3.17.0
+# code.cloudfoundry.org/lager/v3 v3.18.0
 ## explicit; go 1.22.0
 code.cloudfoundry.org/lager/v3
 code.cloudfoundry.org/lager/v3/internal/truncate
 code.cloudfoundry.org/lager/v3/lagerctx
 code.cloudfoundry.org/lager/v3/lagertest
-# code.cloudfoundry.org/tlsconfig v0.11.0
+# code.cloudfoundry.org/tlsconfig v0.12.0
 ## explicit; go 1.22
 code.cloudfoundry.org/tlsconfig
 # github.com/bmizerany/pat v0.0.0-20210406213842-e4b6760bdd6f
@@ -38,7 +38,7 @@ github.com/google/go-cmp/cmp/internal/diff
 github.com/google/go-cmp/cmp/internal/flags
 github.com/google/go-cmp/cmp/internal/function
 github.com/google/go-cmp/cmp/internal/value
-# github.com/google/pprof v0.0.0-20241206021119-61a79c692802
+# github.com/google/pprof v0.0.0-20241210010833-40e02aabc2ad
 ## explicit; go 1.22
 github.com/google/pprof/profile
 # github.com/google/uuid v1.6.0
@@ -74,7 +74,7 @@ github.com/onsi/ginkgo/v2/internal/parallel_support
 github.com/onsi/ginkgo/v2/internal/testingtproxy
 github.com/onsi/ginkgo/v2/reporters
 github.com/onsi/ginkgo/v2/types
-# github.com/onsi/gomega v1.36.0
+# github.com/onsi/gomega v1.36.1
 ## explicit; go 1.22
 github.com/onsi/gomega
 github.com/onsi/gomega/format
