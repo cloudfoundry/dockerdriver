@@ -5,11 +5,11 @@ go 1.23
 toolchain go1.23.2
 
 require (
-	code.cloudfoundry.org/cfhttp/v2 v2.33.0
+	code.cloudfoundry.org/cfhttp/v2 v2.34.0
 	code.cloudfoundry.org/clock v1.28.0
-	code.cloudfoundry.org/goshims v0.60.0
-	code.cloudfoundry.org/lager/v3 v3.25.0
-	code.cloudfoundry.org/tlsconfig v0.17.0
+	code.cloudfoundry.org/goshims v0.61.0
+	code.cloudfoundry.org/lager/v3 v3.26.0
+	code.cloudfoundry.org/tlsconfig v0.18.0
 	github.com/google/uuid v1.6.0
 	github.com/maxbrunsfeld/counterfeiter/v6 v6.9.0
 	github.com/onsi/ginkgo/v2 v2.22.2
