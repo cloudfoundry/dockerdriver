@@ -5,11 +5,11 @@ go 1.23.0
 toolchain go1.23.6
 
 require (
-	code.cloudfoundry.org/cfhttp/v2 v2.40.0
-	code.cloudfoundry.org/clock v1.33.0
-	code.cloudfoundry.org/goshims v0.67.0
-	code.cloudfoundry.org/lager/v3 v3.32.0
-	code.cloudfoundry.org/tlsconfig v0.23.0
+	code.cloudfoundry.org/cfhttp/v2 v2.41.0
+	code.cloudfoundry.org/clock v1.34.0
+	code.cloudfoundry.org/goshims v0.68.0
+	code.cloudfoundry.org/lager/v3 v3.33.0
+	code.cloudfoundry.org/tlsconfig v0.24.0
 	github.com/google/uuid v1.6.0
 	github.com/maxbrunsfeld/counterfeiter/v6 v6.9.0
 	github.com/onsi/ginkgo/v2 v2.23.4
@@ -33,6 +33,6 @@ require (
 	golang.org/x/sync v0.13.0 // indirect
 	golang.org/x/sys v0.32.0 // indirect
 	golang.org/x/text v0.24.0 // indirect
-	golang.org/x/tools v0.31.0 // indirect
+	golang.org/x/tools v0.32.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
