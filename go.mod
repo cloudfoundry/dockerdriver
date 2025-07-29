@@ -7,13 +7,13 @@ toolchain go1.23.6
 require (
 	code.cloudfoundry.org/cfhttp/v2 v2.49.0
 	code.cloudfoundry.org/clock v1.42.0
-	code.cloudfoundry.org/goshims v0.71.0
+	code.cloudfoundry.org/goshims v0.72.0
 	code.cloudfoundry.org/lager/v3 v3.41.0
 	code.cloudfoundry.org/tlsconfig v0.31.0
 	github.com/google/uuid v1.6.0
 	github.com/maxbrunsfeld/counterfeiter/v6 v6.9.0
 	github.com/onsi/ginkgo/v2 v2.23.4
-	github.com/onsi/gomega v1.37.0
+	github.com/onsi/gomega v1.38.0
 	github.com/tedsuo/ifrit v0.0.0-20230516164442-7862c310ad26
 	github.com/tedsuo/rata v1.0.0
 )

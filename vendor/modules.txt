@@ -6,7 +6,7 @@ code.cloudfoundry.org/cfhttp/v2/handlers
 ## explicit; go 1.23.0
 code.cloudfoundry.org/clock
 code.cloudfoundry.org/clock/fakeclock
-# code.cloudfoundry.org/goshims v0.71.0
+# code.cloudfoundry.org/goshims v0.72.0
 ## explicit; go 1.23.0
 code.cloudfoundry.org/goshims/http_wrap
 code.cloudfoundry.org/goshims/http_wrap/http_fake
@@ -74,7 +74,7 @@ github.com/onsi/ginkgo/v2/internal/parallel_support
 github.com/onsi/ginkgo/v2/internal/testingtproxy
 github.com/onsi/ginkgo/v2/reporters
 github.com/onsi/ginkgo/v2/types
-# github.com/onsi/gomega v1.37.0
+# github.com/onsi/gomega v1.38.0
 ## explicit; go 1.23.0
 github.com/onsi/gomega
 github.com/onsi/gomega/format
