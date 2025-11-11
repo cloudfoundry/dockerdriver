@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"slices"
 	"sort"
 	"strings"
 	"time"
@@ -17,6 +18,57 @@ func init() {
 	if os.Getenv("GINKGO_TIME_FORMAT") != "" {
 		GINKGO_TIME_FORMAT = os.Getenv("GINKGO_TIME_FORMAT")
 	}
+}
+
+// ConstructionNodeReport captures information about a Ginkgo spec.
+type ConstructionNodeReport struct {
+	// ContainerHierarchyTexts is a slice containing the text strings of
+	// all Describe/Context/When containers in this spec's hierarchy.
+	ContainerHierarchyTexts []string
+
+	// ContainerHierarchyLocations is a slice containing the CodeLocations of
+	// all Describe/Context/When containers in this spec's hierarchy.
+	ContainerHierarchyLocations []CodeLocation
+
+	// ContainerHierarchyLabels is a slice containing the labels of
+	// all Describe/Context/When containers in this spec's hierarchy
+	ContainerHierarchyLabels [][]string
+
+	// ContainerHierarchySemVerConstraints is a slice containing the semVerConstraints of
+	// all Describe/Context/When containers in this spec's hierarchy
+	ContainerHierarchySemVerConstraints [][]string
+
+	// IsSerial captures whether the any container has the Serial decorator
+	IsSerial bool
+
+	// IsInOrderedContainer captures whether any container is an Ordered container
+	IsInOrderedContainer bool
+}
+
+// FullText returns a concatenation of all the report.ContainerHierarchyTexts and report.LeafNodeText
+func (report ConstructionNodeReport) FullText() string {
+	texts := []string{}
+	texts = append(texts, report.ContainerHierarchyTexts...)
+	texts = slices.DeleteFunc(texts, func(t string) bool {
+		return t == ""
+	})
+	return strings.Join(texts, " ")
+}
+
+// Labels returns a deduped set of all the spec's Labels.
+func (report ConstructionNodeReport) Labels() []string {
+	out := []string{}
+	seen := map[string]bool{}
+	for _, labels := range report.ContainerHierarchyLabels {
+		for _, label := range labels {
+			if !seen[label] {
+				seen[label] = true
+				out = append(out, label)
+			}
+		}
+	}
+
+	return out
 }
 
 // Report captures information about a Ginkgo test run
@@ -144,6 +196,9 @@ type SpecReport struct {
 	LeafNodeLabels            []string
 	LeafNodeSemVerConstraints []string
 	LeafNodeText              string
+
+	// Captures the Spec Priority
+	SpecPriority int
 
 	// State captures whether the spec has passed, failed, etc.
 	State SpecState
@@ -299,6 +354,9 @@ func (report SpecReport) FullText() string {
 	if report.LeafNodeText != "" {
 		texts = append(texts, report.LeafNodeText)
 	}
+	texts = slices.DeleteFunc(texts, func(t string) bool {
+		return t == ""
+	})
 	return strings.Join(texts, " ")
 }
 
