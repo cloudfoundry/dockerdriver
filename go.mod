@@ -3,11 +3,11 @@ module code.cloudfoundry.org/dockerdriver
 go 1.24.9
 
 require (
-	code.cloudfoundry.org/cfhttp/v2 v2.63.0
-	code.cloudfoundry.org/clock v1.55.0
+	code.cloudfoundry.org/cfhttp/v2 v2.64.0
+	code.cloudfoundry.org/clock v1.56.0
 	code.cloudfoundry.org/goshims v0.86.0
-	code.cloudfoundry.org/lager/v3 v3.55.0
-	code.cloudfoundry.org/tlsconfig v0.41.0
+	code.cloudfoundry.org/lager/v3 v3.56.0
+	code.cloudfoundry.org/tlsconfig v0.42.0
 	github.com/google/uuid v1.6.0
 	github.com/maxbrunsfeld/counterfeiter/v6 v6.9.0
 	github.com/onsi/ginkgo/v2 v2.27.3
