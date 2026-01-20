@@ -1,22 +1,22 @@
-# code.cloudfoundry.org/cfhttp/v2 v2.65.0
+# code.cloudfoundry.org/cfhttp/v2 v2.66.0
 ## explicit; go 1.24.9
 code.cloudfoundry.org/cfhttp/v2
 code.cloudfoundry.org/cfhttp/v2/handlers
-# code.cloudfoundry.org/clock v1.57.0
+# code.cloudfoundry.org/clock v1.58.0
 ## explicit; go 1.24.9
 code.cloudfoundry.org/clock
 code.cloudfoundry.org/clock/fakeclock
-# code.cloudfoundry.org/goshims v0.87.0
+# code.cloudfoundry.org/goshims v0.88.0
 ## explicit; go 1.24.9
 code.cloudfoundry.org/goshims/http_wrap
 code.cloudfoundry.org/goshims/http_wrap/http_fake
-# code.cloudfoundry.org/lager/v3 v3.57.0
+# code.cloudfoundry.org/lager/v3 v3.58.0
 ## explicit; go 1.24.9
 code.cloudfoundry.org/lager/v3
 code.cloudfoundry.org/lager/v3/internal/truncate
 code.cloudfoundry.org/lager/v3/lagerctx
 code.cloudfoundry.org/lager/v3/lagertest
-# code.cloudfoundry.org/tlsconfig v0.42.0
+# code.cloudfoundry.org/tlsconfig v0.43.0
 ## explicit; go 1.24.0
 code.cloudfoundry.org/tlsconfig
 # github.com/Masterminds/semver/v3 v3.4.0
@@ -41,7 +41,7 @@ github.com/google/go-cmp/cmp/internal/diff
 github.com/google/go-cmp/cmp/internal/flags
 github.com/google/go-cmp/cmp/internal/function
 github.com/google/go-cmp/cmp/internal/value
-# github.com/google/pprof v0.0.0-20260111202518-71be6bfdd440
+# github.com/google/pprof v0.0.0-20260115054156-294ebfa9ad83
 ## explicit; go 1.24.0
 github.com/google/pprof/profile
 # github.com/google/uuid v1.6.0
