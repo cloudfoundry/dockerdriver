@@ -5,7 +5,7 @@ go 1.24.9
 require (
 	code.cloudfoundry.org/cfhttp/v2 v2.69.0
 	code.cloudfoundry.org/clock v1.61.0
-	code.cloudfoundry.org/goshims v0.91.0
+	code.cloudfoundry.org/goshims v0.92.0
 	code.cloudfoundry.org/lager/v3 v3.61.0
 	code.cloudfoundry.org/tlsconfig v0.45.0
 	github.com/google/uuid v1.6.0
