@@ -7,7 +7,7 @@ require (
 	code.cloudfoundry.org/clock v1.64.0
 	code.cloudfoundry.org/goshims v0.95.0
 	code.cloudfoundry.org/lager/v3 v3.64.0
-	code.cloudfoundry.org/tlsconfig v0.48.0
+	code.cloudfoundry.org/tlsconfig v0.49.0
 	github.com/google/uuid v1.6.0
 	github.com/maxbrunsfeld/counterfeiter/v6 v6.9.0
 	github.com/onsi/ginkgo/v2 v2.28.1
