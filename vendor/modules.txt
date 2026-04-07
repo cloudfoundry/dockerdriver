@@ -6,7 +6,7 @@ code.cloudfoundry.org/cfhttp/v2/handlers
 ## explicit; go 1.25.0
 code.cloudfoundry.org/clock
 code.cloudfoundry.org/clock/fakeclock
-# code.cloudfoundry.org/goshims v0.95.0
+# code.cloudfoundry.org/goshims v0.96.0
 ## explicit; go 1.25.0
 code.cloudfoundry.org/goshims/http_wrap
 code.cloudfoundry.org/goshims/http_wrap/http_fake
@@ -16,7 +16,7 @@ code.cloudfoundry.org/lager/v3
 code.cloudfoundry.org/lager/v3/internal/truncate
 code.cloudfoundry.org/lager/v3/lagerctx
 code.cloudfoundry.org/lager/v3/lagertest
-# code.cloudfoundry.org/tlsconfig v0.49.0
+# code.cloudfoundry.org/tlsconfig v0.50.0
 ## explicit; go 1.25.0
 code.cloudfoundry.org/tlsconfig
 # github.com/Masterminds/semver/v3 v3.4.0
@@ -41,7 +41,7 @@ github.com/google/go-cmp/cmp/internal/diff
 github.com/google/go-cmp/cmp/internal/flags
 github.com/google/go-cmp/cmp/internal/function
 github.com/google/go-cmp/cmp/internal/value
-# github.com/google/pprof v0.0.0-20260302011040-a15ffb7f9dcc
+# github.com/google/pprof v0.0.0-20260402051712-545e8a4df936
 ## explicit; go 1.24.0
 github.com/google/pprof/profile
 # github.com/google/uuid v1.6.0
