@@ -3,11 +3,11 @@ module code.cloudfoundry.org/dockerdriver
 go 1.25.1
 
 require (
-	code.cloudfoundry.org/cfhttp/v2 v2.79.0
-	code.cloudfoundry.org/clock v1.72.0
-	code.cloudfoundry.org/goshims v0.100.0
-	code.cloudfoundry.org/lager/v3 v3.71.0
-	code.cloudfoundry.org/tlsconfig v0.56.0
+	code.cloudfoundry.org/cfhttp/v2 v2.80.0
+	code.cloudfoundry.org/clock v1.73.0
+	code.cloudfoundry.org/goshims v0.102.0
+	code.cloudfoundry.org/lager/v3 v3.72.0
+	code.cloudfoundry.org/tlsconfig v0.58.0
 	github.com/google/uuid v1.6.0
 	github.com/maxbrunsfeld/counterfeiter/v6 v6.9.0
 	github.com/onsi/ginkgo/v2 v2.29.0
@@ -23,14 +23,14 @@ require (
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
-	github.com/google/pprof v0.0.0-20260507013755-92041b743c96 // indirect
+	github.com/google/pprof v0.0.0-20260604005048-7023385849c0 // indirect
 	github.com/nxadm/tail v1.4.11 // indirect
 	github.com/openzipkin/zipkin-go v0.4.3 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
-	golang.org/x/mod v0.36.0 // indirect
+	golang.org/x/mod v0.37.0 // indirect
 	golang.org/x/net v0.55.0 // indirect
-	golang.org/x/sync v0.20.0 // indirect
-	golang.org/x/sys v0.45.0 // indirect
-	golang.org/x/text v0.37.0 // indirect
+	golang.org/x/sync v0.21.0 // indirect
+	golang.org/x/sys v0.46.0 // indirect
+	golang.org/x/text v0.38.0 // indirect
 	golang.org/x/tools v0.45.0 // indirect
 )
