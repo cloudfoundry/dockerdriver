@@ -3,11 +3,11 @@ module code.cloudfoundry.org/dockerdriver
 go 1.27.3
 
 require (
-	code.cloudfoundry.org/cfhttp/v2 v2.102.0
-	code.cloudfoundry.org/clock v1.95.0
-	code.cloudfoundry.org/goshims v0.120.0
-	code.cloudfoundry.org/lager/v3 v3.94.0
-	code.cloudfoundry.org/tlsconfig v0.71.0
+	code.cloudfoundry.org/cfhttp/v2 v2.103.0
+	code.cloudfoundry.org/clock v1.96.0
+	code.cloudfoundry.org/goshims v0.121.0
+	code.cloudfoundry.org/lager/v3 v3.95.0
+	code.cloudfoundry.org/tlsconfig v0.72.0
 	github.com/google/uuid v1.6.0
 	github.com/maxbrunsfeld/counterfeiter/v6 v6.9.0
 	github.com/onsi/ginkgo/v2 v2.34.0
@@ -23,7 +23,7 @@ require (
 	github.com/go-logr/logr v1.4.4 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
-	github.com/google/pprof v0.0.0-20261105003125-4bf881d7fb0b // indirect
+	github.com/google/pprof v0.0.0-20261111200114-fac431ef4d26 // indirect
 	github.com/nxadm/tail v1.4.11 // indirect
 	github.com/onsi/ginkgo v1.16.5 // indirect
 	github.com/openzipkin/zipkin-go v0.4.3 // indirect
